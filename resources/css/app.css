@@ -1,0 +1,276 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+/* ─── Dark Mode (class-based) ────────────────────────────── */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─── Fontes ─────────────────────────────────────────────────── */
+@theme {
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Plus Jakarta Sans', 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ─── Base global ────────────────────────────────────────────── */
+@layer base {
+    html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+
+    body {
+        font-family: var(--font-sans);
+        font-size: 0.9375rem; /* 15px — mais legível que 14px do Tailwind default */
+        line-height: 1.6;
+        color: theme(colors.slate.700);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-display);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.25;
+        color: theme(colors.slate.800);
+    }
+}
+
+/* ─── Sidebar ────────────────────────────────────────────────── */
+.sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition font-medium;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+}
+
+.sidebar-link.active {
+    @apply bg-emerald-50 text-emerald-700;
+    font-weight: 600;
+}
+
+.sidebar-link .icon {
+    @apply w-5 h-5 text-slate-400;
+}
+
+.sidebar-link.active .icon {
+    @apply text-emerald-600;
+}
+
+.menu-title {
+    font-family: var(--font-sans);
+    @apply text-[10px] font-semibold text-slate-400 uppercase tracking-widest px-3 pb-1 w-full;
+}
+
+.menu-items {
+    @apply mt-1 space-y-0.5;
+}
+
+.chevron {
+    @apply w-4 h-4 text-slate-400 transition-transform duration-200;
+}
+
+/* ─── Compat: classes lato-* remapeadas para Inter ───────────── */
+/* Mantidas para não quebrar código existente                      */
+.lato-thin       { font-family: var(--font-sans); font-weight: 300; }
+.lato-light      { font-family: var(--font-sans); font-weight: 300; }
+.lato-regular    { font-family: var(--font-sans); font-weight: 400; }
+.lato-bold       { font-family: var(--font-sans); font-weight: 600; }
+.lato-black      { font-family: var(--font-sans); font-weight: 700; }
+.lato-thin-italic    { font-family: var(--font-sans); font-weight: 300; font-style: italic; }
+.lato-light-italic   { font-family: var(--font-sans); font-weight: 300; font-style: italic; }
+.lato-regular-italic { font-family: var(--font-sans); font-weight: 400; font-style: italic; }
+.lato-bold-italic    { font-family: var(--font-sans); font-weight: 600; font-style: italic; }
+.lato-black-italic   { font-family: var(--font-sans); font-weight: 700; font-style: italic; }
+
+/* ─── Utilitário display (Plus Jakarta Sans) ─────────────────── */
+.font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+}
+
+/* ─── Dark mode: Sidebar classes ─────────────────────────────── */
+.dark .sidebar-link {
+    color: theme(colors.slate.400);
+}
+.dark .sidebar-link:hover {
+    background-color: theme(colors.slate.700);
+    color: theme(colors.slate.200);
+}
+.dark .sidebar-link.active {
+    background-color: theme(colors.emerald.900 / 40%);
+    color: theme(colors.emerald.400);
+}
+.dark .sidebar-link .icon {
+    color: theme(colors.slate.500);
+}
+.dark .sidebar-link.active .icon {
+    color: theme(colors.emerald.400);
+}
+.dark .menu-title {
+    color: theme(colors.slate.600);
+}
+.dark .chevron {
+    color: theme(colors.slate.600);
+}
+
+/* ─── Dark mode: Superfícies brancas e cinzas ────────────────── */
+.dark .bg-white {
+    background-color: theme(colors.slate.800) !important;
+}
+.dark .bg-gray-50,
+.dark .bg-slate-50 {
+    background-color: theme(colors.slate.900) !important;
+}
+
+/* ─── Dark mode: Bordas ──────────────────────────────────────── */
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-slate-200 {
+    border-color: theme(colors.slate.700) !important;
+}
+.dark .divide-gray-100 > * + * {
+    border-color: theme(colors.slate.700) !important;
+}
+
+/* ─── Dark mode: Textos ──────────────────────────────────────── */
+.dark .text-gray-900,
+.dark .text-slate-900 {
+    color: theme(colors.slate.100) !important;
+}
+.dark .text-gray-800,
+.dark .text-slate-800 {
+    color: theme(colors.slate.200) !important;
+}
+.dark .text-gray-700,
+.dark .text-slate-700 {
+    color: theme(colors.slate.300) !important;
+}
+.dark .text-gray-600,
+.dark .text-slate-600 {
+    color: theme(colors.slate.400) !important;
+}
+.dark .text-gray-500,
+.dark .text-slate-500 {
+    color: theme(colors.slate.500) !important;
+}
+.dark .text-gray-400,
+.dark .text-slate-400 {
+    color: theme(colors.slate.600) !important;
+}
+
+/* ─── Dark mode: Hover de linhas e botões ────────────────────── */
+.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-gray-100:hover,
+.dark .hover\:bg-slate-100:hover {
+    background-color: theme(colors.slate.700) !important;
+}
+
+/* ─── Dark mode: Inputs e selects ───────────────────────────── */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark select,
+.dark textarea {
+    background-color: theme(colors.slate.700);
+    border-color: theme(colors.slate.600);
+    color: theme(colors.slate.200);
+}
+.dark input::placeholder,
+.dark textarea::placeholder {
+    color: theme(colors.slate.500);
+}
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+    border-color: theme(colors.emerald.500);
+    outline-color: theme(colors.emerald.500);
+}
+
+/* ─── Dark mode: Dropdown / popover ─────────────────────────── */
+.dark [x-show].bg-white,
+.dark .shadow-lg.bg-white {
+    background-color: theme(colors.slate.800) !important;
+    border-color: theme(colors.slate.700) !important;
+}
+
+/* ─── Dark mode: Tabela thead ────────────────────────────────── */
+.dark thead,
+.dark .bg-gray-50.border-b {
+    background-color: theme(colors.slate.900) !important;
+    border-color: theme(colors.slate.700) !important;
+}
+.dark thead th {
+    color: theme(colors.slate.400) !important;
+}
+
+/* ─── Dark mode: Paginação ───────────────────────────────────── */
+.dark nav[aria-label] span,
+.dark nav[aria-label] a {
+    background-color: theme(colors.slate.800);
+    border-color: theme(colors.slate.700);
+    color: theme(colors.slate.300);
+}
+.dark nav[aria-label] a:hover {
+    background-color: theme(colors.slate.700);
+}
+
+/* ─── Dark mode: Scrollbar sutil ─────────────────────────────── */
+.dark ::-webkit-scrollbar-track {
+    background-color: theme(colors.slate.800);
+}
+.dark ::-webkit-scrollbar-thumb {
+    background-color: theme(colors.slate.600);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+    background-color: theme(colors.slate.500);
+}
+
+/* ─── Dark mode: Cards coloridos (stat cards) ────────────────── */
+/* Neutro/cinza */
+.dark .bg-\[\#F1F5F9\] {
+    background-color: theme(colors.slate.700 / 60%) !important;
+}
+/* Vermelho suave */
+.dark .bg-\[\#FEE2E2\] {
+    background-color: theme(colors.red.900 / 40%) !important;
+}
+/* Verde suave */
+.dark .bg-\[\#D0F5E4\],
+.dark .bg-\[\#D1FAE5\] {
+    background-color: theme(colors.emerald.900 / 40%) !important;
+}
+/* Amarelo suave */
+.dark .bg-\[\#FEF3C7\] {
+    background-color: theme(colors.amber.900 / 40%) !important;
+}
+/* Azul suave */
+.dark .bg-\[\#DBEAFE\] {
+    background-color: theme(colors.blue.900 / 40%) !important;
+}
+
+/* ─── Dark mode: Dropdown fixo (toggleDropdown JS) ───────────── */
+.dark #dropdown {
+    background-color: theme(colors.slate.800);
+    border-color: theme(colors.slate.700);
+}
+.dark #dropdown a,
+.dark #dropdown button {
+    color: theme(colors.slate.300);
+}
+.dark #dropdown a:hover,
+.dark #dropdown button:hover {
+    background-color: theme(colors.slate.700);
+}
+
+/* ─── Dark mode: Overlay mobile sidebar ─────────────────────── */
+.dark .backdrop-blur-sm.bg-black\/40 {
+    background-color: rgb(0 0 0 / 60%);
+}
+
+/* ─── Dark mode: Checkbox / radio ───────────────────────────── */
+.dark input[type="checkbox"],
+.dark input[type="radio"] {
+    border-color: theme(colors.slate.600);
+    background-color: theme(colors.slate.700);
+    color-scheme: dark;
+}
