@@ -2,7 +2,10 @@
 
 namespace App\Livewire\Pages\Meetings;
 
+use App\Livewire\Concerns\EnviaNotificacoes;
 use App\Livewire\SecureComponent;
+use App\Notifications\ReuniaoAgendadaNotification;
+use App\Models\Department;
 use App\Models\Meeting;
 use App\Models\MeetingAgendaItem;
 use App\Models\Reservations;
@@ -18,6 +21,7 @@ use Livewire\Attributes\Title;
 #[Title('Reuniões')]
 class Index extends SecureComponent
 {
+    use EnviaNotificacoes;
     // ── Calendário ────────────────────────────────────────────────────────────
     public int    $calYear;
     public int    $calMonth;
@@ -44,6 +48,7 @@ class Index extends SecureComponent
     public array  $participantIds   = [];
     public string $notes            = '';
     public string $participantSearch = '';
+    public ?int   $departmentFilter  = null;
 
     // ── Pauta (itens de agenda vinculados à reunião) ──────────────────────────
     /**
@@ -255,8 +260,48 @@ class Index extends SecureComponent
                         ->orWhere('position', 'ilike', $term);
                 })
             )
+            ->when(
+                $this->departmentFilter !== null,
+                fn ($q) => $q->where('department_id', $this->departmentFilter)
+            )
             ->orderBy('name')
-            ->get(['id', 'name', 'position']);
+            ->get(['id', 'name', 'position', 'department_id']);
+    }
+
+    #[Computed]
+    public function allDepartments(): \Illuminate\Database\Eloquent\Collection
+    {
+        return Department::has('users')
+            ->orderBy('name')
+            ->get(['id', 'name']);
+    }
+
+    public function setDepartmentFilter(?int $deptId): void
+    {
+        $this->departmentFilter = ($this->departmentFilter === $deptId) ? null : $deptId;
+        unset($this->allUsers);
+    }
+
+    public function toggleDepartmentParticipants(int $deptId): void
+    {
+        $deptUserIds = User::where('is_active', true)
+            ->where('id', '!=', Auth::id())
+            ->where('department_id', $deptId)
+            ->pluck('id')
+            ->map(fn ($v) => (string) $v)
+            ->toArray();
+
+        // Se todos já estão selecionados → desmarcar todos do depto; senão → marcar todos
+        $alreadyAll = count(array_diff($deptUserIds, array_map('strval', $this->participantIds))) === 0;
+
+        if ($alreadyAll) {
+            $this->participantIds = array_values(
+                array_filter($this->participantIds, fn ($id) => ! in_array((string) $id, $deptUserIds))
+            );
+        } else {
+            $merged = array_unique(array_merge(array_map('strval', $this->participantIds), $deptUserIds));
+            $this->participantIds = array_values($merged);
+        }
     }
 
     /** Array de semanas para renderizar o grid do calendário. Semana começa no domingo. */
@@ -538,6 +583,18 @@ class Index extends SecureComponent
                 ->toArray();
 
             $meeting->participants()->sync($syncData);
+
+            // Notifica participantes sobre nova reunião agendada (exceto o criador)
+            $participantes = $meeting->participants()->get();
+            $notificados   = $this->notificarLista($participantes, new ReuniaoAgendadaNotification($meeting, $participantes));
+            if ($notificados > 0) {
+                $this->toastNotif(
+                    'Reunião agendada!',
+                    "{$notificados} participante(s) foram notificados.",
+                    'calendar', 'indigo',
+                    route('reunioes')
+                );
+            }
         }
 
         // ── Sincroniza itens da pauta ─────────────────────────────────────────
@@ -759,6 +816,7 @@ class Index extends SecureComponent
         $this->participantIds    = [];
         $this->notes             = '';
         $this->participantSearch = '';
+        $this->departmentFilter  = null;
         $this->isEditing         = false;
         $this->editingId         = null;
 

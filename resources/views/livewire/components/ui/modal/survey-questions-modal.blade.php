@@ -304,9 +304,9 @@
                                 <button wire:click="salvarPergunta"
                                     wire:loading.attr="disabled" wire:target="salvarPergunta"
                                     class="flex-1 px-4 py-2 text-sm lato-bold rounded-lg
-                                           bg-emerald-600 hover:bg-emerald-700 text-white
+                                           bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20 text-white
                                            flex items-center justify-center gap-2 cursor-pointer
-                                           shadow-sm transition">
+                                           transition">
                                     <svg wire:loading wire:target="salvarPergunta"
                                          class="w-4 h-4 animate-spin"
                                          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -505,7 +505,7 @@
                         @if (! $showForm)
                             <button wire:click="abrirFormulario"
                                 class="flex items-center gap-1.5 px-4 py-2 text-sm lato-bold rounded-lg
-                                       bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition
+                                       bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20 text-white transition
                                        cursor-pointer">
                                 <x-lucide-plus class="w-4 h-4" />
                                 Nova pergunta

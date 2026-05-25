@@ -311,19 +311,25 @@
                     $active = $user->is_active === true;
                     $role   = $user->accessProfile->name ?? '—';
                     $colors = [
-                        'Administrador' => 'bg-red-50 text-red-600 ring-red-200',
-                        'Funcionário'   => 'bg-gray-50 text-gray-600 ring-gray-200',
-                        'RH'            => 'bg-purple-50 text-purple-600 ring-purple-200',
-                        'Gerente'        => 'bg-green-50 text-green-600 ring-green-200',
+                        'CEO'           => 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 ring-amber-300 dark:ring-amber-700',
+                        'Administrador' => 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 ring-red-200 dark:ring-red-800',
+                        'Gerente de RH' => 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 ring-teal-200 dark:ring-teal-700',
+                        'RH'            => 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 ring-purple-200 dark:ring-purple-800',
+                        'Gerente'       => 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 ring-blue-200 dark:ring-blue-700',
+                        'Funcionário'   => 'bg-gray-50 dark:bg-slate-700 text-gray-600 dark:text-slate-300 ring-gray-200 dark:ring-slate-600',
                     ];
                 @endphp
 
                 <div class="bg-white border border-gray-100 rounded-xl p-4 flex items-start justify-between gap-3 shadow-sm">
                     <div class="flex items-center gap-3 min-w-0">
-                        <img
-                            src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}"
-                            class="w-11 h-11 rounded-full border border-gray-200 shrink-0"
-                        >
+                        @if($user->avatar)
+                            <img src="{{ $user->avatarUrl() }}"
+                                 class="w-11 h-11 rounded-full object-cover border border-gray-200 dark:border-slate-600 shrink-0" />
+                        @else
+                            <div class="w-11 h-11 rounded-full bg-gradient-to-br {{ $user->avatarColor() }} flex items-center justify-center shrink-0">
+                                <span class="text-sm lato-bold text-white select-none">{{ $user->initials() }}</span>
+                            </div>
+                        @endif
                         <div class="min-w-0">
                             <p class="font-semibold text-gray-900 text-sm leading-tight truncate">{{ $user->name }}</p>
                             <p class="text-xs text-gray-400 truncate">{{ $user->email }}</p>
@@ -334,13 +340,13 @@
                             <div class="flex flex-wrap items-center gap-1.5 mt-2">
                                 <span
                                     class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full ring-1
-                                    {{ $colors[$role] ?? 'bg-gray-50 text-gray-500 ring-gray-200' }}">
+                                    {{ $colors[$role] ?? 'bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-slate-300 ring-gray-200 dark:ring-slate-600' }}">
                                     {{ $role }}
                                 </span>
                                 <span
                                     class="inline-flex items-center gap-1.5 px-2 py-0.5 text-xs font-medium rounded-full
-                                    {{ $active ? 'bg-green-50 text-green-600 ring-1 ring-green-200' : 'bg-gray-50 text-gray-500 ring-1 ring-gray-200' }}">
-                                    <span class="w-1.5 h-1.5 rounded-full {{ $active ? 'bg-green-500' : 'bg-gray-400' }}"></span>
+                                    {{ $active ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 ring-1 ring-green-200 dark:ring-green-800' : 'bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-slate-400 ring-1 ring-gray-200 dark:ring-slate-600' }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $active ? 'bg-green-500 dark:bg-green-400' : 'bg-gray-400 dark:bg-slate-500' }}"></span>
                                     {{ $active ? 'Ativo' : 'Inativo' }}
                                 </span>
                             </div>
@@ -388,10 +394,12 @@
                             $active = $user->is_active === true;
                             $role   = $user->accessProfile->name ?? '—';
                             $colors = [
-                                'Administrador' => 'bg-red-50 text-red-600 ring-red-200',
-                                'Colaborador'   => 'bg-gray-50 text-gray-600 ring-gray-200',
-                                'RH'            => 'bg-purple-50 text-purple-600 ring-purple-200',
-                                'Gestor'        => 'bg-green-50 text-green-600 ring-green-200',
+                                'CEO'           => 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 ring-amber-300 dark:ring-amber-700',
+                                'Administrador' => 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 ring-red-200 dark:ring-red-800',
+                                'Gerente de RH' => 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400 ring-teal-200 dark:ring-teal-700',
+                                'RH'            => 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 ring-purple-200 dark:ring-purple-800',
+                                'Gerente'       => 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 ring-blue-200 dark:ring-blue-700',
+                                'Funcionário'   => 'bg-gray-50 dark:bg-slate-700 text-gray-600 dark:text-slate-300 ring-gray-200 dark:ring-slate-600',
                             ];
                         @endphp
 
@@ -401,8 +409,14 @@
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center gap-3">
-                                    <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}"
-                                        class="w-10 h-10 rounded-full border border-gray-200">
+                                    @if($user->avatar)
+                                        <img src="{{ $user->avatarUrl() }}"
+                                             class="w-10 h-10 rounded-full object-cover border border-gray-200 dark:border-slate-600 shrink-0" />
+                                    @else
+                                        <div class="w-10 h-10 rounded-full bg-gradient-to-br {{ $user->avatarColor() }} flex items-center justify-center shrink-0">
+                                            <span class="text-sm lato-bold text-white select-none">{{ $user->initials() }}</span>
+                                        </div>
+                                    @endif
                                     <div>
                                         <p class="font-medium text-gray-900 leading-tight">{{ $user->name }}</p>
                                         <p class="text-gray-500 text-xs">{{ $user->email }}</p>
@@ -412,14 +426,14 @@
                             <td class="px-4 py-3 text-gray-600">{{ $user->department->name ?? '—' }}</td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full ring-1
-                                    {{ $colors[$role] ?? 'bg-gray-50 text-gray-500 ring-gray-200' }}">
+                                    {{ $colors[$role] ?? 'bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-slate-300 ring-gray-200 dark:ring-slate-600' }}">
                                     {{ $role }}
                                 </span>
                             </td>
                             <td class="px-4 py-3">
                                 <span class="inline-flex items-center gap-2 px-2.5 py-1 text-xs font-medium rounded-full
-                                    {{ $active ? 'bg-green-50 text-green-600 ring-1 ring-green-200' : 'bg-gray-50 text-gray-500 ring-1 ring-gray-200' }}">
-                                    <span class="w-1.5 h-1.5 rounded-full {{ $active ? 'bg-green-500' : 'bg-gray-400' }}"></span>
+                                    {{ $active ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 ring-1 ring-green-200 dark:ring-green-800' : 'bg-gray-50 dark:bg-slate-700 text-gray-500 dark:text-slate-400 ring-1 ring-gray-200 dark:ring-slate-600' }}">
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $active ? 'bg-green-500 dark:bg-green-400' : 'bg-gray-400 dark:bg-slate-500' }}"></span>
                                     {{ $active ? 'Ativo' : 'Inativo' }}
                                 </span>
                             </td>

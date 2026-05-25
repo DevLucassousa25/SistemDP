@@ -273,6 +273,18 @@
                             {{ $pergunta->type_label }}
                         </span>
 
+                        {{-- Badge: pergunta avalia o gestor do setor --}}
+                        @if ($pergunta->is_manager_evaluation)
+                            <span class="inline-flex items-center gap-1 text-[11px] lato-bold
+                                         px-2 py-0.5 rounded-full border
+                                         bg-violet-50 text-violet-700 border-violet-200
+                                         dark:bg-violet-900/20 dark:text-violet-300 dark:border-violet-700/40"
+                                  title="Esta pergunta é usada para avaliar o seu gestor">
+                                <x-lucide-user-check class="w-3 h-3" />
+                                Avaliação do Gestor
+                            </span>
+                        @endif
+
                         @if ($pergunta->required)
                             <span class="text-[11px] lato-bold text-red-400 flex items-center gap-0.5">
                                 <x-lucide-asterisk class="w-2.5 h-2.5" />
@@ -520,7 +532,7 @@
                             class="flex-1 sm:flex-none px-6 py-2.5 text-sm lato-bold rounded-xl text-white
                                    flex items-center justify-center gap-2 transition-all duration-200
                                    {{ $this->podeEnviar
-                                      ? 'bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-200 dark:shadow-emerald-900/30 cursor-pointer hover:-translate-y-0.5 active:translate-y-0'
+                                      ? 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20 cursor-pointer hover:-translate-y-0.5 active:translate-y-0'
                                       : 'bg-slate-300 dark:bg-slate-600 cursor-not-allowed opacity-60' }}">
                             <svg wire:loading wire:target="enviar"
                                  class="w-4 h-4 animate-spin"

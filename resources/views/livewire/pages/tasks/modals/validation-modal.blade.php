@@ -53,7 +53,7 @@
                             wire:click="confirm"
                             wire:loading.attr="disabled" wire:target="confirm"
                             class="flex items-center gap-2 px-4 py-2 text-sm lato-bold
-                                   bg-emerald-500 hover:bg-emerald-600 disabled:opacity-60 text-white rounded-xl transition cursor-pointer shadow-sm">
+                                   bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20 disabled:opacity-60 text-white rounded-xl transition cursor-pointer">
                         <span wire:loading.remove wire:target="confirm" class="flex items-center gap-2">
                             <x-lucide-shield-check class="w-4 h-4" />
                             Confirmar validação

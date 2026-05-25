@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Verifica e encerra automaticamente ouvidorias inativas a cada hora.
         // Em produção, configure o cron: * * * * * php /path/to/artisan schedule:run
         $schedule->command('ouvidoria:auto-encerrar')->hourly();
+
+        // Publica automaticamente posts agendados (published_at <= now)
+        $schedule->command('posts:publish-scheduled')->everyMinute();
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
@@ -23,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'rh_or_admin'  => \App\Http\Middleware\EnsureRhOrAdmin::class,
             'can_evaluate' => \App\Http\Middleware\EnsureCanEvaluate::class,
+            'not_admin'    => \App\Http\Middleware\EnsureNotAdmin::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

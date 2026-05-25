@@ -35,6 +35,7 @@ class DatabaseSeeder extends Seeder
              //AccessProfileSeeder::class,
              //SalasSeeder::class,
              //ReservationsSeeder::class,
+             FeriadosNacionaisSeeder::class,
         ]);
     }
 }

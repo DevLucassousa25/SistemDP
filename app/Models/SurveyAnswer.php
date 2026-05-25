@@ -15,6 +15,7 @@ class SurveyAnswer extends Model
         'value_scale',
         'value_option',
         'value_text',
+        'manager_id',   // preenchido quando is_manager_evaluation = true na pergunta
     ];
 
     protected $casts = [
@@ -33,6 +34,15 @@ class SurveyAnswer extends Model
     public function question(): BelongsTo
     {
         return $this->belongsTo(SurveyQuestion::class, 'question_id');
+    }
+
+    /**
+     * Gerente que foi avaliado através desta resposta.
+     * Só é preenchido quando a pergunta tem is_manager_evaluation = true.
+     */
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_id');
     }
 
     // ─────────────────────────────────────────────────────────────────

@@ -54,10 +54,10 @@ class Index extends SecureComponent
 
     public bool $isAnonymous = true;
 
-    #[Validate('nullable|date')]
+    #[Validate('required|date')]
     public ?string $startDate = null;
 
-    #[Validate('nullable|date|after_or_equal:startDate')]
+    #[Validate('required|date|after_or_equal:startDate')]
     public ?string $endDate = null;
 
     /** Ciclo de avaliação de desempenho vinculado (opcional, apenas RH/Admin) */
@@ -262,7 +262,15 @@ class Index extends SecureComponent
     public function salvar(): void
     {
         $this->requireCriador();
-        $this->validate();
+        $this->validate(
+            messages: [
+                'startDate.required'         => 'A data de início é obrigatória.',
+                'startDate.date'             => 'Informe uma data de início válida.',
+                'endDate.required'           => 'A data de encerramento é obrigatória.',
+                'endDate.date'               => 'Informe uma data de encerramento válida.',
+                'endDate.after_or_equal'     => 'A data de encerramento deve ser igual ou posterior à data de início.',
+            ]
+        );
 
         $user = Auth::user();
 
@@ -424,7 +432,9 @@ class Index extends SecureComponent
     {
         $this->requireCriador();
 
-        $original = Survey::findOrFail($id);
+        $original = Survey::with([
+            'questions' => fn ($q) => $q->orderBy('order')->orderBy('id'),
+        ])->findOrFail($id);
 
         if (! $this->podeGerir($original)) {
             abort(403);
@@ -443,7 +453,7 @@ class Index extends SecureComponent
             $targetDepartmentIds = $original->target_department_ids;
         }
 
-        Survey::create([
+        $copia = Survey::create([
             'title'                 => $original->title . ' (cópia)',
             'description'           => $original->description,
             'status'                => 'rascunho',
@@ -455,7 +465,24 @@ class Index extends SecureComponent
             'created_by'            => $user->id,
         ]);
 
-        $this->dispatch('toast', type: 'success', message: 'Pesquisa duplicada como rascunho.');
+        // Copia as perguntas da pesquisa original
+        foreach ($original->questions as $pergunta) {
+            $copia->questions()->create([
+                'question'              => $pergunta->question,
+                'type'                  => $pergunta->type,
+                'options'               => $pergunta->options,
+                'required'              => $pergunta->required,
+                'order'                 => $pergunta->order,
+                'is_manager_evaluation' => $pergunta->is_manager_evaluation,
+            ]);
+        }
+
+        $total = $original->questions->count();
+        $msg   = $total > 0
+            ? "Pesquisa duplicada com {$total} pergunta(s)."
+            : 'Pesquisa duplicada como rascunho (sem perguntas).';
+
+        $this->dispatch('toast', type: 'success', message: $msg);
         unset($this->surveys, $this->stats);
     }
 
@@ -469,6 +496,9 @@ class Index extends SecureComponent
         $query = Survey::with([
             'creator' => fn ($q) => $q->select('id', 'name', 'access_profile_id'),
             'creator.accessProfile' => fn ($q) => $q->select('id', 'slug'),
+            // Eager-load das perguntas para exibir o badge de "Clima / Avaliação do Gestor" sem N+1
+            'questions' => fn ($q) => $q->select('id', 'survey_id', 'is_manager_evaluation')
+                                        ->where('is_manager_evaluation', true),
         ]);
 
         if ($user->isRhOuDp()) {

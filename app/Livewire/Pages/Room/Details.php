@@ -3,8 +3,10 @@
 namespace App\Livewire\Pages\Room;
 use App\Livewire\SecureComponent;
 
+use App\Models\Department;
 use App\Models\Reservations;
 use App\Models\room;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -23,7 +25,9 @@ class Details extends SecureComponent
     public string $dataReserva = '';
     public string $horaInicio = '';
     public string $horaFim = '';
-    public int $participantes = 1;
+
+    /** IDs dos participantes selecionados (entangled com Alpine). */
+    public array $participantesSelecionados = [];
 
     public bool $emUsoAgora = false;
 
@@ -76,6 +80,8 @@ class Details extends SecureComponent
     public function abrirModalReserva(): void
     {
         $this->resetForm();
+        // Pré-seleciona o próprio usuário como participante
+        $this->participantesSelecionados = [Auth::id()];
         $this->modalReserva = true;
     }
 
@@ -215,23 +221,25 @@ class Details extends SecureComponent
     protected function rules(): array
     {
         return [
-            'titulo'       => 'required|string|min:2|max:100',
-            'descricao'    => 'nullable|string|max:500',
-            'dataReserva'  => 'required|date|after_or_equal:today',
-            'horaInicio'   => 'required|date_format:H:i',
-            'horaFim'      => 'required|date_format:H:i|after:horaInicio',
-            'participantes' => 'required|integer|min:1|max:' . $this->sala->capacity,
+            'titulo'                    => 'required|string|min:2|max:100',
+            'descricao'                 => 'nullable|string|max:500',
+            'dataReserva'               => 'required|date|after_or_equal:today',
+            'horaInicio'                => 'required|date_format:H:i',
+            'horaFim'                   => 'required|date_format:H:i|after:horaInicio',
+            'participantesSelecionados' => 'required|array|min:1|max:' . $this->sala->capacity,
         ];
     }
 
     protected array $messages = [
-        'titulo.required'        => 'Informe o título da reunião.',
-        'dataReserva.required'   => 'Informe a data da reserva.',
-        'dataReserva.after_or_equal' => 'A data não pode ser no passado.',
-        'horaInicio.required'    => 'Informe o horário de início.',
-        'horaFim.required'       => 'Informe o horário de término.',
-        'horaFim.after'          => 'O término deve ser após o início.',
-        'participantes.max'      => 'Excede a capacidade da sala.',
+        'titulo.required'                    => 'Informe o título da reunião.',
+        'dataReserva.required'               => 'Informe a data da reserva.',
+        'dataReserva.after_or_equal'         => 'A data não pode ser no passado.',
+        'horaInicio.required'                => 'Informe o horário de início.',
+        'horaFim.required'                   => 'Informe o horário de término.',
+        'horaFim.after'                      => 'O término deve ser após o início.',
+        'participantesSelecionados.required' => 'Selecione ao menos um participante.',
+        'participantesSelecionados.min'      => 'Selecione ao menos um participante.',
+        'participantesSelecionados.max'      => 'Excede a capacidade da sala (:max pessoas).',
     ];
 
 
@@ -317,7 +325,7 @@ class Details extends SecureComponent
             'description'     => $this->descricao,
             'start_time'      => $start,
             'end_time'        => $end,
-            'attendees_count' => $this->participantes,
+            'attendees_count' => count($this->participantesSelecionados),
             'status'          => 'confirmada',
         ]);
 
@@ -447,12 +455,12 @@ class Details extends SecureComponent
 
     private function resetForm(): void
     {
-        $this->titulo       = '';
-        $this->descricao    = '';
-        $this->dataReserva  = today()->format('Y-m-d');
-        $this->horaInicio   = '';
-        $this->horaFim      = '';
-        $this->participantes = 1;
+        $this->titulo                    = '';
+        $this->descricao                 = '';
+        $this->dataReserva               = today()->format('Y-m-d');
+        $this->horaInicio                = '';
+        $this->horaFim                   = '';
+        $this->participantesSelecionados = [];
         $this->resetValidation();
     }
 
@@ -472,14 +480,40 @@ class Details extends SecureComponent
             ->limit(20)
             ->get();
 
+        // Dados para o picker de participantes
+        $usuariosDisponiveis = User::where('is_active', true)
+            ->with('department')
+            ->orderBy('name')
+            ->get()
+            ->map(fn ($u) => [
+                'id'              => $u->id,
+                'name'            => $u->name,
+                'initials'        => $u->initials(),
+                'cor'             => $u->avatarColor(),
+                'avatarUrl'       => $u->avatarUrl(),
+                'department_id'   => $u->department_id,
+                'department_name' => $u->department?->name ?? 'Sem departamento',
+                'position'        => $u->position ?? 'Sem cargo',
+            ])
+            ->values()
+            ->toArray();
+
+        $departamentos = Department::has('users')
+            ->orderBy('name')
+            ->get()
+            ->map(fn ($d) => ['id' => $d->id, 'name' => $d->name])
+            ->values()
+            ->toArray();
 
         return view('livewire.pages.room.details', [
-            'sala'           => $this->sala,
-            'imagens'        => $this->sala->images,
-            'imagemCapa'     => $this->sala->images->first(),
-            'imagensGaleria' => $this->sala->images->skip(1),
-            'reservasHojeList' => $reservasHojeList,
-            'historico'       => $historico,
+            'sala'                => $this->sala,
+            'imagens'             => $this->sala->images,
+            'imagemCapa'          => $this->sala->images->first(),
+            'imagensGaleria'      => $this->sala->images->skip(1),
+            'reservasHojeList'    => $reservasHojeList,
+            'historico'           => $historico,
+            'usuariosDisponiveis' => $usuariosDisponiveis,
+            'departamentos'       => $departamentos,
             'recursos' => [
                 ['key' => 'has_tv',               'label' => 'TV',               'icon' => 'tv-2'],
                 ['key' => 'has_wifi',             'label' => 'Wi-Fi',            'icon' => 'wifi'],

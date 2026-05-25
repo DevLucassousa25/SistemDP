@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Pages\Tasks\Modals;
 
+use App\Livewire\Concerns\EnviaNotificacoes;
 use App\Livewire\SecureComponent;
+use App\Notifications\TarefaAtribuidaNotification;
 use App\Models\Task;
 use App\Models\TaskSubtask;
 use App\Models\TaskTag;
@@ -14,6 +16,7 @@ use Livewire\Attributes\On;
 
 class TaskForm extends SecureComponent
 {
+    use EnviaNotificacoes;
     // ── Estado ────────────────────────────────────────────────────────
     public bool   $open       = false;
     public ?int   $editingId  = null;
@@ -143,6 +146,21 @@ class TaskForm extends SecureComponent
             $task = Task::create($data);
             $this->syncSubtasks($task);
             $task->tags()->sync($this->selectedTagIds);
+
+            // Notifica o destinatário (se diferente de quem criou)
+            if ((int) $assignedTo !== (int) Auth::id()) {
+                $destinatario = User::find($assignedTo);
+                if ($destinatario) {
+                    $this->notificarUsuario($destinatario, new TarefaAtribuidaNotification($task, Auth::user()->name));
+                    $this->toastNotif(
+                        'Tarefa atribuída!',
+                        "{$destinatario->name} foi notificado(a) sobre a nova tarefa.",
+                        'check-square', 'blue',
+                        route('tarefas')
+                    );
+                }
+            }
+
             $this->alertSuccess('Tarefa criada com sucesso.');
         }
 
@@ -250,7 +268,8 @@ class TaskForm extends SecureComponent
         $user = Auth::user();
         if (! $user->isGerente()) return collect();
 
-        return User::where('department_id', $user->department_id)
+        return User::notAdmin()
+            ->where('department_id', $user->department_id)
             ->where('id', '!=', Auth::id())
             ->where('is_active', true)
             ->orderBy('name')

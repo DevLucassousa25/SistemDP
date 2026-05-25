@@ -11,12 +11,11 @@ class Sidebar extends SecureComponent
     public $collapsed = false;
 
     public $menus = [
-        'principal' => true,
-        'gestao' => true,
-        'pessoas' => true,
+        'principal'   => true,
+        'gestao'      => true,
+        'pessoas'     => true,
         'colaboracao' => true,
     ];
-
 
     public function close()
     {

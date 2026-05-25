@@ -48,8 +48,8 @@
             </div>
 
             <button type="button" wire:click="abrirModal"
-                    class="flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white
-                           text-sm font-medium px-4 py-2.5 rounded-lg shadow-sm transition cursor-pointer lato-bold">
+                    class="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white
+                           text-sm font-medium px-4 py-2.5 rounded-lg shadow-sm shadow-blue-500/20 transition cursor-pointer lato-bold">
                 <x-lucide-plus class="w-4 h-4" />
                 Novo feedback
             </button>
@@ -767,8 +767,8 @@
                     </p>
                     @if (trim($search) === '' && ! $typeFilter && ! $statusFilter && ! $categoryFilter)
                         <button type="button" wire:click="abrirModal"
-                                class="mt-4 flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white
-                                       text-xs lato-bold px-4 py-2 rounded-lg transition cursor-pointer">
+                                class="mt-4 flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white
+                                       text-xs lato-bold px-4 py-2 rounded-lg shadow-sm shadow-blue-500/20 transition cursor-pointer">
                             <x-lucide-plus class="w-3.5 h-3.5" />
                             Novo feedback
                         </button>
@@ -974,9 +974,21 @@
                     <thead>
                         <tr>
                             <th class="text-left py-2 pr-4 text-slate-400 font-semibold lato-bold w-40">Departamento</th>
-                            <th class="text-center py-2 px-3 text-emerald-600 dark:text-emerald-400 font-semibold lato-bold">★ Reconhecimento</th>
-                            <th class="text-center py-2 px-3 text-blue-600 dark:text-blue-400 font-semibold lato-bold">💡 Sugestão</th>
-                            <th class="text-center py-2 px-3 text-red-600 dark:text-red-400 font-semibold lato-bold">⚠ Alerta</th>
+                            <th class="text-center py-2 px-3 text-emerald-600 dark:text-emerald-400 font-semibold lato-bold">
+                                <span class="inline-flex items-center gap-1 justify-center">
+                                    <x-lucide-star class="w-3.5 h-3.5" /> Reconhecimento
+                                </span>
+                            </th>
+                            <th class="text-center py-2 px-3 text-blue-600 dark:text-blue-400 font-semibold lato-bold">
+                                <span class="inline-flex items-center gap-1 justify-center">
+                                    <x-lucide-lightbulb class="w-3.5 h-3.5" /> Sugestão
+                                </span>
+                            </th>
+                            <th class="text-center py-2 px-3 text-red-600 dark:text-red-400 font-semibold lato-bold">
+                                <span class="inline-flex items-center gap-1 justify-center">
+                                    <x-lucide-alert-triangle class="w-3.5 h-3.5" /> Alerta
+                                </span>
+                            </th>
                             <th class="text-center py-2 px-3 text-slate-400 font-semibold lato-bold">Total</th>
                         </tr>
                     </thead>
@@ -2014,7 +2026,7 @@
                             <button type="button"
                                     wire:click="adicionarTarefa"
                                     class="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold lato-bold
-                                           bg-emerald-500 hover:bg-emerald-600 text-white transition cursor-pointer">
+                                           bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-sm shadow-blue-500/20 transition cursor-pointer">
                                 <x-lucide-plus class="w-3.5 h-3.5" />
                                 Adicionar tarefa
                             </button>
@@ -2074,15 +2086,20 @@
                 <template x-if="step === totalSteps">
                     <button wire:click="salvar" wire:loading.attr="disabled" wire:target="salvar"
                             class="flex items-center gap-1.5 px-5 py-2.5 text-sm lato-bold rounded-xl
-                                   bg-emerald-600 hover:bg-emerald-700 text-white transition cursor-pointer shadow-sm
+                                   bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-md shadow-blue-500/20 transition cursor-pointer
                                    disabled:opacity-60">
-                        <svg wire:loading wire:target="salvar" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                        </svg>
-                        <x-lucide-check class="w-4 h-4" wire:loading.remove wire:target="salvar" />
-                        <span wire:loading.remove wire:target="salvar">{{ $editingId ? 'Salvar' : 'Registrar' }}</span>
-                        <span wire:loading wire:target="salvar">Salvando...</span>
+                        <span wire:loading.remove wire:target="salvar" class="flex items-center gap-1">
+                            @if ($editingId)
+                                <x-lucide-square-pen class="w-4 h-4" />
+                            @else
+                                <x-lucide-circle-check class="w-4 h-4" />
+                            @endif
+                                {{ $editingId ? 'Salvar Alterações' : 'Confirmar' }}
+                        </span>
+
+                        <span wire:loading wire:target="salvar" class="flex items-center gap-2">
+                                <x-lucide-loader-2 class="w-4 h-4 animate-spin" />
+                        </span>
                     </button>
                 </template>
 
@@ -2509,8 +2526,8 @@
                                           border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200
                                           placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
                             <button type="button" wire:click="addComment({{ $fb->id }})"
-                                    class="px-4 py-2 text-xs lato-bold bg-emerald-500 hover:bg-emerald-600 text-white
-                                           rounded-xl transition cursor-pointer shrink-0">
+                                    class="px-4 py-2 text-xs lato-bold bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white
+                                           shadow-sm shadow-blue-500/20 rounded-xl transition cursor-pointer shrink-0">
                                 Enviar
                             </button>
                         </div>

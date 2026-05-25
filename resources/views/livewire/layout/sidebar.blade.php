@@ -60,14 +60,26 @@
                             <x-lucide-layout-dashboard class="icon" />
                             @if(!$collapsed) Dashboard @endif
                         </a>
-                        <a href="#" class="sidebar-link {{ request()->routeIs('feed') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
+                        <a href="{{ route('feed') }}" class="sidebar-link {{ request()->routeIs('feed') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
                             <x-lucide-globe class="icon" />
                             @if(!$collapsed) Feed Social @endif
                         </a>
-                        <a href="#" class="sidebar-link {{ request()->routeIs('publicacoes') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
+                        <a href="{{ route('communities') }}" class="sidebar-link {{ request()->routeIs('communities*') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
+                            <x-lucide-users class="icon" />
+                            @if(!$collapsed) Comunidades @endif
+                        </a>
+                        @if(!auth()->user()?->isAdmin())
+                        <a href="{{ route('humor.pessoal') }}" class="sidebar-link {{ request()->routeIs('humor.pessoal') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
+                            <x-lucide-activity class="icon" />
+                            @if(!$collapsed) Meu Humor @endif
+                        </a>
+                        @endif
+                        @if(auth()->user()?->isRhOuDp())
+                        <a href="{{ route('publicacoes') }}" class="sidebar-link {{ request()->routeIs('publicacoes') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
                             <x-lucide-send class="icon" />
                             @if(!$collapsed) Publicações @endif
                         </a>
+                        @endif
                     </div>
                 @endif
             </div>
@@ -84,11 +96,11 @@
 
                 @if ($menus['gestao'])
                     <div class="menu-items">
-                        <a href="#" class="sidebar-link {{ request()->routeIs('dpi') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
+                        <a href="{{ route('dpi') }}" class="sidebar-link {{ request()->routeIs('dpi') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
                             <x-lucide-bar-chart-3 class="icon" />
                             @if(!$collapsed) DPI @endif
                         </a>
-                        <a href="#" class="sidebar-link {{ request()->routeIs('okrs') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
+                        <a href="{{ route('okrs') }}" class="sidebar-link {{ request()->routeIs('okrs') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
                             <x-lucide-target class="icon" />
                             @if(!$collapsed) OKRs @endif
                         </a>
@@ -96,7 +108,13 @@
                             <x-lucide-check-square class="icon" />
                             @if(!$collapsed) Tarefas @endif
                         </a>
-                        @if(auth()->user()?->podeGerenciarPesquisas())
+                        @if(!auth()->user()?->isRhOuDp())
+                        <a href="{{ route('solicitacoes') }}" class="sidebar-link {{ request()->routeIs('solicitacoes') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
+                            <x-lucide-inbox class="icon" />
+                            @if(!$collapsed) Solicitações RH @endif
+                        </a>
+                        @endif
+                        @if(auth()->user()?->podeAvaliar())
                         <a href="{{ route('avaliacoes') }}" class="sidebar-link {{ request()->routeIs('avaliacoes') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
                             <x-lucide-trending-up class="icon" />
                             @if(!$collapsed) Avaliação @endif
@@ -122,10 +140,17 @@
                             <x-lucide-users class="icon" />
                             @if(!$collapsed) Meu Time @endif
                         </a>
-                        <a href="#" class="sidebar-link {{ request()->routeIs('curriculos') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
-                            <x-lucide-file-text class="icon" />
-                            @if(!$collapsed) Currículos @endif
+                        <a href="{{ route('organograma') }}" class="sidebar-link {{ request()->routeIs('organograma') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
+                            <x-lucide-network class="icon" />
+                            @if(!$collapsed) Organograma @endif
                         </a>
+                        @if(auth()->user()?->isRhOuDp())
+                        <a href="{{ route('rh.curriculos') }}" class="sidebar-link {{ request()->routeIs('rh.curriculos') && request()->query('aba','') !== 'desligamentos' ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
+                            <x-lucide-file-text class="icon" />
+                            @if(!$collapsed) Portal R&S @endif
+                        </a>
+                        @endif
+
                         <a href="{{ route('pesquisas') }}" class="sidebar-link {{ request()->routeIs('pesquisas') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
                             <x-lucide-clipboard-list class="icon" />
                             @if(!$collapsed) Pesquisas @endif
@@ -158,6 +183,10 @@
                             @if(!$collapsed) Feedbacks @endif
                         </a>
                         @endif
+                        <a href="{{ route('calendario') }}" class="sidebar-link {{ request()->routeIs('calendario') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
+                            <x-lucide-calendar-days class="icon" />
+                            @if(!$collapsed) Calendário @endif
+                        </a>
                         <a href="{{ route('reunioes') }}" class="sidebar-link {{ request()->routeIs('reunioes') ? 'active' : '' }} {{ $collapsed ? 'justify-center' : '' }} lato-regular">
                             <x-lucide-calendar class="icon" />
                             @if(!$collapsed) Reuniões @endif
@@ -178,19 +207,31 @@
 
 
         {{-- USER --}}
-        <div class="absolute bottom-0 w-full border-t border-slate-200 dark:border-slate-700 px-4 py-4 flex items-center gap-3 bg-white dark:bg-slate-800">
-            <img src="https://i.pravatar.cc/40" class="w-10 h-10 rounded-full shrink-0">
-            @if(!$collapsed)
-                <div class="min-w-0">
-                    @php
-                        $nomes = explode(' ', auth()->user()->name);
-                        $primeiroSegundo = $nomes[0] . (isset($nomes[1]) ? ' ' . $nomes[1] : '');
-                    @endphp
-                    <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{{ $primeiroSegundo }}</p>
-                    <p class="text-xs text-slate-400 dark:text-slate-500 font-normal">{{ auth()->user()->accessProfile->name }}</p>
+        @php
+            $sidebarUser  = auth()->user();
+            $sidebarNomes = explode(' ', $sidebarUser->name);
+            $sidebarNomeCurto = $sidebarNomes[0] . (isset($sidebarNomes[1]) ? ' ' . $sidebarNomes[1] : '');
+        @endphp
+        <a href="{{ route('profile') }}" wire:navigate
+           class="absolute bottom-0 w-full border-t border-slate-200 dark:border-slate-700 px-4 py-4 flex items-center gap-3 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
+
+            {{-- Avatar ou iniciais --}}
+            @if($sidebarUser->avatar)
+                <img src="{{ $sidebarUser->avatarUrl() }}"
+                     class="w-10 h-10 rounded-full object-cover shrink-0" />
+            @else
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br {{ $sidebarUser->avatarColor() }} flex items-center justify-center shrink-0">
+                    <span class="text-sm lato-bold text-white select-none">{{ $sidebarUser->initials() }}</span>
                 </div>
             @endif
-        </div>
+
+            @if(!$collapsed)
+                <div class="min-w-0">
+                    <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">{{ $sidebarNomeCurto }}</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 font-normal">{{ $sidebarUser->accessProfile?->name }}</p>
+                </div>
+            @endif
+        </a>
 
     </aside>
 

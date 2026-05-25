@@ -479,25 +479,23 @@
                             wire:target="save"
                             :disabled="$wire.managerWarning !== null && $wire.managerWarning !== ''"
                             :class="($wire.managerWarning !== null && $wire.managerWarning !== '')
-                                ? 'flex-1 sm:flex-none px-4 sm:px-6 py-2 text-sm lato-bold rounded-lg bg-emerald-300 text-white flex items-center justify-center gap-2 cursor-not-allowed opacity-60'
-                                : 'flex-1 sm:flex-none px-4 sm:px-6 py-2 text-sm lato-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-emerald-200/50 transition'">
+                                ? 'flex-1 sm:flex-none px-4 sm:px-6 py-2 text-sm lato-bold rounded-lg bg-slate-300 text-white flex items-center justify-center gap-2 cursor-not-allowed opacity-60'
+                                : 'flex-1 sm:flex-none px-4 sm:px-6 py-2 text-sm lato-bold rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20 text-white flex items-center justify-center gap-2 cursor-pointer transition'">
 
-                            <svg wire:loading wire:target="save" class="w-4 h-4 animate-spin"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                            </svg>
+                            <span wire:loading wire:target="save">
+                               <x-lucide-loader-2 class="w-4 h-4 animate-spin" />
+                            </span>
+
 
                             <span wire:loading.remove wire:target="save" class="flex items-center gap-1.5">
                                 @if ($mode === 'create')
-                                    <x-lucide-user-plus class="w-4 h-4" />
-                                    Criar Usuário
+                                    <x-lucide-circle-check class="w-4 h-4" />
+                                    Confirmar
                                 @else
-                                    <x-lucide-check class="w-4 h-4" />
+                                    <x-lucide-square-pen class="w-4 h-4" />
                                     Salvar Alterações
                                 @endif
                             </span>
-                            <span wire:loading wire:target="save">Salvando...</span>
                         </button>
                     </div>
                 </div>

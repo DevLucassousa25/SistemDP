@@ -55,6 +55,19 @@ class Survey extends Model
         return $this->hasMany(SurveyResponse::class);
     }
 
+    public function managerScores(): HasMany
+    {
+        return $this->hasMany(SurveyManagerScore::class);
+    }
+
+    /**
+     * Indica se esta pesquisa possui ao menos uma pergunta de avaliação de gestor.
+     */
+    public function temPerguntasDeGestor(): bool
+    {
+        return $this->questions()->where('is_manager_evaluation', true)->exists();
+    }
+
     // ─────────────────────────────────────────────────────────────────
     // Helpers de resposta
     // ─────────────────────────────────────────────────────────────────

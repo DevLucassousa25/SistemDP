@@ -8,10 +8,10 @@
         @if (auth()->user()?->isRhOuDp())
             <button wire:click="$dispatch('abrir-modal-sala')"
                 class="w-full sm:w-auto flex items-center justify-center gap-2
-                    bg-emerald-500 hover:bg-emerald-600
+                    bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700
                     text-white text-sm font-medium
                     px-4 py-2.5
-                    rounded-lg shadow-sm
+                    rounded-lg shadow-md shadow-blue-500/20
                     transition cursor-pointer lato-bold">
                 <x-lucide-plus class="w-4 h-4" />
                 Nova Sala

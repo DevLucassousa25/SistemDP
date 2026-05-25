@@ -177,6 +177,53 @@
             @endforeach
         </div>
 
+        {{-- ── Pré-computa configs de gráfico em PHP; lidos via data-charts pelo JS persistente ── --}}
+        @php
+            $chartsConfig = [];
+            $chartsConfig[] = [
+                'id'     => 'apex-compare-rate',
+                'kind'   => 'rate',
+                'labels' => $surveyLabels,
+                'rates'  => collect($orderedIds)->map(fn ($id) => $stats[$id]['response_rate'])->values()->toArray(),
+                'colors' => $palette,
+            ];
+            foreach ($comparison['question_analytics'] as $qi => $qa) {
+                if ($qa['type'] === 'escala') {
+                    $chartsConfig[] = [
+                        'id'         => "apex-nps-{$qi}",
+                        'kind'       => 'nps',
+                        'labels'     => $surveyLabels,
+                        'data'       => collect($orderedIds)->map(fn ($id) => $qa['data'][$id]['nps'])->toArray(),
+                        'palette'    => $palette,
+                    ];
+                    $chartsConfig[] = [
+                        'id'         => "apex-bd-{$qi}",
+                        'kind'       => 'breakdown',
+                        'labels'     => $surveyLabels,
+                        'promoters'  => collect($orderedIds)->map(fn ($id) => $qa['data'][$id]['promoters'])->toArray(),
+                        'passives'   => collect($orderedIds)->map(fn ($id) => $qa['data'][$id]['passives'])->toArray(),
+                        'detractors' => collect($orderedIds)->map(fn ($id) => $qa['data'][$id]['detractors'])->toArray(),
+                    ];
+                } elseif ($qa['type'] === 'multipla_escolha') {
+                    $chartsConfig[] = [
+                        'id'      => "apex-mc-{$qi}",
+                        'kind'    => 'mc',
+                        'options' => $qa['options'],
+                        'series'  => collect($orderedIds)->map(function ($sid) use ($qa, $stats) {
+                            return [
+                                'name' => $stats[$sid]['label'],
+                                'data' => collect($qa['options'])->map(fn ($opt) => $qa['data'][$sid]['percentages'][$opt] ?? 0)->values()->toArray(),
+                            ];
+                        })->values()->toArray(),
+                        'palette' => $palette,
+                    ];
+                }
+            }
+        @endphp
+
+        {{-- Container com data-charts; o JS persistente lê daqui após cada re-render --}}
+        <div id="compare-result" data-charts='@json($chartsConfig)'>
+
         {{-- Gráfico de taxa de resposta --}}
         <div class="mt-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 sm:p-6">
             <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 lato-bold uppercase tracking-wide mb-4">
@@ -185,47 +232,18 @@
             <div wire:ignore id="apex-compare-rate" style="min-height:180px"></div>
         </div>
 
-        <script>
-        (function () {
-            var labels    = @json($surveyLabels);
-            var rates     = @json(collect($orderedIds)->map(fn ($id) => $stats[$id]['response_rate'])->values()->toArray());
-            var colors    = @json($palette);
-            function renderRate() {
-                if (typeof ApexCharts === 'undefined') { setTimeout(renderRate, 80); return; }
-                var el = document.getElementById('apex-compare-rate');
-                if (!el || el.dataset.apex) return;
-                el.dataset.apex = '1';
-                var isDark = document.documentElement.classList.contains('dark');
-                var tc = isDark ? '#94a3b8' : '#64748b';
-                new ApexCharts(el, {
-                    chart: { type: 'line', height: 200, toolbar: { show: false }, fontFamily: 'inherit', zoom: { enabled: false } },
-                    series: [{ name: 'Taxa de Resposta', data: rates }],
-                    colors: ['#10b981'],
-                    stroke: { curve: 'smooth', width: 2.5 },
-                    markers: { size: 7, colors: colors.slice(0, rates.length), strokeColors: '#fff', strokeWidth: 2 },
-                    xaxis: { categories: labels, labels: { style: { colors: tc, fontSize: '12px' } } },
-                    yaxis: { min: 0, max: 100, tickAmount: 4, labels: { formatter: function (v) { return v + '%'; }, style: { colors: tc } } },
-                    grid: { borderColor: isDark ? '#334155' : '#e2e8f0' },
-                    dataLabels: { enabled: true, formatter: function (v) { return v + '%'; }, style: { fontSize: '11px', fontFamily: 'inherit' }, background: { enabled: false } },
-                    tooltip: { y: { formatter: function (v) { return v + '%'; } } },
-                }).render();
-            }
-            renderRate();
-        }());
-        </script>
-
         {{-- ───── Bloco por pergunta compartilhada ───────────────────── --}}
         @foreach ($comparison['question_analytics'] as $qi => $qa)
             @php
                 $typeLabel = match ($qa['type']) {
-                    'escala'          => 'Escala 0–10',
-                    'multipla_escolha'=> 'Múltipla escolha',
-                    default           => 'Texto livre',
+                    'escala'           => 'Escala 0–10',
+                    'multipla_escolha' => 'Múltipla escolha',
+                    default            => 'Texto livre',
                 };
                 $typeBg = match ($qa['type']) {
-                    'escala'          => 'background:#eef2ff;color:#4f46e5',
-                    'multipla_escolha'=> 'background:#fffbeb;color:#b45309',
-                    default           => 'background:#f1f5f9;color:#475569',
+                    'escala'           => 'background:#eef2ff;color:#4f46e5',
+                    'multipla_escolha' => 'background:#fffbeb;color:#b45309',
+                    default            => 'background:#f1f5f9;color:#475569',
                 };
             @endphp
 
@@ -244,21 +262,11 @@
 
                 {{-- ── ESCALA ──────────────────────────────────────────── --}}
                 @if ($qa['type'] === 'escala')
-                    @php
-                        $npsArr        = collect($orderedIds)->map(fn ($id) => $qa['data'][$id]['nps'])->toArray();
-                        $avgArr        = collect($orderedIds)->map(fn ($id) => $qa['data'][$id]['avg'])->toArray();
-                        $promotersArr  = collect($orderedIds)->map(fn ($id) => $qa['data'][$id]['promoters'])->toArray();
-                        $passivesArr   = collect($orderedIds)->map(fn ($id) => $qa['data'][$id]['passives'])->toArray();
-                        $detractorsArr = collect($orderedIds)->map(fn ($id) => $qa['data'][$id]['detractors'])->toArray();
-                    @endphp
-
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        {{-- NPS --}}
                         <div>
                             <p class="text-[11px] text-slate-400 lato-regular uppercase tracking-wide mb-2">Evolução do NPS</p>
                             <div wire:ignore id="apex-nps-{{ $qi }}" style="min-height:210px"></div>
                         </div>
-                        {{-- Breakdown --}}
                         <div>
                             <p class="text-[11px] text-slate-400 lato-regular uppercase tracking-wide mb-2">Distribuição por edição</p>
                             <div wire:ignore id="apex-bd-{{ $qi }}" style="min-height:210px"></div>
@@ -285,107 +293,9 @@
                         @endforeach
                     </div>
 
-                    <script>
-                    (function () {
-                        var labels      = @json($surveyLabels);
-                        var npsData     = @json($npsArr);
-                        var palette     = @json($palette);
-                        var promoters   = @json($promotersArr);
-                        var passives    = @json($passivesArr);
-                        var detractors  = @json($detractorsArr);
-
-                        function renderNps() {
-                            if (typeof ApexCharts === 'undefined') { setTimeout(renderNps, 80); return; }
-                            var el = document.getElementById('apex-nps-{{ $qi }}');
-                            if (!el || el.dataset.apex) return;
-                            el.dataset.apex = '1';
-                            var isDark = document.documentElement.classList.contains('dark');
-                            var tc = isDark ? '#94a3b8' : '#64748b';
-                            new ApexCharts(el, {
-                                chart: { type: 'line', height: 210, toolbar: { show: false }, fontFamily: 'inherit', zoom: { enabled: false } },
-                                series: [{ name: 'NPS', data: npsData }],
-                                colors: ['#6366f1'],
-                                stroke: { curve: 'smooth', width: 2.5 },
-                                markers: { size: 7, colors: palette.slice(0, labels.length), strokeColors: '#fff', strokeWidth: 2 },
-                                xaxis: { categories: labels, labels: { style: { colors: tc, fontSize: '12px' } } },
-                                yaxis: { min: -100, max: 100, tickAmount: 4, labels: { style: { colors: tc }, formatter: function (v) { return v > 0 ? '+' + v : v; } } },
-                                grid: { borderColor: isDark ? '#334155' : '#e2e8f0' },
-                                annotations: { yaxis: [{ y: 0, borderColor: '#94a3b8', strokeDashArray: 4, label: { text: 'NPS 0', style: { color: '#94a3b8', fontSize: '10px', background: 'transparent' } } }] },
-                                dataLabels: { enabled: true, formatter: function (v) { return v !== null ? (v > 0 ? '+' + v : v) : ''; }, style: { fontSize: '11px', fontFamily: 'inherit' }, background: { enabled: false } },
-                                tooltip: { y: { formatter: function (v) { return 'NPS ' + (v > 0 ? '+' : '') + v; } } },
-                            }).render();
-                        }
-
-                        function renderBreakdown() {
-                            if (typeof ApexCharts === 'undefined') { setTimeout(renderBreakdown, 80); return; }
-                            var el = document.getElementById('apex-bd-{{ $qi }}');
-                            if (!el || el.dataset.apex) return;
-                            el.dataset.apex = '1';
-                            var isDark = document.documentElement.classList.contains('dark');
-                            var tc = isDark ? '#94a3b8' : '#64748b';
-                            new ApexCharts(el, {
-                                chart: { type: 'bar', height: 210, stacked: true, toolbar: { show: false }, fontFamily: 'inherit' },
-                                series: [
-                                    { name: 'Detratores (0–6)', data: detractors },
-                                    { name: 'Neutros (7–8)',    data: passives },
-                                    { name: 'Promotores (9–10)',data: promoters },
-                                ],
-                                colors: ['#ef4444', '#f59e0b', '#10b981'],
-                                xaxis: { categories: labels, labels: { style: { colors: tc, fontSize: '12px' } } },
-                                yaxis: { max: 100, labels: { formatter: function (v) { return v + '%'; }, style: { colors: tc } } },
-                                plotOptions: { bar: { horizontal: false, columnWidth: '55%', borderRadius: 4, borderRadiusApplication: 'end' } },
-                                grid: { borderColor: isDark ? '#334155' : '#e2e8f0' },
-                                dataLabels: { formatter: function (v) { return v > 6 ? v.toFixed(0) + '%' : ''; }, style: { fontSize: '10px', fontFamily: 'inherit' } },
-                                tooltip: { y: { formatter: function (v) { return v.toFixed(1) + '%'; } } },
-                                legend: { position: 'bottom', labels: { colors: tc }, fontSize: '11px', fontFamily: 'inherit' },
-                            }).render();
-                        }
-
-                        renderNps();
-                        renderBreakdown();
-                    }());
-                    </script>
-
                 {{-- ── MÚLTIPLA ESCOLHA ───────────────────────────────── --}}
                 @elseif ($qa['type'] === 'multipla_escolha')
-                    @php
-                        $mcSeries = collect($orderedIds)->map(function ($sid, $i) use ($qa, $stats) {
-                            $pcts = collect($qa['options'])->map(fn ($opt) => $qa['data'][$sid]['percentages'][$opt] ?? 0)->values()->toArray();
-                            return ['name' => $stats[$sid]['label'], 'data' => $pcts];
-                        })->values()->toArray();
-                    @endphp
-
                     <div wire:ignore id="apex-mc-{{ $qi }}" style="min-height:220px"></div>
-
-                    <script>
-                    (function () {
-                        var options = @json($qa['options']);
-                        var series  = @json($mcSeries);
-                        var palette = @json($palette);
-
-                        function renderMc() {
-                            if (typeof ApexCharts === 'undefined') { setTimeout(renderMc, 80); return; }
-                            var el = document.getElementById('apex-mc-{{ $qi }}');
-                            if (!el || el.dataset.apex) return;
-                            el.dataset.apex = '1';
-                            var isDark = document.documentElement.classList.contains('dark');
-                            var tc = isDark ? '#94a3b8' : '#64748b';
-                            new ApexCharts(el, {
-                                chart: { type: 'bar', height: 240, toolbar: { show: false }, fontFamily: 'inherit' },
-                                series: series,
-                                colors: palette,
-                                xaxis: { categories: options, labels: { style: { colors: tc, fontSize: '11px' } } },
-                                yaxis: { labels: { formatter: function (v) { return v + '%'; }, style: { colors: tc } } },
-                                plotOptions: { bar: { horizontal: false, columnWidth: '65%', borderRadius: 4 } },
-                                grid: { borderColor: isDark ? '#334155' : '#e2e8f0' },
-                                dataLabels: { formatter: function (v) { return v > 5 ? v.toFixed(0) + '%' : ''; }, style: { fontSize: '10px', fontFamily: 'inherit' } },
-                                tooltip: { y: { formatter: function (v) { return v.toFixed(1) + '%'; } } },
-                                legend: { position: 'bottom', labels: { colors: tc }, fontSize: '11px', fontFamily: 'inherit' },
-                            }).render();
-                        }
-                        renderMc();
-                    }());
-                    </script>
 
                 {{-- ── TEXTO LIVRE ─────────────────────────────────────── --}}
                 @else
@@ -423,6 +333,159 @@
             entre as {{ count($orderedIds) }} pesquisas selecionadas
         </p>
 
+        </div>{{-- #compare-result --}}
+
     @endif
 
-</div>
+    {{-- ──────────────────────────────────────────────────────────────────
+         Script persistente: sempre no DOM, inicializa/reinicializa gráficos
+         após cada re-render do Livewire via Livewire.hook('commit').
+         NOTA: Livewire v3 NÃO despacha 'livewire:commit' como evento DOM.
+               O correto é usar Livewire.hook('commit', { succeed }) que
+               dispara APÓS o morphdom atualizar o DOM.
+    ─────────────────────────────────────────────────────────────────────── --}}
+    <script>
+    (function () {
+        function isDark() { return document.documentElement.classList.contains('dark'); }
+        function tc()     { return isDark() ? '#94a3b8' : '#64748b'; }
+        function gc()     { return isDark() ? '#334155' : '#e2e8f0'; }
+
+        window._apexCompare   = window._apexCompare   || {};
+        window._apexCompareOk = window._apexCompareOk || false; // flag: hook já registrado
+
+        function buildOptions(cfg) {
+            var text = tc(), grid = gc(), dark = isDark();
+            switch (cfg.kind) {
+                case 'rate':
+                    return {
+                        chart: { type: 'line', height: 200, toolbar: { show: false }, fontFamily: 'inherit', zoom: { enabled: false } },
+                        series: [{ name: 'Taxa de Resposta', data: cfg.rates }],
+                        colors: ['#10b981'],
+                        stroke: { curve: 'smooth', width: 2.5 },
+                        markers: { size: 7, colors: cfg.colors.slice(0, cfg.rates.length), strokeColors: '#fff', strokeWidth: 2 },
+                        xaxis: { categories: cfg.labels, labels: { style: { colors: text, fontSize: '12px' } } },
+                        yaxis: { min: 0, max: 100, tickAmount: 4, labels: { formatter: function (v) { return v + '%'; }, style: { colors: text } } },
+                        grid: { borderColor: grid },
+                        dataLabels: { enabled: true, formatter: function (v) { return v + '%'; }, style: { fontSize: '11px', fontFamily: 'inherit' }, background: { enabled: false } },
+                        tooltip: { y: { formatter: function (v) { return v + '%'; } } },
+                    };
+                case 'nps':
+                    return {
+                        chart: { type: 'line', height: 210, toolbar: { show: false }, fontFamily: 'inherit', zoom: { enabled: false } },
+                        series: [{ name: 'NPS', data: cfg.data }],
+                        colors: ['#6366f1'],
+                        stroke: { curve: 'smooth', width: 2.5 },
+                        markers: { size: 7, colors: cfg.palette.slice(0, cfg.labels.length), strokeColors: '#fff', strokeWidth: 2 },
+                        xaxis: { categories: cfg.labels, labels: { style: { colors: text, fontSize: '12px' } } },
+                        yaxis: { min: -100, max: 100, tickAmount: 4, labels: { style: { colors: text }, formatter: function (v) { return v > 0 ? '+' + v : String(v); } } },
+                        grid: { borderColor: grid },
+                        annotations: { yaxis: [{ y: 0, borderColor: '#94a3b8', strokeDashArray: 4, label: { text: 'NPS 0', style: { color: '#94a3b8', fontSize: '10px', background: 'transparent' } } }] },
+                        dataLabels: { enabled: true, formatter: function (v) { return v !== null ? (v > 0 ? '+' + v : String(v)) : ''; }, style: { fontSize: '11px', fontFamily: 'inherit' }, background: { enabled: false } },
+                        tooltip: { y: { formatter: function (v) { return 'NPS ' + (v > 0 ? '+' : '') + v; } } },
+                    };
+                case 'breakdown':
+                    return {
+                        chart: { type: 'bar', height: 210, stacked: true, toolbar: { show: false }, fontFamily: 'inherit' },
+                        series: [
+                            { name: 'Detratores (0–6)', data: cfg.detractors },
+                            { name: 'Neutros (7–8)',    data: cfg.passives },
+                            { name: 'Promotores (9–10)', data: cfg.promoters },
+                        ],
+                        colors: ['#ef4444', '#f59e0b', '#10b981'],
+                        xaxis: { categories: cfg.labels, labels: { style: { colors: text, fontSize: '12px' } } },
+                        yaxis: { max: 100, labels: { formatter: function (v) { return v + '%'; }, style: { colors: text } } },
+                        plotOptions: { bar: { horizontal: false, columnWidth: '55%', borderRadius: 4, borderRadiusApplication: 'end' } },
+                        grid: { borderColor: grid },
+                        dataLabels: { formatter: function (v) { return v > 6 ? v.toFixed(0) + '%' : ''; }, style: { fontSize: '10px', fontFamily: 'inherit' } },
+                        tooltip: { y: { formatter: function (v) { return v.toFixed(1) + '%'; } } },
+                        legend: { position: 'bottom', labels: { colors: text }, fontSize: '11px', fontFamily: 'inherit' },
+                    };
+                case 'mc':
+                    return {
+                        chart: { type: 'bar', height: 240, toolbar: { show: false }, fontFamily: 'inherit' },
+                        series: cfg.series,
+                        colors: cfg.palette,
+                        xaxis: { categories: cfg.options, labels: { style: { colors: text, fontSize: '11px' } } },
+                        yaxis: { labels: { formatter: function (v) { return v + '%'; }, style: { colors: text } } },
+                        plotOptions: { bar: { horizontal: false, columnWidth: '65%', borderRadius: 4 } },
+                        grid: { borderColor: grid },
+                        dataLabels: { formatter: function (v) { return v > 5 ? v.toFixed(0) + '%' : ''; }, style: { fontSize: '10px', fontFamily: 'inherit' } },
+                        tooltip: { y: { formatter: function (v) { return v.toFixed(1) + '%'; } } },
+                        legend: { position: 'bottom', labels: { colors: text }, fontSize: '11px', fontFamily: 'inherit' },
+                    };
+            }
+            return null;
+        }
+
+        function initCompareCharts() {
+            var container = document.getElementById('compare-result');
+            if (!container) return; // Comparativo não visível
+
+            var configs;
+            try { configs = JSON.parse(container.dataset.charts || '[]'); } catch (e) { return; }
+            if (!configs.length) return;
+
+            if (typeof ApexCharts === 'undefined') {
+                setTimeout(initCompareCharts, 80);
+                return;
+            }
+
+            configs.forEach(function (cfg) {
+                var el = document.getElementById(cfg.id);
+                if (!el) return;
+
+                // Evita recriar gráfico se os dados não mudaram
+                var hash = JSON.stringify(cfg);
+                if (el.dataset.chartHash === hash) return;
+                el.dataset.chartHash = hash;
+
+                // Destrói instância anterior
+                if (window._apexCompare[cfg.id]) {
+                    try { window._apexCompare[cfg.id].destroy(); } catch (e) {}
+                    delete window._apexCompare[cfg.id];
+                }
+
+                var opts = buildOptions(cfg);
+                if (!opts) return;
+
+                var chart = new ApexCharts(el, opts);
+                window._apexCompare[cfg.id] = chart;
+                chart.render();
+            });
+        }
+
+        // ── Registra hook Livewire uma única vez ───────────────────────────
+        function registerHook() {
+            if (window._apexCompareOk) return;
+            if (typeof window.Livewire === 'undefined' || typeof window.Livewire.hook !== 'function') {
+                // Livewire ainda não inicializou — tenta novamente
+                setTimeout(registerHook, 60);
+                return;
+            }
+            window._apexCompareOk = true;
+            // succeed() dispara APÓS o morphdom terminar de atualizar o DOM
+            window.Livewire.hook('commit', function (ref) {
+                ref.succeed(function () {
+                    requestAnimationFrame(initCompareCharts);
+                });
+            });
+        }
+
+        // ── Execução inicial ───────────────────────────────────────────────
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function () {
+                registerHook();
+                initCompareCharts();
+            });
+        } else {
+            registerHook();
+            initCompareCharts();
+        }
+
+        // Livewire.hook só está disponível após livewire:initialized
+        document.addEventListener('livewire:initialized', function () {
+            registerHook();
+        });
+    }());
+    </script>
+

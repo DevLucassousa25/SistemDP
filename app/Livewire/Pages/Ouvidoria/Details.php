@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Pages\Ouvidoria;
 
+use App\Livewire\Concerns\EnviaNotificacoes;
 use App\Livewire\SecureComponent;
+use App\Notifications\OuvidoriaNovaMensagemNotification;
 use App\Models\AnexoManifestacao;
 use App\Models\ConfiguracaoOuvidoria;
 use App\Models\Manifestacao;
@@ -14,7 +16,7 @@ use Livewire\WithFileUploads;
 
 class Details extends SecureComponent
 {
-    use WithFileUploads;
+    use WithFileUploads, EnviaNotificacoes;
 
     #[Locked]
     public string $manifestacaoId;
@@ -131,6 +133,9 @@ class Details extends SecureComponent
 
         // Re-busca do DB para garantir que o Livewire exibe o estado mais recente
         $this->recarregarManifestacao();
+
+        // Notifica RH/Admin sobre nova mensagem na ouvidoria
+        $this->notificarRhAdmin(new OuvidoriaNovaMensagemNotification($this->manifestacao));
 
         $this->dispatch('manifestacaoAtualizada');
         $this->alertSuccess('Resposta enviada com sucesso!');

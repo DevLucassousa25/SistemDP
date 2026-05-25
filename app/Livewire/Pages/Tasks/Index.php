@@ -155,7 +155,8 @@ class Index extends SecureComponent
         $user = Auth::user();
         if (! $user->isGerente()) return collect();
 
-        return User::where('department_id', $user->department_id)
+        return User::notAdmin()
+            ->where('department_id', $user->department_id)
             ->where('id', '!=', Auth::id())
             ->where('is_active', true)
             ->orderBy('name')
@@ -370,7 +371,8 @@ class Index extends SecureComponent
             ];
 
             // Por colaborador (expandido)
-            $byUser = User::where('department_id', $user->department_id)
+            $byUser = User::notAdmin()
+                ->where('department_id', $user->department_id)
                 ->where('is_active', true)
                 ->withCount([
                     'tasks as total_tasks',

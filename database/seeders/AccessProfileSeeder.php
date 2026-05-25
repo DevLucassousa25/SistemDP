@@ -15,29 +15,39 @@ class AccessProfileSeeder extends Seeder
     {
         $profiles = [
             [
-                'name' => 'Administrador',
-                'slug' => 'administrator',
+                'name'        => 'CEO',
+                'slug'        => 'ceo',
+                'description' => 'Diretor executivo — acesso completo ao sistema',
+            ],
+            [
+                'name'        => 'Administrador',
+                'slug'        => 'administrator',
                 'description' => 'Acesso completo ao sistema',
             ],
             [
-                'name' => 'RH',
-                'slug' => 'hr',
+                'name'        => 'Gerente de RH',
+                'slug'        => 'hr_manager',
+                'description' => 'Gestão estratégica de pessoas e cultura organizacional',
+            ],
+            [
+                'name'        => 'RH',
+                'slug'        => 'hr',
                 'description' => 'Acesso aos Recursos Humanos',
             ],
             [
-                'name' => 'Gerente',
-                'slug' => 'manager',
+                'name'        => 'Gerente',
+                'slug'        => 'manager',
                 'description' => 'Acesso à gestão de equipe',
             ],
             [
-                'name' => 'Funcionário',
-                'slug' => 'employee',
+                'name'        => 'Funcionário',
+                'slug'        => 'employee',
                 'description' => 'Acesso básico ao sistema',
             ],
         ];
 
         foreach ($profiles as $profile) {
-            AccessProfile::create($profile);
+            AccessProfile::firstOrCreate(['slug' => $profile['slug']], $profile);
         }
     }
 }

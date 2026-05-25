@@ -8,6 +8,9 @@
 /* ─── Dark Mode (class-based) ────────────────────────────── */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ─── Alpine.js: esconde elementos com x-cloak até Alpine inicializar ── */
+[x-cloak] { display: none !important; }
+
 /* ─── Fontes ─────────────────────────────────────────────────── */
 @theme {
     --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
@@ -225,6 +228,34 @@
     background-color: theme(colors.slate.500);
 }
 
+/* ─── Dark mode: Badges de perfil / status ──────────────────── */
+.dark .bg-green-50 {
+    background-color: theme(colors.green.900 / 30%) !important;
+}
+.dark .bg-purple-50 {
+    background-color: theme(colors.purple.900 / 30%) !important;
+}
+.dark .bg-red-50 {
+    background-color: theme(colors.red.900 / 30%) !important;
+}
+.dark .text-green-600 {
+    color: theme(colors.green.400) !important;
+}
+.dark .text-purple-600 {
+    color: theme(colors.purple.400) !important;
+}
+.dark .text-red-600 {
+    color: theme(colors.red.400) !important;
+}
+.dark .ring-green-200 {
+    --tw-ring-color: theme(colors.green.800) !important;
+}
+.dark .ring-purple-200 {
+    --tw-ring-color: theme(colors.purple.800) !important;
+}
+.dark .ring-red-200 {
+    --tw-ring-color: theme(colors.red.800) !important;
+}
 /* ─── Dark mode: Cards coloridos (stat cards) ────────────────── */
 /* Neutro/cinza */
 .dark .bg-\[\#F1F5F9\] {
@@ -273,4 +304,10 @@
     border-color: theme(colors.slate.600);
     background-color: theme(colors.slate.700);
     color-scheme: dark;
+}
+
+/* ─── Shimmer (loading button) ───────────────────────────────── */
+@keyframes shimmer {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
 }

@@ -1,15 +1,26 @@
 <?php
 
 namespace App\Livewire\Pages\Users;
-use App\Livewire\SecureComponent;
 
+use App\Livewire\SecureComponent;
+use App\Models\DpiPlan;
+use App\Models\FeedPost;
+use App\Models\Feedback;
+use App\Models\Meeting;
+use App\Models\Manifestacao;
+use App\Models\PostRead;
+use App\Models\SurveyResponse;
+use App\Models\Task;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
 class Details extends SecureComponent
 {
     #[Locked]
     public int $userId;
+
     public ?User $user = null;
 
     protected $listeners = [
@@ -20,11 +31,7 @@ class Details extends SecureComponent
 
     public function mount(int $id): void
     {
-        // Apenas Admin/RH-DP podem acessar qualquer perfil de usuário.
-        // O middleware de rota já bloqueia na camada HTTP; esta verificação
-        // protege contra chamadas diretas ao componente Livewire.
         $this->requireRhOrAdmin();
-
         $this->userId = $id;
         $this->loadUser();
     }
@@ -33,26 +40,38 @@ class Details extends SecureComponent
     {
         $this->user = User::with(['department', 'accessProfile'])
             ->select([
-                'id',
-                'name',
-                'email',
-                'department_id',
-                'access_profile_id',
-                'position',
-                'is_active',
+                'id', 'name', 'email', 'department_id',
+                'access_profile_id', 'position', 'is_active',
+                'bio', 'created_at',
             ])
             ->findOrFail($this->userId);
     }
-
 
     public function refreshUser(): void
     {
         $this->loadUser();
     }
 
+    // ── Stats ─────────────────────────────────────────────────────────
+
+    #[Computed]
+    public function stats(): array
+    {
+        $uid = $this->userId;
+
+        return [
+            'tarefas'   => Task::where('assigned_to', $uid)->count(),
+            'reunioes'  => Meeting::whereHas('participants', fn ($q) => $q->where('user_id', $uid))->count(),
+            'feed'      => FeedPost::where('user_id', $uid)->count(),
+            'leituras'  => PostRead::where('user_id', $uid)->count(),
+            'feedbacks' => Feedback::where('employee_id', $uid)->count(),
+            'pesquisas' => SurveyResponse::where('user_id', $uid)->whereNotNull('completed_at')->count(),
+        ];
+    }
 
     public function render()
     {
-        return view('livewire.pages.users.details');
+        return view('livewire.pages.users.details')
+            ->layout('components.layouts.app', ['title' => 'Perfil do Usuário']);
     }
 }

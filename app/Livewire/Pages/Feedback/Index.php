@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Pages\Feedback;
 
+use App\Livewire\Concerns\EnviaNotificacoes;
 use App\Livewire\SecureComponent;
+use App\Notifications\FeedbackRecebidoNotification;
 use App\Models\Feedback;
 use App\Models\FeedbackActionTask;
 use App\Models\FeedbackComment;
@@ -15,7 +17,7 @@ use Livewire\WithFileUploads;
 
 class Index extends SecureComponent
 {
-    use WithFileUploads;
+    use WithFileUploads, EnviaNotificacoes;
 
     // ── Estado da UI ──────────────────────────────────────────────────
     public bool   $modalOpen     = false;
@@ -353,7 +355,8 @@ class Index extends SecureComponent
     {
         $user = Auth::user();
 
-        return User::with('department')
+        return User::notAdmin()
+            ->with('department')
             ->when($user->isGerente(), fn ($q) => $q->where('department_id', $user->department_id))
             ->where('is_active', true)
             ->orderBy('name')
@@ -364,7 +367,8 @@ class Index extends SecureComponent
     #[Computed]
     public function departmentManagers(): array
     {
-        return User::whereHas('accessProfile', fn ($q) => $q->where('slug', 'manager'))
+        return User::notAdmin()
+            ->whereHas('accessProfile', fn ($q) => $q->where('slug', 'manager'))
             ->where('is_active', true)
             ->get(['id', 'name', 'department_id'])
             ->keyBy('department_id')
@@ -669,6 +673,19 @@ class Index extends SecureComponent
             ]);
 
             $this->syncActionTasks($fb);
+
+            // Notifica o colaborador que recebeu o feedback
+            $destinatario = User::find($this->employee_id);
+            if ($destinatario) {
+                $this->notificarUsuario($destinatario, new FeedbackRecebidoNotification(Auth::user()->name, $this->type));
+                $this->toastNotif(
+                    'Feedback enviado!',
+                    "{$destinatario->name} foi notificado(a).",
+                    'message-circle', 'violet',
+                    route('feedback')
+                );
+            }
+
             $this->alertSuccess('Feedback registrado com sucesso.');
         }
 

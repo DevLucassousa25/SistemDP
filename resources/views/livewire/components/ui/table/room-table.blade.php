@@ -312,8 +312,8 @@
                             <td class="px-5 py-4">
                                 <div class="flex items-center gap-3">
                                     <div
-                                        class="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                                        <x-lucide-building-2 class="w-5 h-5 text-emerald-500" />
+                                        class="w-9 h-9 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
+                                        <x-lucide-building-2 class="w-5 h-5 text-white" />
                                     </div>
                                     <div>
                                         <p class="font-semibold text-gray-900">{{ $sala->name }}</p>

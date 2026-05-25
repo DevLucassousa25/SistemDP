@@ -33,23 +33,7 @@
             </button>
 
             <!-- Notificações -->
-            <div class="relative">
-
-                <button
-                    class="flex items-center justify-center w-9 h-9 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-
-                    <x-lucide-bell class="w-5 h-5" />
-
-                </button>
-
-                <span
-                    class="absolute -top-1 -right-1 flex items-center justify-center
-                           min-w-[18px] h-[18px] px-1 text-[10px] font-semibold
-                           text-white bg-red-500 rounded-full">
-                    2
-                </span>
-
-            </div>
+            @livewire('components.notification-bell')
 
             <!-- Usuário -->
             @livewire('components.ui.dropdown.user-dropdown')

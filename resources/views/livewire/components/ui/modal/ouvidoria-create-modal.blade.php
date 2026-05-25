@@ -148,7 +148,7 @@
                     </div>
 
                     {{-- ── Anonimato ── --}}
-                    <div class="flex items-start gap-3 p-3.5 sm:p-4 rounded-xl border border-gray-200 bg-gray-50/50 cursor-pointer"
+                    <div class="flex items-start gap-3 p-3.5 sm:p-4 rounded-xl border border-gray-200 bg-gray-50/50 dark:bg-transparent cursor-pointer"
                         wire:click="$toggle('isAnonimo')">
                         <div class="flex-shrink-0 mt-0.5">
                             <div class="w-5 h-5 rounded border-2 flex items-center justify-center transition
@@ -181,7 +181,7 @@
                 </div>
 
                 {{-- Footer --}}
-                <div class="flex-shrink-0 px-4 py-3 sm:px-6 sm:py-4 border-t border-gray-100 bg-gray-50/50 rounded-b-2xl space-y-2 sm:space-y-0">
+                <div class="flex-shrink-0 px-4 py-3 sm:px-6 sm:py-4 border-t border-gray-100 bg-gray-50/50 dark:bg-transparent rounded-b-2xl space-y-2 sm:space-y-0">
 
                     {{-- Indicador de identidade --}}
                     <div class="flex items-center gap-1.5 pb-2 sm:hidden border-b border-gray-100">
@@ -221,15 +221,14 @@
 
                             <button wire:click="salvar" wire:loading.attr="disabled"
                                 class="flex-1 sm:flex-none px-4 sm:px-5 py-2.5 text-sm font-medium text-white cursor-pointer
-                                    bg-emerald-500 hover:bg-emerald-600 rounded-xl transition
+                                    bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20 rounded-xl transition
                                     flex items-center justify-center gap-2 disabled:opacity-60 lato-bold">
                                 <span wire:loading.remove wire:target="salvar" class="flex items-center gap-2">
-                                    <x-lucide-send class="w-4 h-4" />
-                                    Enviar
+                                    <x-lucide-circle-check class="w-4 h-4" />
+                                    Confirmar
                                 </span>
                                 <span wire:loading wire:target="salvar" class="flex items-center gap-2">
                                     <x-lucide-loader-2 class="w-4 h-4 animate-spin" />
-                                    Enviando...
                                 </span>
                             </button>
                         </div>

@@ -33,9 +33,9 @@
             </div>
 
             <button type="button" wire:click="abrirModal"
-                    class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm
-                           font-semibold lato-bold px-4 py-2.5 rounded-xl shadow-sm transition cursor-pointer">
-                <x-lucide-plus class="w-4 h-4" />
+                    class="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm
+                           font-semibold lato-bold px-4 py-2.5 rounded-xl shadow-md shadow-blue-500/20 transition cursor-pointer">
+                <x-lucide-circle-plus class="w-4 h-4" />
                 Nova tarefa
             </button>
         </div>
@@ -564,48 +564,8 @@
     {{-- KANBAN                                                         --}}
     {{-- ═══════════════════════════════════════════════════════════════ --}}
     @if ($viewMode === 'kanban' && in_array($activeTab, ['minhas','departamento']))
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
-             x-data="{
-                 _sortables: [],
-                 setupKanban() {
-                     if (typeof Sortable === 'undefined') return;
-                     this._sortables.forEach(s => s.destroy());
-                     this._sortables = [];
-                     const self = this;
-                     ['pendente','em_andamento','concluida','cancelada'].forEach(status => {
-                         const el = document.getElementById('kanban-col-' + status);
-                         if (!el) return;
-                         self._sortables.push(Sortable.create(el, {
-                             group: 'kanban',
-                             animation: 150,
-                             ghostClass: 'opacity-30',
-                             dragClass: 'shadow-lg scale-[1.02]',
-                             onEnd(evt) {
-                                 const taskId   = parseInt(evt.item.dataset.taskId);
-                                 const fromStatus = evt.from.dataset.status;
-                                 const toStatus   = evt.to.dataset.status;
-                                 if (taskId && toStatus && fromStatus !== toStatus) {
-                                     self.$wire.moverKanban(taskId, toStatus);
-                                 }
-                             }
-                         }));
-                     });
-                 }
-             }"
-             x-init="
-                 $nextTick(() => setupKanban());
-
-                 const _lwHandler = () => $nextTick(() => setupKanban());
-                 document.addEventListener('livewire:updated', _lwHandler);
-                 $el._kanbanLwHandler = _lwHandler;
-
-                 window.addEventListener('kanban-atualizado', _lwHandler);
-                 $el._kanbanMvHandler = _lwHandler;
-             "
-             x-destroy="
-                 document.removeEventListener('livewire:updated', $el._kanbanLwHandler);
-                 window.removeEventListener('kanban-atualizado', $el._kanbanMvHandler);
-             ">
+        {{-- Wrapper horizontal — todas as colunas sempre visíveis via scroll --}}
+        <div id="kanban-board" class="flex gap-4 overflow-x-auto pb-3 -mx-1 px-1">
 
             @php
                 $colDefs = [
@@ -623,7 +583,7 @@
 
             @foreach ($colDefs as $colStatus => [$colLabel, $colDotClass])
                 @php $colTasks = $this->kanbanTasks->get($colStatus, collect()); @endphp
-                <div class="flex flex-col gap-3">
+                <div class="flex-none w-[270px] flex flex-col gap-3">
 
                     {{-- Header da coluna --}}
                     <div class="flex items-center gap-2 px-1">
@@ -767,6 +727,78 @@
             @endforeach
         </div>
     @endif
+
+    {{-- ──────────────────────────────────────────────────────────────────
+         SortableJS — script standalone (sem Alpine).
+         Usa Livewire.hook('commit') que dispara APÓS morphdom atualizar DOM.
+         NOTA: livewire:updated NÃO existe como evento DOM no Livewire v3.
+    ─────────────────────────────────────────────────────────────────────── --}}
+    <script>
+    (function () {
+        window._kanbanSortables = window._kanbanSortables || [];
+        window._kanbanHooked    = window._kanbanHooked    || false;
+
+        function setupKanban() {
+            if (typeof Sortable === 'undefined') {
+                setTimeout(setupKanban, 80);
+                return;
+            }
+            // Destrói instâncias antigas
+            window._kanbanSortables.forEach(function (s) {
+                try { s.destroy(); } catch (e) {}
+            });
+            window._kanbanSortables = [];
+
+            ['pendente', 'em_andamento', 'concluida', 'cancelada'].forEach(function (status) {
+                var el = document.getElementById('kanban-col-' + status);
+                if (!el) return;
+
+                window._kanbanSortables.push(Sortable.create(el, {
+                    group:     'kanban',
+                    animation: 150,
+                    ghostClass: 'opacity-30',
+                    dragClass:  'shadow-lg scale-[1.02]',
+                    onEnd: function (evt) {
+                        var taskId     = parseInt(evt.item.dataset.taskId);
+                        var fromStatus = evt.from.dataset.status;
+                        var toStatus   = evt.to.dataset.status;
+                        if (!taskId || !toStatus || fromStatus === toStatus) return;
+
+                        // Chama moverKanban no componente Livewire pai
+                        var wireEl = evt.from.closest('[wire\\:id]');
+                        if (!wireEl) return;
+                        var component = window.Livewire.find(wireEl.getAttribute('wire:id'));
+                        if (component) component.moverKanban(taskId, toStatus);
+                    }
+                }));
+            });
+        }
+
+        function registerHook() {
+            if (window._kanbanHooked) return;
+            if (typeof window.Livewire === 'undefined' || typeof window.Livewire.hook !== 'function') {
+                setTimeout(registerHook, 60);
+                return;
+            }
+            window._kanbanHooked = true;
+            // succeed() dispara APÓS o morphdom terminar — momento certo para recriar SortableJS
+            window.Livewire.hook('commit', function (ref) {
+                ref.succeed(function () {
+                    requestAnimationFrame(setupKanban);
+                });
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function () { registerHook(); setupKanban(); });
+        } else {
+            registerHook();
+            setupKanban();
+        }
+
+        document.addEventListener('livewire:initialized', registerHook);
+    }());
+    </script>
 
     {{-- ═══════════════════════════════════════════════════════════════ --}}
     {{-- ABA: Minhas tarefas (lista)                                    --}}

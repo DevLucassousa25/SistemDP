@@ -2,10 +2,14 @@
 
 namespace App\Livewire\Pages\Surveys;
 
+use App\Livewire\Concerns\EnviaNotificacoes;
 use App\Livewire\SecureComponent;
+use App\Notifications\PesquisaRespondidaNotification;
 use App\Models\Survey;
 use App\Models\SurveyAnswer;
+use App\Models\SurveyManagerScore;
 use App\Models\SurveyResponse;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
@@ -13,6 +17,7 @@ use Livewire\Attributes\Locked;
 
 class Respond extends SecureComponent
 {
+    use EnviaNotificacoes;
     // ──────────────────────────────────────────────────────────────────
     // Estado da página
     // ──────────────────────────────────────────────────────────────────
@@ -154,6 +159,32 @@ class Respond extends SecureComponent
     }
 
     // ──────────────────────────────────────────────────────────────────
+    // Localiza o gerente do colaborador pelo departamento
+    // ──────────────────────────────────────────────────────────────────
+
+    /**
+     * Retorna o ID do gerente ativo do departamento do usuário.
+     * Retorna null se o usuário não tiver departamento ou se não houver gerente.
+     *
+     * Regra: gerente é o User com accessProfile.slug = 'manager'
+     *        e mesmo department_id, que esteja ativo.
+     */
+    private function resolverManagerId(User $user): ?int
+    {
+        if (! $user->department_id) {
+            return null;
+        }
+
+        return User::whereHas(
+            'accessProfile',
+            fn ($q) => $q->where('slug', 'manager')
+        )
+            ->where('department_id', $user->department_id)
+            ->where('is_active', true)
+            ->value('id');
+    }
+
+    // ──────────────────────────────────────────────────────────────────
     // Enviar resposta
     // ──────────────────────────────────────────────────────────────────
 
@@ -196,8 +227,21 @@ class Respond extends SecureComponent
             return;
         }
 
+        // Resolve gerente do respondente (antes da transação, para não bloquear)
+        $managerId = $this->resolverManagerId($user);
+
+        // Coleta quais question_ids contribuem para o score do gestor:
+        // apenas perguntas com is_manager_evaluation = true E tipo numérico (escala ou múltipla escolha).
+        // Texto livre é exibido na view mas não entra no cálculo de pontuação.
+        $managerEvalQuestionIds = $survey->questions
+            ->where('is_manager_evaluation', true)
+            ->whereIn('type', ['escala', 'multipla_escolha'])
+            ->pluck('id')
+            ->flip()   // transforma em mapa para O(1) lookup
+            ->all();
+
         // Persiste em transação
-        DB::transaction(function () use ($survey, $user) {
+        DB::transaction(function () use ($survey, $user, $managerId, $managerEvalQuestionIds) {
             $response = SurveyResponse::create([
                 'survey_id'    => $survey->id,
                 'user_id'      => $user->id,
@@ -222,9 +266,23 @@ class Respond extends SecureComponent
                     'texto_livre'      => $answerData['value_text']   = $this->sanitize((string) $valor),
                 };
 
+                // RN-PC02 / RN-PC03: se a pergunta avalia o gestor, vincula o manager_id
+                if (isset($managerEvalQuestionIds[$question->id]) && $managerId) {
+                    $answerData['manager_id'] = $managerId;
+                }
+
                 SurveyAnswer::create($answerData);
             }
         });
+
+        // Recalcula score do gerente fora da transação (não precisa bloquear o insert)
+        // RN-RG04: recalcular a cada nova submissão
+        if ($managerId && ! empty($managerEvalQuestionIds)) {
+            SurveyManagerScore::recalcular($survey->id, $managerId);
+        }
+
+        // Notifica RH/Admin sobre nova resposta à pesquisa
+        $this->notificarRhAdmin(new PesquisaRespondidaNotification($survey));
 
         $this->submitted = true;
         unset($this->progresso, $this->podeEnviar);

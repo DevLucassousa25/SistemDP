@@ -15,11 +15,13 @@ class EvaluationCycle extends Model
         'end_date',
         'status',
         'created_by',
+        'results_published_at',
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'end_date'   => 'date',
+        'start_date'           => 'date',
+        'end_date'             => 'date',
+        'results_published_at' => 'datetime',
     ];
 
     // ── Relacionamentos ────────────────────────────────────────────────
@@ -37,6 +39,11 @@ class EvaluationCycle extends Model
     public function surveys(): HasMany
     {
         return $this->hasMany(\App\Models\Survey::class, 'evaluation_cycle_id');
+    }
+
+    public function selfEvaluations(): HasMany
+    {
+        return $this->hasMany(SelfEvaluation::class, 'evaluation_cycle_id');
     }
 
     // ── Acessórios ─────────────────────────────────────────────────────

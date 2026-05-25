@@ -12,11 +12,15 @@ class ManagerEvaluation extends Model
         'evaluation_cycle_id',
         'manager_id',
         'status',
+        'final_score',
         'completed_at',
+        'results_published_at',
     ];
 
     protected $casts = [
-        'completed_at' => 'datetime',
+        'completed_at'         => 'datetime',
+        'results_published_at' => 'datetime',
+        'final_score'          => 'float',
     ];
 
     // ── Relacionamentos ────────────────────────────────────────────────
@@ -59,10 +63,50 @@ class ManagerEvaluation extends Model
     }
 
     /**
-     * Média geral de todas as notas desta avaliação.
+     * Média ponderada das notas, considerando calibração e peso dos critérios.
+     * Persiste o resultado em final_score ao ser chamado.
+     */
+    public function calculateFinalScore(): ?float
+    {
+        $entries = $this->entries()->with('criterion')->get();
+
+        if ($entries->isEmpty()) {
+            return null;
+        }
+
+        $totalWeight = 0;
+        $weightedSum = 0;
+
+        foreach ($entries as $entry) {
+            $criterion    = $entry->criterion;
+            $weight       = (float) ($criterion->weight ?? 1.0);
+            $score        = $entry->normalizedScore;
+
+            if ($score !== null) {
+                $weightedSum += $score * $weight;
+                $totalWeight += $weight;
+            }
+        }
+
+        if ($totalWeight <= 0) {
+            return null;
+        }
+
+        $final = round($weightedSum / $totalWeight, 2);
+        $this->update(['final_score' => $final]);
+
+        return $final;
+    }
+
+    /**
+     * Média simples (sem ponderação) — fallback legado.
      */
     public function getAverageScoreAttribute(): ?float
     {
+        if ($this->final_score !== null) {
+            return $this->final_score;
+        }
+
         $avg = $this->entries()->avg('score');
         return $avg ? round((float) $avg, 1) : null;
     }

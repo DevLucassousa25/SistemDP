@@ -29,8 +29,8 @@
                             </div>
                             <button wire:click="abrirCriarTemplate"
                                 class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs lato-bold rounded-lg
-                                       bg-indigo-500 hover:bg-indigo-600 text-white transition cursor-pointer shadow-sm">
-                                <x-lucide-plus class="w-3.5 h-3.5" />
+                                       bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20 text-white transition cursor-pointer">
+                                <x-lucide-circle-plus class="w-3.5 h-3.5" />
                                 <span class="hidden sm:inline">Novo template</span>
                             </button>
                             <button wire:click="fecharModal"
@@ -70,7 +70,7 @@
                                 <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 lato-bold">Nenhum template encontrado</h3>
                                 <p class="text-xs text-slate-400 lato-regular mt-1 max-w-xs">Tente outro filtro ou crie um template personalizado.</p>
                                 <button wire:click="abrirCriarTemplate"
-                                    class="mt-4 flex items-center gap-1.5 px-4 py-2 text-xs lato-bold rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white transition cursor-pointer shadow-sm">
+                                    class="mt-4 flex items-center gap-1.5 px-4 py-2 text-xs lato-bold rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20 text-white transition cursor-pointer">
                                     <x-lucide-plus class="w-3.5 h-3.5" />
                                     Criar template
                                 </button>
@@ -134,8 +134,8 @@
 
                                         <div class="px-4 py-2.5 border-t border-slate-100 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800/40 flex items-center gap-2">
                                             <button type="button" wire:click="usarTemplate({{ $template->id }})"
-                                                class="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs lato-bold rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white transition cursor-pointer shadow-sm">
-                                                <x-lucide-check class="w-3.5 h-3.5" />Usar template
+                                                class="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs lato-bold rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20 text-white transition cursor-pointer">
+                                                <x-lucide-circle-check class="w-3.5 h-3.5" />Usar template
                                             </button>
                                             @if ($canEdit)
                                                 <button type="button" wire:click="editarTemplate({{ $template->id }})"
@@ -500,8 +500,8 @@
                             </button>
                             <button wire:click="salvarTemplate"
                                 wire:loading.attr="disabled" wire:target="salvarTemplate"
-                                class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2 text-sm lato-bold rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white transition cursor-pointer shadow-sm">
-                                <svg wire:loading wire:target="salvarTemplate" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2 text-sm lato-bold rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20 text-white transition cursor-pointer">
+                                {{-- <svg wire:loading wire:target="salvarTemplate" class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                                 </svg>
@@ -509,7 +509,21 @@
                                     <x-lucide-check class="w-4 h-4" />
                                     {{ $editingTemplateId ? 'Salvar alterações' : 'Criar template' }}
                                 </span>
-                                <span wire:loading wire:target="salvarTemplate">Salvando...</span>
+                                <span wire:loading wire:target="salvarTemplate">Salvando...</span> --}}
+
+                                 <span wire:loading.remove wire:target="salvarTemplate" class="flex items-center gap-1">
+                                    @if ($editingTemplateId)
+                                        <x-lucide-square-pen class="w-4 h-4" />
+                                    @else
+                                        <x-lucide-circle-check class="w-4 h-4" />
+                                    @endif
+                                        {{ $editingTemplateId ? 'Salvar Alterações' : 'Confirmar' }}
+                                </span>
+
+                        <span wire:loading wire:target="salvarTemplate" class="flex items-center gap-2">
+                                <x-lucide-loader-2 class="w-4 h-4 animate-spin" />
+                        </span>
+
                             </button>
                         </div>
                     </div>

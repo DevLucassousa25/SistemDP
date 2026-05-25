@@ -12,8 +12,8 @@
         </div>
         <button
             wire:click="openCreateModal"
-            class="w-full sm:w-auto flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600
-                   text-white text-sm font-semibold lato-bold px-4 py-2.5 rounded-lg transition cursor-pointer">
+            class="w-full sm:w-auto flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 dark:from-blue-500 dark:to-indigo-600 dark:hover:from-blue-600 dark:hover:to-indigo-700
+                   text-white text-sm font-semibold lato-bold px-4 py-2.5 rounded-lg shadow-md shadow-blue-500/20 transition cursor-pointer">
             <x-lucide-plus class="w-4 h-4" />
             Nova Reunião
         </button>
@@ -445,6 +445,11 @@
                     </div>
                 </div>
 
+                {{-- Aviso de feriados/eventos no dia selecionado --}}
+                @if($startDate)
+                    <x-calendario-aviso :data="$startDate" />
+                @endif
+
                 {{-- Tipo de local --}}
                 <div>
                     <label class="block text-xs font-semibold lato-bold text-slate-600 dark:text-slate-400 mb-2 uppercase tracking-wide">
@@ -645,6 +650,57 @@
                         </div>
                     @enderror
 
+                    {{-- Filtro por departamento --}}
+                    @if ($this->allDepartments->isNotEmpty())
+                        <div class="mb-2">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="text-[10px] font-semibold lato-bold text-slate-400 dark:text-slate-500 uppercase tracking-wide shrink-0">Depto:</span>
+                                {{-- Pill "Todos" --}}
+                                <button
+                                    wire:click="setDepartmentFilter(null)"
+                                    class="px-2.5 py-0.5 rounded-full text-[11px] lato-bold transition cursor-pointer border
+                                           {{ $departmentFilter === null
+                                               ? 'bg-indigo-500 border-indigo-500 text-white'
+                                               : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400' }}">
+                                    Todos
+                                </button>
+                                @foreach ($this->allDepartments as $dept)
+                                    <button
+                                        wire:click="setDepartmentFilter({{ $dept->id }})"
+                                        class="px-2.5 py-0.5 rounded-full text-[11px] lato-bold transition cursor-pointer border
+                                               {{ $departmentFilter === $dept->id
+                                                   ? 'bg-indigo-500 border-indigo-500 text-white'
+                                                   : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400' }}">
+                                        {{ $dept->name }}
+                                    </button>
+                                @endforeach
+                            </div>
+
+                            {{-- Botão "Selecionar / Desmarcar todo o departamento" --}}
+                            @if ($departmentFilter !== null)
+                                @php
+                                    $deptUserIds = $this->allUsers->pluck('id')->map(fn($v) => (string)$v)->toArray();
+                                    $allDeptSelected = count($deptUserIds) > 0 &&
+                                        count(array_diff($deptUserIds, array_map('strval', $participantIds))) === 0;
+                                @endphp
+                                <button
+                                    wire:click="toggleDepartmentParticipants({{ $departmentFilter }})"
+                                    class="mt-1.5 w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs lato-bold transition cursor-pointer border
+                                           {{ $allDeptSelected
+                                               ? 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30'
+                                               : 'border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/30' }}">
+                                    @if ($allDeptSelected)
+                                        <x-lucide-user-minus class="w-3.5 h-3.5" />
+                                        Desmarcar todo o departamento
+                                    @else
+                                        <x-lucide-users class="w-3.5 h-3.5" />
+                                        Selecionar todo o departamento
+                                    @endif
+                                </button>
+                            @endif
+                        </div>
+                    @endif
+
                     {{-- Campo de busca --}}
                     <div class="relative mb-1.5">
                         <x-lucide-search class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 dark:text-slate-500 pointer-events-none" />
@@ -721,8 +777,12 @@
                             <div class="flex flex-col items-center justify-center py-6 text-center px-4">
                                 <x-lucide-user-search class="w-6 h-6 text-slate-300 dark:text-slate-600 mb-1.5" />
                                 <p class="text-xs text-slate-400 dark:text-slate-500 lato-regular">
-                                    Nenhum usuário encontrado para
-                                    "<span class="font-semibold">{{ $participantSearch }}</span>"
+                                    @if ($departmentFilter !== null && trim($participantSearch) === '')
+                                        Nenhum usuário neste departamento
+                                    @else
+                                        Nenhum usuário encontrado para
+                                        "<span class="font-semibold">{{ $participantSearch }}</span>"
+                                    @endif
                                 </p>
                             </div>
                         @endforelse
@@ -914,18 +974,18 @@
                 <button wire:click="saveReuniao"
                         wire:loading.attr="disabled"
                         class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-2 text-sm lato-bold text-white
-                               bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600
+                               bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20
                                rounded-lg transition cursor-pointer disabled:opacity-60">
-                    <span wire:loading.remove wire:target="saveReuniao" class="flex items-center">
-                        <x-lucide-check class="w-4 h-4 inline-block mr-1" />
-                        {{ $isEditing ? 'Salvar Alterações' : 'Agendar Reunião' }}
+                    <span wire:loading.remove wire:target="saveReuniao" class="flex items-center gap-1" >
+                        @if ($isEditing)
+                            <x-lucide-square-pen class="w-4 h-4" />
+                        @else
+                            <x-lucide-circle-check class="w-4 h-4" />
+                        @endif
+                        {{ $isEditing ? 'Salvar Alterações' : 'Confirmar' }}
                     </span>
                     <span wire:loading wire:target="saveReuniao" class="flex items-center gap-1.5">
-                        <svg class="w-4 h-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
-                        </svg>
-                        Salvando...
+                       <x-lucide-loader-2 class="w-4 h-4 animate-spin" />
                     </span>
                 </button>
             </div>
