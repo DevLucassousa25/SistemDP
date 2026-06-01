@@ -89,7 +89,7 @@
                                     {{-- Múltipla escolha --}}
                                     <label @class([
                                         'flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 cursor-pointer transition',
-                                        'border-violet-400 bg-violet-50 dark:bg-violet-900/20 text-violet-700' => $questionType === 'multipla_escolha',
+                                        'border-indigo-400 bg-violet-50 dark:bg-violet-900/20 text-violet-700' => $questionType === 'multipla_escolha',
                                         'border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-500 hover:border-slate-300' => $questionType !== 'multipla_escolha',
                                     ])>
                                         <input type="radio" wire:model.live="questionType"
@@ -157,7 +157,7 @@
                                                             dark:border-violet-600 shrink-0 flex items-center
                                                             justify-center">
                                                     <div class="w-2 h-2 rounded-full bg-violet-300
-                                                                dark:bg-violet-600"></div>
+                                                                dark:bg-indigo-600"></div>
                                                 </div>
                                                 <input type="text"
                                                     wire:model.blur="options.{{ $idx }}"
@@ -166,7 +166,7 @@
                                                            bg-slate-50 dark:bg-slate-600 text-slate-800 dark:text-white
                                                            placeholder-slate-400 border border-slate-200
                                                            dark:border-slate-500 focus:outline-none focus:ring-2
-                                                           focus:ring-violet-400/40 focus:border-violet-400 transition
+                                                           focus:ring-indigo-400/40 focus:border-indigo-400 transition
                                                            {{ $errors->has("options.{$idx}") ? 'border-red-400' : '' }}">
                                                 @if (count($options) > 2)
                                                     <button wire:click="removerOpcao({{ $idx }})"
@@ -192,7 +192,7 @@
                                     @enderror
 
                                     <button wire:click="adicionarOpcao"
-                                        class="flex items-center gap-1.5 text-xs lato-bold text-violet-600
+                                        class="flex items-center gap-1.5 text-xs lato-bold text-indigo-600
                                                hover:text-violet-700 transition cursor-pointer mt-1">
                                         <x-lucide-plus class="w-3.5 h-3.5" />
                                         Adicionar opção
@@ -272,7 +272,7 @@
                                             ? 'bg-violet-50 border-violet-200 dark:bg-violet-900/10 dark:border-violet-800/40'
                                             : 'bg-slate-50 border-slate-200 dark:bg-slate-700/40 dark:border-slate-600' }}">
                                 <div class="flex items-center gap-2">
-                                    <x-lucide-user-check class="w-4 h-4 {{ $questionIsManagerEval ? 'text-violet-600' : 'text-slate-400' }}" />
+                                    <x-lucide-user-check class="w-4 h-4 {{ $questionIsManagerEval ? 'text-indigo-600' : 'text-slate-400' }}" />
                                     <div>
                                         <span class="text-xs lato-bold {{ $questionIsManagerEval ? 'text-violet-700 dark:text-violet-300' : 'text-slate-600 dark:text-slate-300' }}">
                                             Avaliação do Gestor
@@ -285,7 +285,7 @@
                                 <label class="relative inline-flex items-center cursor-pointer shrink-0">
                                     <input type="checkbox" wire:model.live="questionIsManagerEval" class="sr-only peer">
                                     <div class="w-10 h-[1.375rem] bg-slate-300 rounded-full peer
-                                                peer-checked:bg-violet-500
+                                                peer-checked:bg-indigo-600
                                                 after:content-[''] after:absolute after:top-[2px] after:left-[2px]
                                                 after:bg-white after:rounded-full after:h-[1.125rem] after:w-[1.125rem]
                                                 after:transition-all peer-checked:after:translate-x-full
@@ -413,7 +413,7 @@
                                             <div class="mt-2 flex flex-wrap gap-1.5">
                                                 @foreach ($pergunta->options as $opcao)
                                                     <span class="text-[11px] lato-regular px-2 py-0.5 rounded-full
-                                                                 bg-violet-50 dark:bg-violet-900/20 text-violet-600
+                                                                 bg-violet-50 dark:bg-violet-900/20 text-indigo-600
                                                                  dark:text-violet-300 border border-violet-100
                                                                  dark:border-violet-800">
                                                         {{ $opcao }}

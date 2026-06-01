@@ -99,7 +99,8 @@ class ManagerEvaluation extends Model
     }
 
     /**
-     * Média simples (sem ponderação) — fallback legado.
+     * Média efetiva: usa final_score (já considera calibração) se disponível,
+     * senão calcula a média dos effective_scores (calibrado ou original).
      */
     public function getAverageScoreAttribute(): ?float
     {
@@ -107,7 +108,12 @@ class ManagerEvaluation extends Model
             return $this->final_score;
         }
 
-        $avg = $this->entries()->avg('score');
+        $entries = $this->entries()->with('criterion')->get();
+        if ($entries->isEmpty()) {
+            return null;
+        }
+
+        $avg = $entries->avg(fn ($e) => $e->effectiveScore);
         return $avg ? round((float) $avg, 1) : null;
     }
 }

@@ -65,7 +65,7 @@
                                 <img src="{{ Storage::url($community->cover_image) }}"
                                      class="w-full h-full object-cover object-top" />
                             @else
-                                <div class="w-full h-full bg-gradient-to-br from-indigo-400 via-violet-500 to-purple-600"></div>
+                                <div class="w-full h-full bg-gradient-to-br from-indigo-400 via-violet-500 to-indigo-600"></div>
                             @endif
                             {{-- Avatar --}}
                             <div class="absolute -bottom-5 left-4">
@@ -139,7 +139,7 @@
                             @if ($community->cover_image)
                                 <img src="{{ Storage::url($community->cover_image) }}" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300" />
                             @else
-                                <div class="w-full h-full bg-gradient-to-br from-indigo-400 via-violet-500 to-purple-600 group-hover:scale-105 transition-transform duration-300"></div>
+                                <div class="w-full h-full bg-gradient-to-br from-indigo-400 via-violet-500 to-indigo-600 group-hover:scale-105 transition-transform duration-300"></div>
                             @endif
                             <div class="absolute -bottom-5 left-4">
                                 <span class="w-11 h-11 rounded-xl {{ $community->avatar_color }} text-white text-sm lato-bold
@@ -207,25 +207,60 @@
     </div>
 
     {{-- ══════════════════════════════════════════════════════════════
-         MODAL: Criar comunidade
+         MODAL: Criar comunidade  (Bottom Sheet no mobile / Dialog no desktop)
     ══════════════════════════════════════════════════════════════ --}}
     @if ($createModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-             @click.self="$wire.set('createModal', false)" style="cursor:pointer">
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg" @click.stop
-                 x-data="{ coverPreview: null }">
+        <div
+            class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex"
+            x-data="{
+                coverPreview: null,
+                open: false,
+                close() {
+                    this.open = false;
+                    setTimeout(() => $wire.set('createModal', false), 300);
+                }
+            }"
+            x-init="requestAnimationFrame(() => open = true)"
+            @click.self="close()"
+            {{-- Layout: bottom-sheet no mobile, centralizado no ≥sm --}}
+            style="align-items: flex-end; justify-content: center;"
+            :class="{ 'sm:items-center': true }"
+        >
+            {{-- Painel --}}
+            <div
+                @click.stop
+                class="
+                    bg-white dark:bg-slate-800 shadow-2xl w-full
+                    {{-- Mobile: bottom-sheet (cantos superiores arredondados, sem padding lateral de p-4) --}}
+                    rounded-t-3xl
+                    {{-- Desktop: dialog centralizado --}}
+                    sm:rounded-2xl sm:max-w-lg sm:mb-0 sm:mx-4
+                    transition-transform duration-300 ease-out will-change-transform
+                "
+                :class="open
+                    ? 'translate-y-0'
+                    : 'translate-y-full sm:translate-y-4 sm:opacity-0'"
+                style="max-height: 92dvh; display: flex; flex-direction: column;"
+            >
+                {{-- Drag handle — visível só no mobile --}}
+                <div class="flex justify-center pt-3 pb-1 sm:hidden">
+                    <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+                </div>
 
-                <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700">
+                {{-- Header --}}
+                <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
                     <h3 class="text-sm lato-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                         <x-lucide-users class="w-4 h-4 text-indigo-500" /> Nova comunidade
                     </h3>
-                    <button wire:click="$set('createModal', false)" type="button"
+                    <button @click="close()" type="button"
                             class="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
                         <x-lucide-x class="w-4 h-4" />
                     </button>
                 </div>
 
-                <div class="p-5 space-y-4">
+                {{-- Corpo — scrollável --}}
+                <div class="p-5 space-y-4 overflow-y-auto flex-1">
+
                     {{-- Capa --}}
                     <label class="block group cursor-pointer">
                         <div class="h-28 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-400 to-violet-600 relative flex items-center justify-center">
@@ -279,30 +314,32 @@
                         <div class="relative">
                             <input wire:model="newIsPrivate" type="checkbox" class="sr-only peer" />
                             <div class="w-10 h-6 bg-slate-200 dark:bg-slate-700 rounded-full peer-checked:bg-indigo-500 transition-colors"></div>
-                            <div class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform peer-checked:translate-x-4"></div>
                         </div>
-                        <div>
-                            <p class="text-sm lato-bold text-slate-700 dark:text-slate-200">Comunidade privada</p>
-                            <p class="text-xs text-slate-400 lato-regular">Requer aprovação para entrar</p>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 lato-bold">Comunidade Privada</p>
+                            <p class="text-xs text-slate-400 lato-regular">Apenas membros aprovados podem participar</p>
                         </div>
                     </label>
-                </div>
 
-                <div class="flex justify-end gap-2 px-5 pb-5">
+                </div>
+                {{-- /body --}}
+
+                {{-- Footer --}}
+                <div class="flex gap-3 px-5 py-4 border-t border-slate-100 dark:border-slate-700 shrink-0">
                     <button wire:click="$set('createModal', false)" type="button"
-                            class="px-4 py-2 text-xs lato-bold rounded-xl border border-slate-200 dark:border-slate-700
-                                   text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                            class="px-4 py-2.5 text-sm border border-slate-200 dark:border-slate-700 text-slate-500
+                                   rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition lato-regular cursor-pointer">
                         Cancelar
                     </button>
-                    <button wire:click="createCommunity" type="button" wire:loading.attr="disabled"
-                            class="px-5 py-2 text-xs lato-bold rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600
-                                   text-white hover:from-indigo-600 hover:to-violet-700 disabled:opacity-50 transition shadow-sm">
-                        <span wire:loading.remove wire:target="createCommunity">Criar comunidade</span>
-                        <span wire:loading wire:target="createCommunity">Criando…</span>
+                    <button wire:click="createCommunity" type="button"
+                            class="flex-1 py-2.5 text-sm lato-bold rounded-xl
+                                   bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700
+                                   text-white shadow-md shadow-blue-500/20 transition cursor-pointer">
+                        Criar Comunidade
                     </button>
                 </div>
+
             </div>
         </div>
     @endif
-
-</div>
+    {{-- /createModal --}}

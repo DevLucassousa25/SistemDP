@@ -149,26 +149,26 @@
             {{-- Questões abertas --}}
             <div class="space-y-4">
                 <h2 class="text-sm lato-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-                    <x-lucide-message-circle class="w-4 h-4 text-violet-400" />
+                    <x-lucide-message-circle class="w-4 h-4 text-indigo-400" />
                     Feedback aberto <span class="text-xs text-slate-400 lato-regular font-normal">(opcional)</span>
                 </h2>
 
                 <div>
                     <label class="block text-xs lato-bold text-slate-500 dark:text-slate-400 mb-1.5">O que você mais valorizou na empresa?</label>
                     <textarea wire:model="pontosPositivos" rows="3" placeholder="Pontos positivos, boas experiências..."
-                              class="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400/30 resize-none"></textarea>
+                              class="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 resize-none"></textarea>
                 </div>
 
                 <div>
                     <label class="block text-xs lato-bold text-slate-500 dark:text-slate-400 mb-1.5">O que poderia melhorar?</label>
                     <textarea wire:model="pontosMelhoria" rows="3" placeholder="Sugestões de melhoria..."
-                              class="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400/30 resize-none"></textarea>
+                              class="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 resize-none"></textarea>
                 </div>
 
                 <div>
                     <label class="block text-xs lato-bold text-slate-500 dark:text-slate-400 mb-1.5">Algum comentário adicional?</label>
                     <textarea wire:model="outrosComentarios" rows="2" placeholder="Qualquer outra consideração..."
-                              class="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400/30 resize-none"></textarea>
+                              class="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 resize-none"></textarea>
                 </div>
             </div>
         </div>

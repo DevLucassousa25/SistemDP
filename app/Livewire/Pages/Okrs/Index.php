@@ -179,6 +179,17 @@ class Index extends SecureComponent
     #[Computed]
     public function users(): \Illuminate\Support\Collection
     {
+        $user = Auth::user();
+        $slug = $user->accessProfile?->slug ?? '';
+
+        // Gerente vê apenas os funcionários do seu próprio departamento
+        if ($slug === 'manager' && $user->department_id) {
+            return User::where('is_active', true)
+                ->where('department_id', $user->department_id)
+                ->orderBy('name')
+                ->get(['id', 'name', 'access_profile_id']);
+        }
+
         return User::where('is_active', true)
             ->orderBy('name')
             ->get(['id', 'name', 'access_profile_id']);
@@ -187,6 +198,16 @@ class Index extends SecureComponent
     #[Computed]
     public function departments(): \Illuminate\Support\Collection
     {
+        $user = Auth::user();
+        $slug = $user->accessProfile?->slug ?? '';
+
+        // Gerente vê apenas o seu próprio departamento
+        if ($slug === 'manager' && $user->department_id) {
+            return Department::where('id', $user->department_id)
+                ->orderBy('name')
+                ->get(['id', 'name']);
+        }
+
         return Department::orderBy('name')->get(['id', 'name']);
     }
 
@@ -335,10 +356,28 @@ class Index extends SecureComponent
             $this->alertError('Crie um ciclo primeiro.');
             return;
         }
+
+        $user = Auth::user();
+        $slug = $user->accessProfile?->slug ?? '';
+        $isManager = $slug === 'manager';
+
+        // Gerente não pode criar objetivos de empresa
+        if ($isManager && $level === 'company') {
+            $this->alertError('Gerentes não podem criar objetivos de empresa.');
+            return;
+        }
+
         $this->resetObjectiveForm();
-        $this->objLevel        = $level;
-        $this->objectiveMode   = 'create';
-        $this->objectiveModal  = true;
+        $this->objLevel      = $level;
+        $this->objectiveMode = 'create';
+
+        // Pré-preenche o departamento do Gerente automaticamente
+        if ($isManager && $user->department_id) {
+            $this->objDepartmentId = $user->department_id;
+            $this->objOwnerId      = $user->id;
+        }
+
+        $this->objectiveModal = true;
     }
 
     public function openEditObjective(int $id): void
@@ -369,11 +408,44 @@ class Index extends SecureComponent
             'objDepartmentId'=> 'nullable|exists:departments,id',
         ], ['objTitle.required' => 'Título é obrigatório.']);
 
+        $user      = Auth::user();
+        $slug      = $user->accessProfile?->slug ?? '';
+        $isManager = $slug === 'manager';
+
+        // Garante que gerente não burle o departamento via JS
+        if ($isManager && $user->department_id && $this->objLevel === 'department') {
+            $this->objDepartmentId = $user->department_id;
+        }
+
         // Somente RH/Admin pode criar objetivos de empresa
         if ($this->objLevel === 'company') $this->requireRhOrAdmin();
+
         // Somente Gestor+/RH/Admin pode criar de departamento
         if ($this->objLevel === 'department') {
             $this->requireRole(['administrator', 'hr', 'manager']);
+        }
+
+        // Gerente: restrições de escopo
+        if ($isManager) {
+            // Não pode criar objetivo de empresa
+            if ($this->objLevel === 'company') {
+                $this->alertError('Gerentes não podem criar objetivos de empresa.');
+                return;
+            }
+
+            // Departamento deve ser o seu próprio
+            if ($this->objLevel === 'department' && $this->objDepartmentId !== $user->department_id) {
+                $this->objDepartmentId = $user->department_id;
+            }
+
+            // Responsável deve ser ele mesmo ou funcionário do seu departamento
+            if ($this->objOwnerId && $this->objOwnerId !== $user->id) {
+                $targetUser = \App\Models\User::find($this->objOwnerId);
+                if (!$targetUser || $targetUser->department_id !== $user->department_id) {
+                    $this->alertError('Você só pode atribuir OKRs a funcionários do seu departamento.');
+                    return;
+                }
+            }
         }
 
         $data = [
@@ -463,6 +535,17 @@ class Index extends SecureComponent
             'krCurrent' => 'required|numeric',
             'krDueDate' => 'nullable|date',
         ], ['krTitle.required' => 'Título do Key Result é obrigatório.']);
+
+        // Gerente: responsável do KR deve ser ele mesmo ou funcionário do seu depto
+        $user = Auth::user();
+        $slug = $user->accessProfile?->slug ?? '';
+        if ($slug === 'manager' && $this->krOwnerId && $this->krOwnerId !== $user->id) {
+            $targetUser = \App\Models\User::find($this->krOwnerId);
+            if (! $targetUser || $targetUser->department_id !== $user->department_id) {
+                $this->alertError('Você só pode atribuir Key Results a funcionários do seu departamento.');
+                return;
+            }
+        }
 
         $data = [
             'title'         => $this->sanitize($this->krTitle),

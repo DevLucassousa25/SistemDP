@@ -186,12 +186,14 @@ class Index extends SecureComponent
         $comparison = $managerEval->entries->map(function ($entry) use ($selfEntries) {
             $selfEntry = $selfEntries->get($entry->criterion_id);
             return (object) [
-                'criterion'       => $entry->criterion,
-                'manager_score'   => $entry->effectiveScore,
-                'self_score'      => $selfEntry?->score,
-                'manager_display' => $entry->displayValue,
-                'self_display'    => $selfEntry?->displayValue ?? '—',
-                'comment'         => $entry->calibration_note ?? $entry->comment,
+                'criterion'        => $entry->criterion,
+                'manager_score'    => $entry->effectiveScore,
+                'self_score'       => $selfEntry?->score,
+                'manager_display'  => $entry->effectiveDisplayValue,
+                'is_calibrated'    => $entry->calibrated_score !== null,
+                'original_display' => $entry->displayValue,
+                'self_display'     => $selfEntry?->displayValue ?? '—',
+                'comment'          => $entry->calibration_note ?? $entry->comment,
             ];
         });
 
@@ -572,11 +574,12 @@ class Index extends SecureComponent
             ->get();
 
         return $managers->map(function (User $manager) {
+            // Usa nota calibrada quando disponível (COALESCE garante fallback para original)
             $avgScore = DB::table('manager_evaluation_entries')
                 ->join('manager_evaluations', 'manager_evaluations.id', '=', 'manager_evaluation_entries.manager_evaluation_id')
                 ->where('manager_evaluations.manager_id', $manager->id)
                 ->where('manager_evaluations.status', 'completed')
-                ->avg('score');
+                ->avg(DB::raw('COALESCE(manager_evaluation_entries.calibrated_score, manager_evaluation_entries.score)'));
 
             $survScore = null;
             if ($manager->department_id) {

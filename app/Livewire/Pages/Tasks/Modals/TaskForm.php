@@ -248,7 +248,8 @@ class TaskForm extends SecureComponent
 
     public function deleteTag(int $tagId): void
     {
-        TaskTag::find($tagId)?->delete();
+        // Só pode deletar tags que o próprio usuário criou
+        TaskTag::where('id', $tagId)->where('created_by', Auth::id())->delete();
         $this->selectedTagIds = array_values(array_filter($this->selectedTagIds, fn ($id) => $id !== $tagId));
         unset($this->allTags);
         $this->dispatch('tags-updated');
@@ -259,7 +260,8 @@ class TaskForm extends SecureComponent
     #[Computed]
     public function allTags()
     {
-        return TaskTag::orderBy('name')->get();
+        // Cada usuário vê apenas suas próprias tags
+        return TaskTag::where('created_by', Auth::id())->orderBy('name')->get();
     }
 
     #[Computed]

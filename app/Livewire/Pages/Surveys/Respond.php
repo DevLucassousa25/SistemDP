@@ -89,6 +89,11 @@ class Respond extends SecureComponent
         foreach ($survey->questions as $question) {
             $this->answers[$question->id] = null;
         }
+
+        $this->dispatch('breadcrumb-set', items: [
+            ['label' => 'Pesquisas', 'icon' => 'clipboard-list', 'url' => route('pesquisas')],
+            ['label' => $survey->title, 'url' => null],
+        ]);
     }
 
     // ──────────────────────────────────────────────────────────────────

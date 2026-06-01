@@ -132,9 +132,9 @@
 
             {{-- ════ PASSO 2: Perfil profissional ════ --}}
             @if ($step === 2)
-            <div class="px-8 py-7 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/20">
+            <div class="px-8 py-7 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-500/20 dark:to-indigo-600/20">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-violet-600 flex items-center justify-center shrink-0">
+                    <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     </div>
                     <div>
@@ -279,7 +279,7 @@
                             {{-- Vagas --}}
                             @foreach ($this->vagasPublicadas as $vaga)
                             @php
-                                $vagaColors = ['bg-indigo-500','bg-violet-500','bg-blue-500','bg-teal-500','bg-emerald-500','bg-pink-500'];
+                                $vagaColors = ['bg-indigo-500','bg-indigo-600','bg-blue-500','bg-teal-500','bg-emerald-500','bg-pink-500'];
                                 $vc = $vagaColors[abs(crc32($vaga->titulo)) % count($vagaColors)];
                                 $searchText = strtolower($vaga->titulo . ' ' . $vaga->cargo . ' ' . $vaga->cidade . ' ' . $vaga->modalidade);
                             @endphp

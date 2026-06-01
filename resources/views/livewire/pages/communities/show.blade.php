@@ -2,12 +2,12 @@
     $me     = Auth::user();
     $meParts = explode(' ', trim($me->name ?? '?'));
     $meInit  = strtoupper(substr($meParts[0],0,1).(isset($meParts[1])?substr($meParts[1],0,1):''));
-    $pal     = ['bg-indigo-500','bg-violet-500','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
+    $pal     = ['bg-indigo-500','bg-indigo-600','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
     $meBg    = $pal[abs(crc32($me->name ?? '')) % count($pal)];
 
     if (!function_exists('commBg')) {
         function commBg(string $name): string {
-            $p = ['bg-indigo-500','bg-violet-500','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
+            $p = ['bg-indigo-500','bg-indigo-600','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
             return $p[abs(crc32($name)) % count($p)];
         }
     }
@@ -28,7 +28,7 @@
     {{-- ── Banner da comunidade ────────────────────────────────────── --}}
     <div class="relative">
         {{-- Imagem do banner --}}
-        <div class="h-44 sm:h-56 w-full overflow-hidden bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-700 relative">
+        <div class="h-44 sm:h-56 w-full overflow-hidden bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 relative">
             @if ($community->cover_image)
                 <img src="{{ Storage::url($community->cover_image) }}"
                      class="w-full h-full object-cover object-top" />
@@ -150,8 +150,15 @@
                                  r.onload = ev => this.previewUrls.push(ev.target.result);
                                  r.readAsDataURL(f);
                              });
+                             e.target.value = '';
+                         },
+                         clearImages() {
+                             this.previewUrls = [];
+                             const dt = new DataTransfer();
+                             if (this.$refs.fileInput) this.$refs.fileInput.files = dt.files;
                          }
-                     }">
+                     }"
+                     @post-created.window="clearImages(); expanded = false; showPoll = false;">
                     <div class="flex items-start gap-3">
                         <span class="w-10 h-10 rounded-full {{ $meBg }} text-white text-sm lato-bold flex items-center justify-center shrink-0 mt-0.5">{{ $meInit }}</span>
                         <div class="flex-1">
@@ -164,7 +171,7 @@
                                              focus:outline-none focus:ring-2 focus:ring-indigo-400/30 placeholder-slate-400 resize-none transition-all"></textarea>
 
                             {{-- Preview imagens --}}
-                            <template x-if="previewUrls.length > 0">
+                            <template x-if="expanded && previewUrls.length > 0">
                                 <div class="mt-2 grid gap-1" x-bind:class="previewUrls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'">
                                     <template x-for="(url, i) in previewUrls" :key="i">
                                         <div class="rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-900 aspect-video">
@@ -253,7 +260,7 @@
                         <div class="flex items-center gap-1">
                             <label class="p-2 rounded-xl text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition cursor-pointer" title="Imagens">
                                 <x-lucide-image class="w-4 h-4" />
-                                <input type="file" class="hidden" wire:model="newPostImages" accept="image/*" multiple @change="addFiles($event)" />
+                                <input type="file" class="hidden" x-ref="fileInput" wire:model="newPostImages" accept="image/*" multiple @change="addFiles($event)" />
                             </label>
                             <button type="button" @click="showPoll = !showPoll" class="p-2 rounded-xl text-slate-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition" title="Enquete">
                                 <x-lucide-bar-chart-2 class="w-4 h-4" />
@@ -261,7 +268,7 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-slate-400 lato-regular">{{ strlen($newPostContent) }}/2000</span>
-                            <button wire:click="createPost" type="button" wire:loading.attr="disabled"
+                            <button wire:click="createPost" @click="clearImages(); expanded = false; showPoll = false;" type="button" wire:loading.attr="disabled"
                                     class="px-5 py-2 text-xs lato-bold rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 text-white
                                            hover:from-indigo-600 hover:to-violet-700 disabled:opacity-50 transition shadow-sm">
                                 <span wire:loading.remove wire:target="createPost">Publicar</span>
@@ -441,19 +448,33 @@
          MODAL: Membros
     ══════════════════════════════════════════════════════════════════ --}}
     @if ($membersModal)
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-             @click.self="$wire.set('membersModal', false)" style="cursor:pointer">
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col" @click.stop>
-                <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700 shrink-0">
-                    <h3 class="text-sm lato-bold text-slate-800 dark:text-slate-100">
+        <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center"
+             x-data="{ open: false, close() { this.open = false; setTimeout(() => $wire.set('membersModal', false), 300); } }"
+             x-init="requestAnimationFrame(() => open = true)"
+             @click.self="close()">
+            <div @click.stop
+                 class="bg-white dark:bg-slate-800 shadow-2xl w-full rounded-t-3xl sm:rounded-2xl sm:max-w-md sm:mx-4
+                        flex flex-col transition-transform duration-300 ease-out will-change-transform"
+                 :class="open ? 'translate-y-0' : 'translate-y-full sm:translate-y-4'"
+                 style="max-height: 88dvh;">
+
+                {{-- Drag handle --}}
+                <div class="flex justify-center pt-3 pb-1 sm:hidden shrink-0">
+                    <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+                </div>
+
+                <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
+                    <h3 class="text-sm lato-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <x-lucide-users class="w-4 h-4 text-indigo-500" />
                         Membros · {{ $this->acceptedMembers->count() }}
                     </h3>
-                    <button wire:click="$set('membersModal', false)" type="button"
+                    <button @click="close()" type="button"
                             class="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
                         <x-lucide-x class="w-4 h-4" />
                     </button>
                 </div>
-                <div class="flex-1 overflow-y-auto p-5 space-y-3">
+
+                <div class="flex-1 overflow-y-auto p-5 space-y-3 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
                     @foreach ($this->acceptedMembers as $member)
                         @php $mName = $member->user->name ?? '?'; @endphp
                         <div class="flex items-center gap-3">
@@ -468,13 +489,13 @@
                                 </p>
                             </div>
                             @if ($isAdmin && $member->role !== 'admin')
-                                <div class="flex items-center gap-1" x-data="{ open: false }" @click.away="open=false">
+                                <div class="relative flex items-center gap-1" x-data="{ open: false }" @click.away="open=false">
                                     <button @click="open=!open" type="button"
                                             class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
                                         <x-lucide-more-horizontal class="w-4 h-4" />
                                     </button>
                                     <div x-show="open" x-transition
-                                         class="absolute right-5 mt-16 w-40 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-1 z-20">
+                                         class="absolute right-0 top-8 w-40 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg py-1 z-20">
                                         <button wire:click="promoteToAdmin({{ $member->id }})" @click="open=false" type="button"
                                                 class="w-full text-left px-3 py-2 text-xs text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2">
                                             <x-lucide-star class="w-3.5 h-3.5 text-amber-500" /> Tornar admin
@@ -686,75 +707,71 @@
     ══════════════════════════════════════════════════════════════════ --}}
     @if ($statsModal && $isAdmin)
         @php $stats = $this->communityStats; @endphp
-        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-             @click.self="$wire.set('statsModal', false)" style="cursor:pointer">
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-5" @click.stop>
-                <div class="flex items-center justify-between mb-5">
+        <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center"
+             x-data="{ open: false, close() { this.open = false; setTimeout(() => $wire.set('statsModal', false), 300); } }"
+             x-init="requestAnimationFrame(() => open = true)"
+             @click.self="close()">
+            <div @click.stop
+                 class="bg-white dark:bg-slate-800 shadow-2xl w-full rounded-t-3xl sm:rounded-2xl sm:max-w-md sm:mx-4
+                        flex flex-col transition-transform duration-300 ease-out will-change-transform"
+                 :class="open ? 'translate-y-0' : 'translate-y-full sm:translate-y-4'"
+                 style="max-height: 88dvh;">
+
+                {{-- Drag handle --}}
+                <div class="flex justify-center pt-3 pb-1 sm:hidden shrink-0">
+                    <div class="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+                </div>
+
+                <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
                     <h3 class="text-sm lato-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                         <x-lucide-bar-chart-2 class="w-4 h-4 text-indigo-500" /> Estatísticas da comunidade
                     </h3>
-                    <button wire:click="$set('statsModal', false)" type="button"
+                    <button @click="close()" type="button"
                             class="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
                         <x-lucide-x class="w-4 h-4" />
                     </button>
                 </div>
 
-                {{-- Números principais --}}
-                <div class="grid grid-cols-3 gap-3 mb-5">
-                    <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-3 text-center">
-                        <p class="text-xl lato-bold text-indigo-600 dark:text-indigo-400">{{ $stats['total_posts'] }}</p>
-                        <p class="text-[10px] text-slate-500 lato-regular mt-0.5">Total de posts</p>
+                <div class="flex-1 overflow-y-auto p-5 space-y-5 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+
+                    {{-- Números principais --}}
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-3 text-center">
+                            <p class="text-xl lato-bold text-indigo-600 dark:text-indigo-400">{{ $stats['total_posts'] }}</p>
+                            <p class="text-[10px] text-slate-500 lato-regular mt-0.5">Total de posts</p>
+                        </div>
+                        <div class="bg-violet-50 dark:bg-violet-900/20 rounded-xl p-3 text-center">
+                            <p class="text-xl lato-bold text-indigo-600 dark:text-indigo-400">{{ $stats['posts_week'] }}</p>
+                            <p class="text-[10px] text-slate-500 lato-regular mt-0.5">Esta semana</p>
+                        </div>
+                        <div class="bg-teal-50 dark:bg-teal-900/20 rounded-xl p-3 text-center">
+                            <p class="text-xl lato-bold text-teal-600 dark:text-teal-400">{{ $stats['active_members'] }}</p>
+                            <p class="text-[10px] text-slate-500 lato-regular mt-0.5">Ativos (30d)</p>
+                        </div>
                     </div>
-                    <div class="bg-violet-50 dark:bg-violet-900/20 rounded-xl p-3 text-center">
-                        <p class="text-xl lato-bold text-violet-600 dark:text-violet-400">{{ $stats['posts_week'] }}</p>
-                        <p class="text-[10px] text-slate-500 lato-regular mt-0.5">Esta semana</p>
-                    </div>
-                    <div class="bg-teal-50 dark:bg-teal-900/20 rounded-xl p-3 text-center">
-                        <p class="text-xl lato-bold text-teal-600 dark:text-teal-400">{{ $stats['active_members'] }}</p>
-                        <p class="text-[10px] text-slate-500 lato-regular mt-0.5">Ativos (30d)</p>
+
+                    {{-- Breakdown por tipo --}}
+                    @if (! empty($stats['types']))
+                        <div>
+                            <p class="text-[10px] lato-bold text-slate-500 uppercase tracking-wide mb-2">Posts por tipo</p>
+                            <div class="space-y-1.5">
+                                @php
+                                    $typeLabels = ['post' => 'Geral', 'aviso' => 'Aviso', 'evento' => 'Evento', 'discussao' => 'Discussão'];
+                                    $typeColors = ['post' => 'bg-slate-400', 'aviso' => 'bg-orange-400', 'evento' => 'bg-purple-400', 'discussao' => 'bg-blue-400'];
+                                    $totalTyped = array_sum($stats['types']);
+                                @endphp
+                                @foreach ($stats['types'] as $typeKey => $typeCount)
+                                    @php $pct = $totalTyped > 0 ? round($typeCount / $totalTyped * 100) : 0; @endphp
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex-1 h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                            <div class="h-full rounded-full bg-indigo-500" style="width: {{ min(100, $typeCount) }}%"></div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
                 </div>
-
-                {{-- Breakdown por tipo --}}
-                @if (! empty($stats['types']))
-                    <div class="mb-4">
-                        <p class="text-[10px] lato-bold text-slate-500 uppercase tracking-wide mb-2">Posts por tipo</p>
-                        <div class="space-y-1.5">
-                            @php
-                                $typeLabels = ['post' => 'Geral', 'aviso' => 'Aviso', 'evento' => 'Evento', 'discussao' => 'Discussão'];
-                                $typeColors = ['post' => 'bg-slate-400', 'aviso' => 'bg-orange-400', 'evento' => 'bg-purple-400', 'discussao' => 'bg-blue-400'];
-                                $totalTyped = array_sum($stats['types']);
-                            @endphp
-                            @foreach ($stats['types'] as $typeKey => $typeCount)
-                                @php $pct = $totalTyped > 0 ? round($typeCount / $totalTyped * 100) : 0; @endphp
-                                <div class="flex items-center gap-2">
-                                    <span class="text-[10px] lato-regular text-slate-500 w-20 shrink-0">{{ $typeLabels[$typeKey] ?? $typeKey }}</span>
-                                    <div class="flex-1 h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                                        <div class="h-full {{ $typeColors[$typeKey] ?? 'bg-indigo-400' }} rounded-full transition-all" style="width: {{ $pct }}%"></div>
-                                    </div>
-                                    <span class="text-[10px] lato-bold text-slate-600 dark:text-slate-300 w-8 text-right">{{ $typeCount }}</span>
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-
-                {{-- Top poster --}}
-                @if ($stats['top_poster'])
-                    @php $tp = $stats['top_poster']->user; $tpName = $tp->name ?? '?'; @endphp
-                    <div class="flex items-center gap-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/30">
-                        <span class="w-9 h-9 rounded-full {{ commBg($tpName) }} text-white text-xs lato-bold flex items-center justify-center shrink-0">
-                            {{ commInit($tpName) }}
-                        </span>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-xs lato-bold text-slate-700 dark:text-slate-200 truncate">{{ $tpName }}</p>
-                            <p class="text-[10px] text-slate-400">Mais ativo · {{ $stats['top_poster']->total }} {{ $stats['top_poster']->total === 1 ? 'post' : 'posts' }}</p>
-                        </div>
-                        <x-lucide-trophy class="w-5 h-5 text-amber-500 shrink-0" />
-                    </div>
-                @endif
             </div>
         </div>
     @endif
-
-</div>

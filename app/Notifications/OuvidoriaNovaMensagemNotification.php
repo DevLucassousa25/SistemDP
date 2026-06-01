@@ -10,11 +10,12 @@ class OuvidoriaNovaMensagemNotification extends AppNotification
 
     public function toArray(object $notifiable): array
     {
-        $protocolo = $this->manifestacao->protocolo ?? "#{$this->manifestacao->id}";
+        $protocolo  = $this->manifestacao->protocolo ?? "#{$this->manifestacao->id}";
+        $tipoLabel  = $this->manifestacao->tipo_label ?? 'Manifestação';
 
         return [
             'title'   => 'Nova manifestação na Ouvidoria',
-            'message' => "Protocolo {$protocolo} — {$this->manifestacao->tipo_label ?? 'Manifestação'} recebida e aguardando análise.",
+            'message' => "Protocolo {$protocolo} — {$tipoLabel} recebida e aguardando análise.",
             'icon'    => 'megaphone',
             'color'   => 'red',
             'url'     => route('ouvidoria'),

@@ -21,6 +21,8 @@ class User extends Authenticatable
         protected $fillable = [
         'name',
         'email',
+        'cpf',
+        'telefone',
         'password',
         'department_id',
         'position',
@@ -28,6 +30,7 @@ class User extends Authenticatable
         'avatar',
         'access_profile_id',
         'is_active',
+        'sidebar_preferences',
     ];
 
     /**
@@ -48,8 +51,9 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'email_verified_at'    => 'datetime',
+            'password'             => 'hashed',
+            'sidebar_preferences'  => 'array',
         ];
     }
 

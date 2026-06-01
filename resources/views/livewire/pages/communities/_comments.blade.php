@@ -2,12 +2,12 @@
     $me      = Auth::user();
     $meParts = explode(' ', trim($me->name ?? '?'));
     $meInit  = strtoupper(substr($meParts[0],0,1).(isset($meParts[1])?substr($meParts[1],0,1):''));
-    $palC    = ['bg-indigo-500','bg-violet-500','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
+    $palC    = ['bg-indigo-500','bg-indigo-600','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
     $meBg    = $palC[abs(crc32($me->name ?? '')) % count($palC)];
 
     if (!function_exists('cBg')) {
         function cBg(string $name): string {
-            $p = ['bg-indigo-500','bg-violet-500','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
+            $p = ['bg-indigo-500','bg-indigo-600','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
             return $p[abs(crc32($name)) % count($p)];
         }
     }

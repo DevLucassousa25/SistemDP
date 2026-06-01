@@ -103,7 +103,7 @@
         @forelse ($this->curriculos as $curr)
         @php
             $initials  = collect(explode(' ', $curr->nome))->map(fn($w) => strtoupper($w[0] ?? ''))->take(2)->join('');
-            $colors    = ['bg-indigo-500','bg-violet-500','bg-blue-500','bg-teal-500','bg-emerald-500','bg-pink-500','bg-rose-500','bg-amber-500'];
+            $colors    = ['bg-indigo-500','bg-indigo-600','bg-blue-500','bg-teal-500','bg-emerald-500','bg-pink-500','bg-rose-500','bg-amber-500'];
             $avatarBg  = $colors[crc32($curr->nome) % count($colors)];
             $escLabels = ['fundamental'=>'Fundamental','medio'=>'Médio','tecnico'=>'Técnico','graduacao'=>'Graduação','pos_graduacao'=>'Pós-Graduação','mestrado'=>'Mestrado','doutorado'=>'Doutorado'];
             $statusMap = [
@@ -241,7 +241,7 @@
         ];
         [$dcStatusClass, $dcStatusLabel] = $statusMap[$dc->status] ?? $statusMap['inativo'];
         $initials = collect(explode(' ', $dc->nome))->map(fn($w) => strtoupper($w[0] ?? ''))->take(2)->join('');
-        $colors   = ['bg-indigo-500','bg-violet-500','bg-blue-500','bg-teal-500','bg-emerald-500','bg-pink-500','bg-rose-500','bg-amber-500'];
+        $colors   = ['bg-indigo-500','bg-indigo-600','bg-blue-500','bg-teal-500','bg-emerald-500','bg-pink-500','bg-rose-500','bg-amber-500'];
         $avatarBg = $colors[crc32($dc->nome) % count($colors)];
     @endphp
     <div class="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" wire:click="closeDrawer"></div>

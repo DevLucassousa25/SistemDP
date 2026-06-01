@@ -92,7 +92,7 @@
                     @php
                         $curr    = $cand['curriculo'] ?? null;
                         $initials = $curr ? collect(explode(' ', $curr['nome']))->map(fn($w) => strtoupper($w[0] ?? ''))->take(2)->join('') : '??';
-                        $colors   = ['bg-indigo-500','bg-violet-500','bg-blue-500','bg-teal-500','bg-emerald-500','bg-pink-500'];
+                        $colors   = ['bg-indigo-500','bg-indigo-600','bg-blue-500','bg-teal-500','bg-emerald-500','bg-pink-500'];
                         $avatarBg = $colors[crc32($curr['nome'] ?? 'x') % count($colors)];
                     @endphp
                     <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-3 hover:shadow-md transition cursor-pointer group"

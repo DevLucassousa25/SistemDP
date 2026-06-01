@@ -29,6 +29,9 @@ class Details extends SecureComponent
     /** IDs dos participantes selecionados (entangled com Alpine). */
     public array $participantesSelecionados = [];
 
+    /** Itens da pauta da reunião (setados via Alpine antes de salvar). */
+    public array $pautaItems = [];
+
     public bool $emUsoAgora = false;
 
     // ── Manutenção ──────────────────────────────────────────────
@@ -66,6 +69,11 @@ class Details extends SecureComponent
         $this->carregarEstatisticas();
 
         $this->dataReserva = today()->format('Y-m-d');
+
+        $this->dispatch('breadcrumb-set', items: [
+            ['label' => 'Salas', 'icon' => 'door-open', 'url' => route('rooms')],
+            ['label' => $this->sala->name, 'url' => null],
+        ]);
     }
 
     #[On('room-updated')]

@@ -78,13 +78,13 @@
                     {{ $this->stats['com_nota'] }}
                 </p>
                 @if ($this->stats['total_gerentes'] > 0)
-                    <p class="text-xs text-violet-500 dark:text-violet-400 lato-regular mt-0.5 flex items-center gap-1">
+                    <p class="text-xs text-indigo-500 dark:text-indigo-400 lato-regular mt-0.5 flex items-center gap-1">
                         <x-lucide-percent class="w-3 h-3" />
                         {{ round(($this->stats['com_nota'] / $this->stats['total_gerentes']) * 100) }}% do total
                     </p>
                 @endif
             </div>
-            <x-lucide-star class="w-8 h-8 sm:w-10 sm:h-10 text-violet-500" />
+            <x-lucide-star class="w-8 h-8 sm:w-10 sm:h-10 text-indigo-500" />
         </div>
 
         <div class="bg-[#FEF3C7] dark:bg-amber-900/20 rounded-2xl p-4 sm:p-5 flex items-center justify-between">
@@ -352,7 +352,7 @@
 
                             {{-- Gerente --}}
                             <div class="col-span-1 sm:col-span-3 flex items-center gap-2.5 min-w-0">
-                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500
                                             flex items-center justify-center shrink-0 text-white text-xs lato-black">
                                     {{ mb_strtoupper(mb_substr($score->manager?->name ?? '?', 0, 1)) }}
                                 </div>

@@ -273,7 +273,7 @@
     <div class="mt-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6">
         <div class="flex items-center gap-3 mb-5">
             <div class="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
-                <x-lucide-user-check class="w-5 h-5 text-violet-600" />
+                <x-lucide-user-check class="w-5 h-5 text-indigo-600" />
             </div>
             <div>
                 <p class="text-sm font-bold text-slate-800 dark:text-white lato-black">Como meus funcionários me avaliam</p>
@@ -286,7 +286,7 @@
             </div>
             @if($survStats['avg'] !== null)
                 <div class="ml-auto text-right shrink-0">
-                    <p class="text-3xl font-black text-violet-600 dark:text-violet-400 lato-black">{{ number_format($survStats['avg'], 1) }}</p>
+                    <p class="text-3xl font-black text-indigo-600 dark:text-indigo-400 lato-black">{{ number_format($survStats['avg'], 1) }}</p>
                     <p class="text-[10px] text-slate-400 lato-regular">de 10 pontos</p>
                 </div>
             @endif
@@ -298,7 +298,7 @@
                 <p class="text-sm text-slate-400 lato-regular">Nenhuma avaliação de gestor disponível ainda.</p>
                 <p class="text-xs text-slate-400 lato-regular mt-1 max-w-xs">
                     O RH/DP precisa marcar perguntas como
-                    <span class="text-violet-500 lato-bold">Avaliação do Gestor</span>
+                    <span class="text-indigo-500 lato-bold">Avaliação do Gestor</span>
                     nas pesquisas de clima para que os resultados apareçam aqui.
                 </p>
             </div>
@@ -308,10 +308,10 @@
                 <div class="mb-5">
                     <div class="flex items-center justify-between mb-1.5">
                         <span class="text-xs text-slate-500 lato-regular">Média geral (escala 0–10)</span>
-                        <span class="text-xs font-bold text-violet-600 lato-bold">{{ number_format($survStats['avg'], 1) }}/10</span>
+                        <span class="text-xs font-bold text-indigo-600 lato-bold">{{ number_format($survStats['avg'], 1) }}/10</span>
                     </div>
                     <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-2">
-                        <div class="bg-gradient-to-r from-violet-500 to-purple-600 h-2 rounded-full transition-all"
+                        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full transition-all"
                              style="width: {{ min(100, ($survStats['avg'] / 10) * 100) }}%"></div>
                     </div>
                 </div>
@@ -719,7 +719,7 @@
                 @php
                     $grouped = $eval->entries->groupBy('employee_id');
                     $avgByCriterion = $eval->entries->groupBy('criterion_id')
-                        ->map(fn($g) => round($g->avg('score'), 1));
+                        ->map(fn($g) => round($g->avg(fn($e) => $e->effectiveScore), 1));
                 @endphp
 
                 {{-- Média por critério --}}
@@ -753,7 +753,7 @@
                     @foreach($grouped as $empId => $entries)
                         @php
                             $emp = $entries->first()->employee;
-                            $empAvg = round($entries->avg('score'), 1);
+                            $empAvg = round($entries->avg(fn($e) => $e->effectiveScore), 1);
                         @endphp
                         <div class="bg-slate-50 dark:bg-slate-700/40 rounded-xl p-3">
                             <div class="flex items-center justify-between mb-2">
@@ -778,13 +778,17 @@
                             </div>
                             <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                                 @foreach($entries as $entry)
+                                    @php $effectiveScore = $entry->effectiveScore; $isCalibrated = $entry->calibrated_score !== null; @endphp
                                     <div class="flex items-center gap-1.5 text-[10px] lato-regular text-slate-500 dark:text-slate-400">
                                         <div class="flex gap-0.5">
                                             @for($s = 1; $s <= 5; $s++)
-                                                <div class="w-2 h-2 rounded-full {{ $s <= $entry->score ? 'bg-amber-400' : 'bg-slate-200 dark:bg-slate-600' }}"></div>
+                                                <div class="w-2 h-2 rounded-full {{ $s <= $effectiveScore ? ($isCalibrated ? 'bg-indigo-600' : 'bg-amber-400') : 'bg-slate-200 dark:bg-slate-600' }}"></div>
                                             @endfor
                                         </div>
                                         <span class="truncate">{{ $entry->criterion->name }}</span>
+                                        @if($isCalibrated)
+                                            <span title="Nota calibrada pelo RH" class="text-indigo-500">✦</span>
+                                        @endif
                                     </div>
                                 @endforeach
                             </div>
@@ -1006,7 +1010,7 @@
                 <div class="col-span-2 flex items-center gap-1">
                     <x-lucide-building-2 class="w-3.5 h-3.5" /> Departamento
                 </div>
-                <div class="col-span-2 flex items-center justify-center gap-1 text-violet-500">
+                <div class="col-span-2 flex items-center justify-center gap-1 text-indigo-500">
                     <x-lucide-star class="w-3.5 h-3.5" /> Aval. Gestor
                 </div>
                 <div class="col-span-2 flex items-center justify-center gap-1">
@@ -1212,7 +1216,7 @@
                 &lt; 6,0 — Atenção
             </span>
             <span class="hidden sm:flex items-center gap-1.5 ml-auto">
-                <x-lucide-star class="w-3 h-3 text-violet-400" />
+                <x-lucide-star class="w-3 h-3 text-indigo-400" />
                 Aval. Gestor = perguntas marcadas como "Avaliação do Gestor" (0–10)
             </span>
         </div>
@@ -1485,6 +1489,12 @@
                                 @endphp
                                 <p class="text-xs text-slate-400 lato-regular mb-0.5">Gerente</p>
                                 <p class="text-lg font-bold lato-black {{ $mColor }}">{{ $comp->manager_display }}</p>
+                                @if($comp->is_calibrated)
+                                    <p class="text-[10px] text-indigo-400 lato-regular mt-0.5 flex items-center justify-center gap-0.5">
+                                        <span>✦</span> calibrado
+                                        <span class="text-slate-400 ml-1">(orig. {{ $comp->original_display }})</span>
+                                    </p>
+                                @endif
                             </div>
                             <div class="col-span-4 text-center">
                                 <p class="text-xs text-slate-400 lato-regular mb-0.5">Autoavaliação</p>
@@ -2050,222 +2060,20 @@
                                 </span>
                             </button>
                         </div>
+                        {{-- /footer salvar --}}
                         @endif
-
-                    @endif
+                        {{-- /else calibração normal --}}
+                    </div>
+                    {{-- /flex-1 overflow panel --}}
                 </div>
-
-            </div>
+                {{-- /painel de entradas --}}
             @endif
+            {{-- /!calibrationEmployeeId @else --}}
+
+            @endif
+            {{-- /calibrationManagers @else --}}
+
         @endif
-    </div>
-    @endif
+        {{-- /!calibrationCycleId @else --}}
 
-
-    {{-- ═══════════════════════════════════════════════════════════════
-         MODAL: CICLO (criar / editar)
-    ═══════════════════════════════════════════════════════════════════ --}}
-    @if($cycleModal)
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" wire:click="$set('cycleModal', false)"></div>
-        <div class="relative z-10 bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md">
-
-            <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-700">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
-                        <x-lucide-clipboard-list class="w-4 h-4 text-indigo-600" />
-                    </div>
-                    <h2 class="text-sm font-bold text-slate-800 dark:text-white lato-black">
-                        {{ $editingCycleId ? 'Editar ciclo' : 'Novo ciclo de avaliação' }}
-                    </h2>
-                </div>
-                <button type="button" wire:click="$set('cycleModal', false)"
-                        class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer">
-                    <x-lucide-x class="w-4 h-4" />
-                </button>
-            </div>
-
-            <div class="px-6 py-5 space-y-4">
-                <div>
-                    <label class="block text-xs lato-bold text-slate-600 dark:text-slate-300 mb-1.5">Nome do ciclo <span class="text-red-400">*</span></label>
-                    <input type="text" wire:model="cycleName" placeholder="Ex: Avaliação Semestral 2026"
-                           class="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-xl
-                                  bg-white dark:bg-slate-700 text-slate-800 dark:text-white
-                                  placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 lato-regular" />
-                    @error('cycleName') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs lato-bold text-slate-600 dark:text-slate-300 mb-1.5">Data de início <span class="text-red-400">*</span></label>
-                        <input type="date" wire:model="cycleStart"
-                               class="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-xl
-                                      bg-white dark:bg-slate-700 text-slate-800 dark:text-white
-                                      focus:outline-none focus:ring-2 focus:ring-indigo-500/40 lato-regular" />
-                        @error('cycleStart') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-                    </div>
-                    <div>
-                        <label class="block text-xs lato-bold text-slate-600 dark:text-slate-300 mb-1.5">Data de fim <span class="text-red-400">*</span></label>
-                        <input type="date" wire:model="cycleEnd"
-                               class="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-xl
-                                      bg-white dark:bg-slate-700 text-slate-800 dark:text-white
-                                      focus:outline-none focus:ring-2 focus:ring-indigo-500/40 lato-regular" />
-                        @error('cycleEnd') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs lato-bold text-slate-600 dark:text-slate-300 mb-1.5">Descrição</label>
-                    <textarea wire:model="cycleDescription" rows="2" placeholder="Descreva o objetivo deste ciclo..."
-                              class="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-xl
-                                     bg-white dark:bg-slate-700 text-slate-800 dark:text-white
-                                     placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 lato-regular resize-none"></textarea>
-                </div>
-            </div>
-
-            <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3">
-                <button type="button" wire:click="$set('cycleModal', false)"
-                        class="px-4 py-2 text-sm lato-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition cursor-pointer">
-                    Cancelar
-                </button>
-                <button type="button" wire:click="saveCycle"
-                        wire:loading.attr="disabled" wire:target="saveCycle"
-                        class="flex items-center gap-2 px-5 py-2 text-sm lato-bold bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20 text-white rounded-xl transition cursor-pointer disabled:opacity-60">
-                    <x-lucide-save class="w-3.5 h-3.5" />
-                    {{ $editingCycleId ? 'Atualizar' : 'Criar ciclo' }}
-                </button>
-            </div>
-        </div>
-    </div>
-    @endif
-
-
-    {{-- ═══════════════════════════════════════════════════════════════
-         MODAL: CRITÉRIO (criar / editar)
-    ═══════════════════════════════════════════════════════════════════ --}}
-    @if($criterionModal)
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" wire:click="$set('criterionModal', false)"></div>
-        <div class="relative z-10 bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-lg">
-
-            <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-700">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center">
-                        <x-lucide-list-checks class="w-4.5 h-4.5 text-violet-600 dark:text-violet-400" />
-                    </div>
-                    <div>
-                        <h2 class="text-sm font-bold text-slate-800 dark:text-white lato-black">
-                            {{ $editingCriterionId ? 'Editar Critério' : 'Novo Critério' }}
-                        </h2>
-                        <p class="text-[11px] text-slate-400 lato-regular">Configure nome, tipo de resposta e peso</p>
-                    </div>
-                </div>
-                <button wire:click="$set('criterionModal', false)" type="button"
-                        class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-                    <x-lucide-x class="w-4 h-4" />
-                </button>
-            </div>
-
-            <div class="px-6 py-5 space-y-4">
-                <div>
-                    <label class="block text-xs lato-bold text-slate-600 dark:text-slate-400 mb-1.5">Nome do critério <span class="text-red-400">*</span></label>
-                    <input type="text" wire:model="criterionName" placeholder="Ex: Trabalho em equipe"
-                           class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700/50 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40 lato-regular" />
-                    @error('criterionName') <p class="text-[11px] text-red-500 mt-1 lato-regular">{{ $message }}</p> @enderror
-                </div>
-
-                <div>
-                    <label class="block text-xs lato-bold text-slate-600 dark:text-slate-400 mb-1.5">Descrição</label>
-                    <textarea wire:model="criterionDescription" rows="2" placeholder="Orientação para avaliadores (opcional)..."
-                              class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700/50 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40 lato-regular resize-none"></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-xs lato-bold text-slate-600 dark:text-slate-400 mb-1.5">Peso <span class="text-red-400">*</span></label>
-                    <input type="number" wire:model="criterionWeight" step="0.1" min="0.1" max="10" placeholder="1.0"
-                           class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700/50 text-slate-800 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40 lato-regular" />
-                    @error('criterionWeight') <p class="text-[11px] text-red-500 mt-1 lato-regular">{{ $message }}</p> @enderror
-                </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 dark:border-slate-700">
-                <button wire:click="$set('criterionModal', false)" type="button"
-                        class="px-4 py-2 rounded-xl text-sm lato-bold cursor-pointer text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
-                    Cancelar
-                </button>
-                <button wire:click="saveCriterion" wire:loading.attr="disabled" wire:target="saveCriterion" type="button"
-                        class="inline-flex items-center gap-2 px-5 py-2 rounded-xl cursor-pointer text-sm lato-bold bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20 text-white transition disabled:opacity-60">
-                    {{-- <x-lucide-save class="w-3.5 h-3.5" />
-                    {{ $editingCriterionId ? 'Salvar alterações' : 'Criar critério' }} --}}
-
-                     <span wire:loading.remove wire:target="saveCriterion" class="flex items-center gap-1">
-                            @if ($editingCriterionId)
-                                <x-lucide-square-pen class="w-4 h-4" />
-                            @else
-                                <x-lucide-circle-check class="w-4 h-4" />
-                            @endif
-                                {{ $editingCriterionId ? 'Salvar Alterações' : 'Confirmar' }}
-                        </span>
-
-                        <span wire:loading wire:target="saveCriterion" class="flex items-center gap-2">
-                                <x-lucide-loader-2 class="w-4 h-4 animate-spin" />
-                        </span>
-                </button>
-            </div>
-        </div>
-    </div>
-    @endif
-
-
-    {{-- ═══════════════════════════════════════════════════════════════
-         MODAL: CONFIRMAÇÃO GENÉRICA
-    ═══════════════════════════════════════════════════════════════════ --}}
-    @if($confirmModal)
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" wire:click="$set('confirmModal', false)"></div>
-        <div class="relative z-10 bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm p-6">
-
-            @php
-                $confirmConfig = match($confirmType) {
-                    'activate_cycle'      => ['Ativar ciclo', 'Ao ativar, qualquer ciclo ativo atual será encerrado automaticamente. Os gerentes poderão iniciar suas avaliações.', 'Ativar', 'emerald'],
-                    'close_cycle'         => ['Encerrar ciclo', 'Ao encerrar, os gerentes não poderão mais realizar ou editar avaliações neste ciclo.', 'Encerrar', 'rose'],
-                    'delete_cycle'        => ['Excluir ciclo', 'Esta ação é irreversível. Todas as avaliações vinculadas a este ciclo serão excluídas.', 'Excluir', 'red'],
-                    'complete_evaluation' => ['Finalizar avaliação', 'Após finalizar, os dados não poderão ser editados. Tem certeza que deseja continuar?', 'Finalizar', 'emerald'],
-                    default               => ['Confirmar', 'Deseja confirmar esta ação?', 'Confirmar', 'indigo'],
-                };
-            @endphp
-
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-full bg-{{ $confirmConfig[3] }}-100 dark:bg-{{ $confirmConfig[3] }}-900/30 flex items-center justify-center shrink-0">
-                    @if(in_array($confirmType, ['delete_cycle', 'close_cycle']))
-                        <x-lucide-alert-triangle class="w-5 h-5 text-{{ $confirmConfig[3] }}-600" />
-                    @else
-                        <x-lucide-check-circle class="w-5 h-5 text-{{ $confirmConfig[3] }}-600" />
-                    @endif
-                </div>
-                <h3 class="text-sm font-bold text-slate-800 dark:text-white lato-black">{{ $confirmConfig[0] }}</h3>
-            </div>
-
-            <p class="text-sm text-slate-500 dark:text-slate-400 lato-regular leading-relaxed mb-6">
-                {{ $confirmConfig[1] }}
-            </p>
-
-            <div class="flex gap-3 justify-end">
-                <button type="button" wire:click="$set('confirmModal', false)"
-                        class="px-4 py-2 text-sm lato-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition cursor-pointer">
-                    Cancelar
-                </button>
-                <button type="button" wire:click="confirmAction"
-                        wire:loading.attr="disabled" wire:target="confirmAction"
-                        class="px-5 py-2 text-sm lato-bold text-white rounded-xl shadow-sm transition cursor-pointer disabled:opacity-60
-                               bg-{{ $confirmConfig[3] }}-600 hover:bg-{{ $confirmConfig[3] }}-700">
-                    {{ $confirmConfig[2] }}
-                </button>
-            </div>
-        </div>
-    </div>
-    @endif
-
-    <livewire:components.ui.modal.alert-modal />
-
-</div>
+@endif

@@ -23,7 +23,7 @@
                 bem:     'from-blue-400 via-indigo-500 to-violet-500',
                 normal:  'from-amber-400 via-yellow-400 to-orange-400',
                 pessimo: 'from-rose-400 via-red-500 to-pink-500',
-                padrao:  'from-violet-400 via-blue-500 to-indigo-500',
+                padrao:  'from-blue-500 via-blue-500 to-indigo-500',
             },
             msgs: {
                 otimo:   'Que ótimo! Fico feliz em saber disso.',

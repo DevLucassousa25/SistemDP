@@ -231,7 +231,7 @@
 
                     $accentColor = match ($pergunta->type) {
                         'escala'           => ['ring' => 'ring-blue-400/30',    'dot' => 'bg-blue-400',   'badge' => 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800/30'],
-                        'multipla_escolha' => ['ring' => 'ring-violet-400/30',  'dot' => 'bg-violet-400', 'badge' => 'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-900/20 dark:text-violet-300 dark:border-violet-800/30'],
+                        'multipla_escolha' => ['ring' => 'ring-indigo-400/30',  'dot' => 'bg-violet-400', 'badge' => 'bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-900/20 dark:text-violet-300 dark:border-violet-800/30'],
                         'texto_livre'      => ['ring' => 'ring-amber-400/30',   'dot' => 'bg-amber-400',  'badge' => 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800/30'],
                         default            => ['ring' => 'ring-slate-400/30',   'dot' => 'bg-slate-400',  'badge' => 'bg-slate-100 text-slate-600 border-slate-200'],
                     };
@@ -401,12 +401,12 @@
                                          class="flex items-center gap-3.5 px-4 py-3.5 rounded-xl border-2 cursor-pointer
                                                 transition-all duration-150 select-none
                                                 {{ $sel
-                                                   ? 'border-violet-400 bg-violet-50 dark:bg-violet-900/20 dark:border-violet-500 shadow-sm shadow-violet-100 dark:shadow-violet-900/20'
+                                                   ? 'border-indigo-400 bg-violet-50 dark:bg-violet-900/20 dark:border-indigo-500 shadow-sm shadow-violet-100 dark:shadow-indigo-500/20'
                                                    : 'border-slate-200 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-700/30 hover:border-violet-200 dark:hover:border-violet-800/60 hover:bg-violet-50/40 dark:hover:bg-violet-900/10' }}">
 
                                         {{-- Radio visual (decorativo, sem binding Livewire) --}}
                                         <div class="w-5 h-5 rounded-full border-2 shrink-0 flex items-center justify-center transition-all duration-150
-                                                    {{ $sel ? 'border-violet-500 bg-violet-500' : 'border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700' }}">
+                                                    {{ $sel ? 'border-indigo-500 bg-indigo-600' : 'border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700' }}">
                                             @if ($sel)
                                                 <div class="w-2 h-2 rounded-full bg-white"></div>
                                             @endif
@@ -424,7 +424,7 @@
                                         </span>
 
                                         @if ($sel)
-                                            <x-lucide-check-circle class="w-4 h-4 text-violet-500 shrink-0" />
+                                            <x-lucide-check-circle class="w-4 h-4 text-indigo-500 shrink-0" />
                                         @endif
                                     </div>
                                 @endforeach

@@ -4,6 +4,7 @@ namespace App\Livewire\Pages\Rh;
 
 use App\Livewire\Concerns\EnviaNotificacoes;
 use App\Livewire\SecureComponent;
+use App\Models\EquipamentoAtribuicao;
 use App\Models\RhOnboarding;
 use App\Models\RhOnboardingTarefa;
 use Illuminate\Support\Facades\Auth;
@@ -74,6 +75,21 @@ class Onboarding extends SecureComponent
             'candidatura.vaga:id,titulo,cargo',
             'candidatura.curriculo:id,nome,email,telefone',
         ])->find($this->drawerOnbId);
+    }
+
+    #[Computed]
+    public function drawerEquipamentos()
+    {
+        if (! $this->drawerOnbId) return collect();
+        $onb = RhOnboarding::find($this->drawerOnbId);
+        if (! $onb?->user_id) return collect();
+
+        return EquipamentoAtribuicao::with(['equipamento'])
+            ->where('user_id', $onb->user_id)
+            ->where('tipo', 'entrega')
+            ->whereNull('data_devolucao')
+            ->orderBy('data_entrega')
+            ->get();
     }
 
     #[Computed]

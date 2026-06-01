@@ -41,6 +41,13 @@ use App\Livewire\Pages\Candidato\Teste as CandidatoTeste;
 use App\Livewire\Pages\Funcionario\EntrevistaDesligamento;
 use App\Livewire\Pages\Funcionario\Solicitacoes as FuncionarioSolicitacoes;
 use App\Livewire\Pages\Organograma\Index as OrganogramaIndex;
+use App\Livewire\Pages\Equipamentos\Index as EquipamentosIndex;
+use App\Livewire\Pages\Treinamentos\Catalogo as TreinamentosCatalogo;
+use App\Livewire\Pages\Treinamentos\Curso as TreinamentosCurso;
+use App\Livewire\Pages\Treinamentos\Gestao as TreinamentosGestao;
+use App\Livewire\Pages\Treinamentos\Trilhas as TreinamentosTrilhas;
+use App\Livewire\Pages\Treinamentos\Relatorios as TreinamentosRelatorios;
+use App\Http\Controllers\Treinamentos\CertificadoController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -97,7 +104,7 @@ Route::middleware('auth')->group(function () {
 
     // ── Humor das Equipes (RH/Admin) ───────────────────────────────
     Route::middleware('rh_or_admin')->group(function () {
-        Route::get('/rh/humor-equipes', \App\Livewire\Pages\Rh\HumorEquipes::class)->name('rh.humor-equipes');
+        Route::get('/rh/humor-equipes', fn() => redirect()->route('rh.curriculos', ['aba' => 'humor-equipes']))->name('rh.humor-equipes');
         Route::get('/rh/humor-equipes/exportar/pdf/hoje',   [HumorExport::class, 'pdfHoje'])->name('rh.humor-equipes.export.pdf.hoje');
         Route::get('/rh/humor-equipes/exportar/pdf/mensal', [HumorExport::class, 'pdfMensal'])->name('rh.humor-equipes.export.pdf.mensal');
         Route::get('/rh/humor-equipes/exportar/excel',      [HumorExport::class, 'excelMensal'])->name('rh.humor-equipes.export.excel');
@@ -114,4 +121,20 @@ Route::middleware('auth')->group(function () {
         Route::get('/users', \App\Livewire\Pages\Users\Index::class)->name('users');
         Route::get('/users/{id}', \App\Livewire\Pages\Users\Details::class)->name('users.details');
     });
+
+    // ── Treinamentos ────────────────────────────────────────────────
+    Route::get('/treinamentos', TreinamentosCatalogo::class)->name('treinamentos');
+    Route::get('/treinamentos/trilhas', TreinamentosTrilhas::class)->name('treinamentos.trilhas');
+    Route::get('/treinamentos/gestao', TreinamentosGestao::class)->name('treinamentos.gestao')->middleware('rh_or_admin');
+    Route::get('/treinamentos/relatorios', TreinamentosRelatorios::class)->name('treinamentos.relatorios')->middleware('rh_or_admin');
+    Route::get('/treinamentos/certificado/{inscricaoId}', [CertificadoController::class, 'show'])->name('treinamentos.certificado');
+    Route::get('/treinamentos/{id}', TreinamentosCurso::class)->name('treinamentos.curso');
+
+    // -- Controle de Equipamentos (RH/DP ou Departamento de TI) -----
+    // A autorização granular é feita dentro do componente Livewire
+    Route::get('/equipamentos', EquipamentosIndex::class)->name('equipamentos');
+
+    // Termo de Responsabilidade (impressão/PDF)
+    Route::get('/equipamentos/termo/{atribuicao}', [App\Http\Controllers\EquipamentoTermoController::class, 'show'])
+        ->name('equipamentos.termo');
 });

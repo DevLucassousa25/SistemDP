@@ -23,6 +23,12 @@ class Profile extends SecureComponent
     {
         $this->requireAuth();
         $this->userId = $userId;
+
+        $userName = User::where('id', $userId)->value('name') ?? 'Perfil';
+        $this->dispatch('breadcrumb-set', items: [
+            ['label' => 'Feed Social', 'icon' => 'newspaper', 'url' => route('feed')],
+            ['label' => $userName, 'url' => null],
+        ]);
     }
 
     public function openEditModal(): void

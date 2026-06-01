@@ -129,6 +129,38 @@
                                 </p>
                             @enderror
                         </div>
+
+                        {{-- CPF --}}
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-semibold lato-bold text-slate-600 dark:text-slate-300 uppercase tracking-wide">
+                                CPF
+                            </label>
+                            <div class="relative">
+                                <x-lucide-id-card class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                <input wire:model.blur="cpf" type="text" placeholder="000.000.000-00"
+                                    x-mask="999.999.999-99"
+                                    class="w-full pl-9 pr-3 py-2 text-sm lato-regular rounded-lg bg-white dark:bg-slate-700
+                                           text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500
+                                           focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-400
+                                           transition duration-150 border border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500">
+                            </div>
+                        </div>
+
+                        {{-- Telefone --}}
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-semibold lato-bold text-slate-600 dark:text-slate-300 uppercase tracking-wide">
+                                Telefone
+                            </label>
+                            <div class="relative">
+                                <x-lucide-phone class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                <input wire:model.blur="telefone" type="text" placeholder="(00) 00000-0000"
+                                    x-mask="(99) 99999-9999"
+                                    class="w-full pl-9 pr-3 py-2 text-sm lato-regular rounded-lg bg-white dark:bg-slate-700
+                                           text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500
+                                           focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-400
+                                           transition duration-150 border border-slate-200 dark:border-slate-600 hover:border-slate-300 dark:hover:border-slate-500">
+                            </div>
+                        </div>
                     </div>
                 </section>
 

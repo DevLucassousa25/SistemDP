@@ -1,0 +1,492 @@
+<div class="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 lg:p-8
+            [&_button:not([disabled])]:cursor-pointer [&_a]:cursor-pointer [&_select]:cursor-pointer">
+
+    <div class="max-w-7xl mx-auto space-y-5">
+
+        {{-- ── Cabeçalho ───────────────────────────────────────────── --}}
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <h1 class="text-xl lato-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <x-lucide-graduation-cap class="w-5 h-5 text-violet-500" />
+                    Treinamentos
+                </h1>
+                <p class="text-sm text-slate-400 lato-regular mt-0.5">Desenvolva suas habilidades com cursos internos e externos</p>
+            </div>
+            @if(auth()->user()?->isRhOuDp())
+                <a href="{{ route('treinamentos.gestao') }}" wire:navigate
+                   class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs lato-bold
+                          bg-gradient-to-r from-violet-500 to-purple-600 text-white
+                          hover:from-violet-600 hover:to-purple-700 transition shadow-sm w-fit">
+                    <x-lucide-settings class="w-3.5 h-3.5" /> Gerenciar Cursos
+                </a>
+            @endif
+        </div>
+
+        {{-- ── Tabs + Filtros ──────────────────────────────────────── --}}
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-3 flex items-center gap-3 flex-wrap">
+            {{-- Abas --}}
+            <div class="flex items-center gap-1">
+                @foreach([
+                    ['catalogo',    'Catálogo',     'book-open'],
+                    ['meus_cursos', 'Meus Cursos',  'graduation-cap'],
+                    ['certificados','Certificados', 'award'],
+                ] as [$tab, $label, $icon])
+                <button wire:click="$set('aba','{{ $tab }}')" type="button"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs lato-bold transition
+                        {{ $aba === $tab
+                            ? 'bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-sm'
+                            : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700' }}">
+                    <x-dynamic-component :component="'lucide-'.$icon" class="w-3.5 h-3.5" />
+                    {{ $label }}
+                    @if($tab === 'meus_cursos' && $this->statsAluno['total'] > 0)
+                        <span class="ml-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] lato-bold
+                            {{ $aba === 'meus_cursos' ? 'bg-white/30 text-white' : 'bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400' }}">
+                            {{ $this->statsAluno['total'] }}
+                        </span>
+                    @endif
+                </button>
+                @endforeach
+            </div>
+
+            {{-- Busca (só no catálogo) --}}
+            @if($aba === 'catalogo')
+            <div class="relative flex-1 min-w-[180px]">
+                <x-lucide-search class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                <input wire:model.live.debounce.300ms="search" type="search"
+                    placeholder="Buscar por título, categoria ou instrutor…"
+                    class="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 dark:border-slate-700 rounded-xl
+                           bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200
+                           focus:outline-none focus:ring-2 focus:ring-violet-400/30 placeholder-slate-400 lato-regular" />
+            </div>
+            {{-- Filtro: Tipo --}}
+            <div x-data="{ open: false }" @click.outside="open = false" class="relative">
+                <button @click="open = !open" type="button"
+                    class="flex items-center gap-2 text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700
+                           bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 lato-regular hover:bg-white dark:hover:bg-slate-800 transition whitespace-nowrap">
+                    @if($tipoFiltro === 'interno')
+                        <span class="w-2 h-2 rounded-full bg-blue-400 shrink-0"></span> Interno
+                    @elseif($tipoFiltro === 'externo')
+                        <span class="w-2 h-2 rounded-full bg-orange-400 shrink-0"></span> Externo
+                    @else
+                        <span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 shrink-0"></span> Todos os tipos
+                    @endif
+                    <x-lucide-chevron-down class="w-3 h-3 text-slate-400 ml-0.5 transition-transform duration-200" ::class="{ 'rotate-180': open }" />
+                </button>
+                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75"
+                     x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                     class="absolute top-full left-0 mt-1.5 z-30 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg py-1 min-w-[140px]"
+                     style="display:none;">
+                    @foreach([
+                        ['todos',    'Todos os tipos', 'bg-slate-300 dark:bg-slate-500'],
+                        ['interno',  'Interno',        'bg-blue-400'],
+                        ['externo',  'Externo',        'bg-orange-400'],
+                    ] as [$val, $label, $dot])
+                    <button type="button" @click="$wire.set('tipoFiltro', '{{ $val }}'); open = false"
+                        class="w-full flex items-center gap-2.5 px-3 py-2 text-xs lato-regular text-left transition
+                               {{ $tipoFiltro === $val ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
+                        <span class="w-2 h-2 rounded-full {{ $dot }} shrink-0"></span>
+                        {{ $label }}
+                        @if($tipoFiltro === $val) <x-lucide-check class="w-3 h-3 ml-auto text-violet-500" /> @endif
+                    </button>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Filtro: Nível --}}
+            <div x-data="{ open: false }" @click.outside="open = false" class="relative">
+                <button @click="open = !open" type="button"
+                    class="flex items-center gap-2 text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700
+                           bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 lato-regular hover:bg-white dark:hover:bg-slate-800 transition whitespace-nowrap">
+                    @if($nivelFiltro === 'basico')
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span> Básico
+                    @elseif($nivelFiltro === 'intermediario')
+                        <span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span> Intermediário
+                    @elseif($nivelFiltro === 'avancado')
+                        <span class="w-2 h-2 rounded-full bg-rose-400 shrink-0"></span> Avançado
+                    @else
+                        <span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 shrink-0"></span> Todos os níveis
+                    @endif
+                    <x-lucide-chevron-down class="w-3 h-3 text-slate-400 ml-0.5 transition-transform duration-200" ::class="{ 'rotate-180': open }" />
+                </button>
+                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75"
+                     x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                     class="absolute top-full left-0 mt-1.5 z-30 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg py-1 min-w-[160px]"
+                     style="display:none;">
+                    @foreach([
+                        ['todos',         'Todos os níveis', 'bg-slate-300 dark:bg-slate-500'],
+                        ['basico',        'Básico',          'bg-emerald-400'],
+                        ['intermediario', 'Intermediário',   'bg-amber-400'],
+                        ['avancado',      'Avançado',        'bg-rose-400'],
+                    ] as [$val, $label, $dot])
+                    <button type="button" @click="$wire.set('nivelFiltro', '{{ $val }}'); open = false"
+                        class="w-full flex items-center gap-2.5 px-3 py-2 text-xs lato-regular text-left transition
+                               {{ $nivelFiltro === $val ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
+                        <span class="w-2 h-2 rounded-full {{ $dot }} shrink-0"></span>
+                        {{ $label }}
+                        @if($nivelFiltro === $val) <x-lucide-check class="w-3 h-3 ml-auto text-violet-500" /> @endif
+                    </button>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Filtro: Categoria --}}
+            @if($this->categorias->isNotEmpty())
+            <div x-data="{ open: false }" @click.outside="open = false" class="relative">
+                <button @click="open = !open" type="button"
+                    class="flex items-center gap-2 text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700
+                           bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 lato-regular hover:bg-white dark:hover:bg-slate-800 transition whitespace-nowrap">
+                    <span class="w-2 h-2 rounded-full {{ $categoriaFiltro !== 'todos' ? 'bg-violet-400' : 'bg-slate-300 dark:bg-slate-600' }} shrink-0"></span>
+                    {{ $categoriaFiltro !== 'todos' ? $categoriaFiltro : 'Todas as categorias' }}
+                    <x-lucide-chevron-down class="w-3 h-3 text-slate-400 ml-0.5 transition-transform duration-200" ::class="{ 'rotate-180': open }" />
+                </button>
+                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95"
+                     x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75"
+                     x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                     class="absolute top-full right-0 mt-1.5 z-30 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg py-1 min-w-[170px] max-h-56 overflow-y-auto"
+                     style="display:none;">
+                    <button type="button" @click="$wire.set('categoriaFiltro', 'todos'); open = false"
+                        class="w-full flex items-center gap-2.5 px-3 py-2 text-xs lato-regular text-left transition
+                               {{ $categoriaFiltro === 'todos' ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
+                        <span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-500 shrink-0"></span>
+                        Todas as categorias
+                        @if($categoriaFiltro === 'todos') <x-lucide-check class="w-3 h-3 ml-auto text-violet-500" /> @endif
+                    </button>
+                    @foreach($this->categorias as $cat)
+                    <button type="button" @click="$wire.set('categoriaFiltro', '{{ $cat }}'); open = false"
+                        class="w-full flex items-center gap-2.5 px-3 py-2 text-xs lato-regular text-left transition
+                               {{ $categoriaFiltro === $cat ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
+                        <span class="w-2 h-2 rounded-full bg-violet-400 shrink-0"></span>
+                        {{ $cat }}
+                        @if($categoriaFiltro === $cat) <x-lucide-check class="w-3 h-3 ml-auto text-violet-500" /> @endif
+                    </button>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+            @endif
+        </div>
+
+        {{-- ════════════════════════════════════════════════════════════
+             ABA: CATÁLOGO
+        ════════════════════════════════════════════════════════════ --}}
+        @if($aba === 'catalogo')
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            @forelse($this->cursos as $curso)
+                @php
+                    $inscricao   = $curso->inscricaoDoUsuario(auth()->id());
+                    $nivelCores  = [
+                        'basico'        => ['dot' => 'bg-emerald-400', 'badge' => 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300'],
+                        'intermediario' => ['dot' => 'bg-amber-400',   'badge' => 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'],
+                        'avancado'      => ['dot' => 'bg-rose-400',    'badge' => 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300'],
+                    ];
+                    $nc         = $nivelCores[$curso->nivel] ?? ['dot' => 'bg-slate-400', 'badge' => 'bg-slate-100 text-slate-500'];
+                    $eObrigatorio = in_array($curso->id, $this->cursosObrigatoriosIds);
+                @endphp
+                <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
+
+                    {{-- Banner --}}
+                    <div class="h-28 relative overflow-hidden">
+                        @if($curso->capa)
+                            <img src="{{ asset('storage/'.$curso->capa) }}" class="w-full h-full object-cover" />
+                        @else
+                            <div class="w-full h-full bg-gradient-to-br from-violet-400 via-purple-500 to-indigo-600 flex items-center justify-center">
+                                <x-lucide-book-open class="w-10 h-10 text-white/30" />
+                            </div>
+                        @endif
+
+                        {{-- Overlay badges topo --}}
+                        <div class="absolute top-2 left-2 flex gap-1 flex-wrap">
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-black/40 text-white lato-bold backdrop-blur-sm">
+                                {{ $curso->tipo_label }}
+                            </span>
+                            @if($eObrigatorio)
+                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-red-500/80 text-white lato-bold backdrop-blur-sm">
+                                    Obrigatório
+                                </span>
+                            @endif
+                        </div>
+
+                        {{-- Status badge topo direito --}}
+                        @if($inscricao)
+                            <div class="absolute top-2 right-2">
+                                @if($inscricao->status === 'concluido')
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500 text-white lato-bold flex items-center gap-1">
+                                        <x-lucide-check class="w-2.5 h-2.5" /> Concluído
+                                    </span>
+                                @elseif($inscricao->status === 'em_andamento')
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500 text-white lato-bold">Em andamento</span>
+                                @endif
+                            </div>
+                        @endif
+
+                        {{-- Barra de progresso sobreposta (quando inscrito) --}}
+                        @if($inscricao && $inscricao->progresso > 0)
+                            <div class="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+                                <div class="h-full bg-white/80 transition-all duration-300"
+                                     style="width: {{ $inscricao->progresso }}%"></div>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- Corpo --}}
+                    <div class="p-3.5 flex flex-col flex-1">
+
+                        {{-- Nível + Categoria --}}
+                        <div class="flex items-center gap-1.5 mb-2 flex-wrap">
+                            <span class="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full lato-bold {{ $nc['badge'] }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $nc['dot'] }}"></span>
+                                {{ ucfirst($curso->nivel) }}
+                            </span>
+                            @if($curso->categoria)
+                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 lato-regular truncate max-w-[120px]">
+                                    {{ $curso->categoria }}
+                                </span>
+                            @endif
+                        </div>
+
+                        {{-- Título --}}
+                        <h3 class="text-sm lato-bold text-slate-800 dark:text-slate-100 leading-snug line-clamp-2 mb-1.5">
+                            {{ $curso->titulo }}
+                        </h3>
+
+                        {{-- Instrutor --}}
+                        @if($curso->instrutor)
+                            <p class="text-[11px] text-slate-400 dark:text-slate-500 lato-regular mb-1.5 truncate">
+                                <x-lucide-user class="w-3 h-3 inline -mt-0.5 mr-0.5" />{{ $curso->instrutor }}
+                            </p>
+                        @endif
+
+                        {{-- Meta --}}
+                        <div class="flex items-center gap-2.5 text-[10px] text-slate-400 dark:text-slate-500 lato-regular mb-3">
+                            <span class="flex items-center gap-0.5">
+                                <x-lucide-clock class="w-3 h-3" />{{ $curso->carga_horaria_formatada }}
+                            </span>
+                            <span class="flex items-center gap-0.5">
+                                <x-lucide-users class="w-3 h-3" />{{ $curso->inscricoes_count }}
+                            </span>
+                            @if($inscricao)
+                                <span class="ml-auto lato-bold text-violet-500">{{ $inscricao->progresso }}%</span>
+                            @endif
+                        </div>
+
+                        {{-- Prazo (se tiver) --}}
+                        @if($inscricao?->prazo_conclusao && $inscricao->status !== 'concluido')
+                            @php $dp = now()->startOfDay()->diffInDays($inscricao->prazo_conclusao, false); @endphp
+                            <div class="mb-2.5 flex items-center gap-1 text-[10px] rounded-lg px-2 py-1 lato-bold
+                                {{ $dp < 0 ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' : ($dp <= 3 ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400' : 'bg-blue-50 dark:bg-blue-900/20 text-blue-500 dark:text-blue-400') }}">
+                                <x-lucide-calendar class="w-3 h-3 shrink-0" />
+                                {{ $dp < 0 ? 'Prazo vencido há '.abs($dp).'d' : ($dp === 0 ? 'Prazo hoje!' : 'Prazo em '.$dp.' dia(s)') }}
+                            </div>
+                        @endif
+
+                        {{-- Ação --}}
+                        <div class="mt-auto">
+                            @if($inscricao)
+                                <button wire:click="acessarCurso({{ $curso->id }})" type="button"
+                                    class="w-full py-2 text-xs lato-bold rounded-xl transition flex items-center justify-center gap-1.5
+                                           bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white shadow-sm">
+                                    <x-lucide-play class="w-3.5 h-3.5" />
+                                    {{ $inscricao->status === 'concluido' ? 'Rever Curso' : 'Continuar' }}
+                                </button>
+                            @elseif($curso->inscricao_aberta)
+                                <button wire:click="inscrever({{ $curso->id }})" type="button"
+                                    class="w-full py-2 text-xs lato-bold rounded-xl transition flex items-center justify-center gap-1.5
+                                           border border-violet-300 dark:border-violet-700 text-violet-600 dark:text-violet-400
+                                           hover:bg-violet-50 dark:hover:bg-violet-900/20">
+                                    <x-lucide-plus class="w-3.5 h-3.5" /> Inscrever-se
+                                </button>
+                            @else
+                                <div class="w-full py-2 text-[10px] lato-regular text-center text-slate-400 rounded-xl bg-slate-50 dark:bg-slate-900">
+                                    Inscrições fechadas
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-span-full flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
+                    <div class="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+                        <x-lucide-search class="w-7 h-7 opacity-40" />
+                    </div>
+                    <p class="text-sm lato-bold">Nenhum curso encontrado</p>
+                    <p class="text-xs lato-regular mt-1">Tente ajustar os filtros de busca</p>
+                </div>
+            @endforelse
+        </div>
+
+        {{-- Paginação --}}
+        <div>{{ $this->cursos->links() }}</div>
+        @endif
+
+        {{-- ════════════════════════════════════════════════════════════
+             ABA: MEUS CURSOS
+        ════════════════════════════════════════════════════════════ --}}
+        @if($aba === 'meus_cursos')
+
+            {{-- Stats compactos --}}
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                @foreach([
+                    ['Inscritos',     $this->statsAluno['total'],        'text-slate-700 dark:text-white',                 'bg-white dark:bg-slate-800',   'border-slate-200 dark:border-slate-700'],
+                    ['Concluídos',    $this->statsAluno['concluidos'],   'text-emerald-600 dark:text-emerald-400',          'bg-emerald-50 dark:bg-emerald-900/20', 'border-emerald-100 dark:border-emerald-800/40'],
+                    ['Em andamento',  $this->statsAluno['em_andamento'], 'text-blue-600 dark:text-blue-400',               'bg-blue-50 dark:bg-blue-900/20',       'border-blue-100 dark:border-blue-800/40'],
+                    ['Certificados',  $this->statsAluno['certificados'], 'text-amber-600 dark:text-amber-400',             'bg-amber-50 dark:bg-amber-900/20',     'border-amber-100 dark:border-amber-800/40'],
+                ] as [$label, $val, $fg, $bg, $border])
+                <div class="{{ $bg }} rounded-2xl border {{ $border }} p-4">
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500 lato-regular">{{ $label }}</p>
+                    <p class="text-2xl lato-black {{ $fg }} mt-0.5">{{ $val }}</p>
+                </div>
+                @endforeach
+            </div>
+
+            {{-- Lista --}}
+            <div class="space-y-2.5">
+                @forelse($this->meusСursos as $inscricao)
+                    @php
+                        $trein    = $inscricao->treinamento;
+                        $obrigMe  = in_array($trein->id, $this->cursosObrigatoriosIds);
+                        $statusCls = match($inscricao->status) {
+                            'concluido'    => 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300',
+                            'em_andamento' => 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300',
+                            'reprovado'    => 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300',
+                            default        => 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300',
+                        };
+                        $statusLabel = match($inscricao->status) {
+                            'concluido'    => 'Concluído',
+                            'em_andamento' => 'Em andamento',
+                            'reprovado'    => 'Reprovado',
+                            default        => 'Inscrito',
+                        };
+                    @endphp
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4 flex items-center gap-4 hover:shadow-sm transition-shadow">
+
+                        {{-- Ícone --}}
+                        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center shrink-0">
+                            <x-lucide-book-open class="w-5 h-5 text-white" />
+                        </div>
+
+                        {{-- Info --}}
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center gap-1.5 mb-0.5">
+                                <p class="text-sm lato-bold text-slate-800 dark:text-slate-100 truncate">{{ $trein->titulo }}</p>
+                                <span class="text-[10px] px-2 py-0.5 rounded-full lato-bold {{ $statusCls }}">{{ $statusLabel }}</span>
+                                @if($obrigMe)
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 lato-bold">Obrigatório</span>
+                                @endif
+                            </div>
+
+                            {{-- Prazo --}}
+                            @if($inscricao->prazo_conclusao && $inscricao->status !== 'concluido')
+                                @php $diasRestantes = now()->startOfDay()->diffInDays($inscricao->prazo_conclusao, false); @endphp
+                                <span class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full lato-bold mb-1
+                                    {{ $diasRestantes < 0 ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : ($diasRestantes <= 3 ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400') }}">
+                                    <x-lucide-calendar class="w-2.5 h-2.5" />
+                                    {{ $diasRestantes < 0 ? 'Vencido há '.abs($diasRestantes).'d' : ($diasRestantes === 0 ? 'Prazo hoje!' : 'Prazo: '.$inscricao->prazo_conclusao->format('d/m/Y')) }}
+                                </span>
+                            @endif
+
+                            <div class="flex items-center gap-3 text-[10px] text-slate-400 dark:text-slate-500 lato-regular">
+                                <span>{{ $trein->categoria ?? $trein->tipo_label }}</span>
+                                <span>{{ $trein->carga_horaria_formatada }}</span>
+                                <span>Inscrito {{ $inscricao->created_at->format('d/m/Y') }}</span>
+                            </div>
+                            <div class="mt-2 flex items-center gap-2">
+                                <div class="flex-1 h-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full transition-all duration-500"
+                                         style="width: {{ $inscricao->progresso }}%"></div>
+                                </div>
+                                <span class="text-[10px] lato-bold text-slate-400 shrink-0">{{ $inscricao->progresso }}%</span>
+                            </div>
+                        </div>
+
+                        {{-- Ações --}}
+                        <div class="flex gap-2 shrink-0">
+                            <button wire:click="acessarCurso({{ $trein->id }})" type="button"
+                                class="flex items-center gap-1.5 px-3 py-2 text-xs lato-bold rounded-xl transition
+                                       bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white shadow-sm">
+                                <x-lucide-play class="w-3.5 h-3.5" />
+                                {{ $inscricao->status === 'concluido' ? 'Rever' : 'Continuar' }}
+                            </button>
+                            @if($inscricao->status !== 'concluido')
+                            <button wire:click="cancelarInscricao({{ $inscricao->id }})"
+                                wire:confirm="Deseja cancelar sua inscrição neste curso?"
+                                type="button"
+                                class="p-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-red-500 hover:border-red-200 dark:hover:border-red-800 transition">
+                                <x-lucide-x class="w-3.5 h-3.5" />
+                            </button>
+                            @endif
+                        </div>
+                    </div>
+                @empty
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500">
+                        <div class="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-3">
+                            <x-lucide-graduation-cap class="w-6 h-6 opacity-50" />
+                        </div>
+                        <p class="text-sm lato-bold">Você ainda não está inscrito em nenhum curso</p>
+                        <button wire:click="$set('aba','catalogo')" type="button"
+                            class="mt-3 text-xs text-violet-600 dark:text-violet-400 hover:underline lato-bold">
+                            Explorar catálogo →
+                        </button>
+                    </div>
+                @endforelse
+            </div>
+        @endif
+
+        {{-- ════════════════════════════════════════════════════════════
+             ABA: CERTIFICADOS
+        ════════════════════════════════════════════════════════════ --}}
+        @if($aba === 'certificados')
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                @forelse($this->meusCertificados as $cert)
+                    @php $trein = $cert->inscricao->treinamento; @endphp
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-amber-200 dark:border-amber-700/30 overflow-hidden hover:shadow-md transition-shadow">
+                        {{-- Topo dourado --}}
+                        <div class="h-1.5 bg-gradient-to-r from-amber-400 to-yellow-500"></div>
+                        <div class="p-4">
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shrink-0 shadow-sm shadow-amber-200 dark:shadow-amber-900/30">
+                                    <x-lucide-award class="w-5 h-5 text-white" />
+                                </div>
+                                <span class="text-[10px] bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full lato-bold border border-amber-100 dark:border-amber-800/30">
+                                    Certificado
+                                </span>
+                            </div>
+                            <h3 class="text-sm lato-bold text-slate-800 dark:text-slate-100 leading-snug line-clamp-2 mb-1">
+                                {{ $trein->titulo }}
+                            </h3>
+                            <p class="text-[10px] text-slate-400 lato-regular">
+                                Emitido em {{ $cert->emitido_em->format('d/m/Y') }}
+                            </p>
+                            <p class="text-[10px] text-slate-300 dark:text-slate-600 font-mono mt-0.5">
+                                {{ $cert->codigo }}
+                            </p>
+                            <div class="mt-3 flex gap-2">
+                                <a href="{{ route('treinamentos.certificado', $cert->inscricao_id) }}" target="_blank"
+                                   class="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs lato-bold rounded-xl
+                                          bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-white transition shadow-sm">
+                                    <x-lucide-download class="w-3.5 h-3.5" /> Baixar PDF
+                                </a>
+                                <button wire:click="acessarCurso({{ $trein->id }})" type="button"
+                                    class="flex items-center justify-center gap-1.5 px-3 py-2 text-xs lato-regular rounded-xl
+                                           border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400
+                                           hover:bg-slate-50 dark:hover:bg-slate-700 transition">
+                                    <x-lucide-eye class="w-3.5 h-3.5" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-full bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col items-center justify-center py-16 text-slate-400 dark:text-slate-500">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center mb-3">
+                            <x-lucide-award class="w-6 h-6 text-amber-400 opacity-60" />
+                        </div>
+                        <p class="text-sm lato-bold">Nenhum certificado ainda</p>
+                        <p class="text-xs lato-regular mt-1">Conclua um curso para receber seu certificado</p>
+                    </div>
+                @endforelse
+            </div>
+        @endif
+
+    </div>
+</div>

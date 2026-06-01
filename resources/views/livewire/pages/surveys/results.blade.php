@@ -282,7 +282,7 @@
                                         <x-lucide-bar-chart-2 class="w-3 h-3" /> Escala 0–10
                                     </span>
                                 @elseif ($qr['type'] === 'multipla_escolha')
-                                    <span class="inline-flex items-center gap-1 text-[10px] lato-bold px-1.5 py-0.5 rounded-md bg-violet-50 text-violet-600 dark:bg-violet-900/20 dark:text-violet-400 border border-violet-200 dark:border-violet-700/40">
+                                    <span class="inline-flex items-center gap-1 text-[10px] lato-bold px-1.5 py-0.5 rounded-md bg-violet-50 text-indigo-600 dark:bg-violet-900/20 dark:text-indigo-400 border border-violet-200 dark:border-violet-700/40">
                                         <x-lucide-list-checks class="w-3 h-3" /> Múltipla escolha
                                     </span>
                                 @else

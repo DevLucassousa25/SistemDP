@@ -1,7 +1,7 @@
 @php
     if (!function_exists('profBg')) {
         function profBg(string $name): string {
-            $pal2 = ['bg-indigo-500','bg-violet-500','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
+            $pal2 = ['bg-indigo-500','bg-indigo-600','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
             return $pal2[abs(crc32($name)) % count($pal2)];
         }
     }

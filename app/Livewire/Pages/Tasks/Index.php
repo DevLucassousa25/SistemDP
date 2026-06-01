@@ -20,6 +20,7 @@ class Index extends SecureComponent
     public string $activeTab = 'minhas';   // minhas|departamento|plano_acao|relatorio
     public string $viewMode  = 'list';     // list|kanban
 
+
     // ── Filtros ───────────────────────────────────────────────────────
     public string $search           = '';
     public string $statusFilter     = '';
@@ -167,7 +168,7 @@ class Index extends SecureComponent
     #[Computed]
     public function allTags()
     {
-        return TaskTag::orderBy('name')->get();
+        return TaskTag::where('created_by', auth()->id())->orderBy('name')->get();
     }
 
     // ── Stats ─────────────────────────────────────────────────────────
@@ -449,6 +450,11 @@ class Index extends SecureComponent
     public function abrirModal(): void
     {
         $this->dispatch('open-task-form');
+    }
+
+    public function confirmarExclusao(int $id): void
+    {
+        $this->dispatch('confirm-delete-task', taskId: $id);
     }
 
     public function editar(int $id): void

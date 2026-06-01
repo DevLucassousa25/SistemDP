@@ -312,7 +312,7 @@ class ExportController extends Controller
                 $entry = $entriesByCriterion->get($criterion->id);
                 $score = $entry?->effectiveScore;
                 $sheet->setCellValue($this->colLetter($col++) . $row,
-                    $score !== null ? $entry->displayValue : '—');
+                    $score !== null ? $entry->effectiveDisplayValue : '—');
             }
 
             // Destaque de nota

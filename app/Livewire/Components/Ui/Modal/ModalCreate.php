@@ -25,6 +25,8 @@ class ModalCreate extends SecureComponent
     // Campos do formulário
     public $name;
     public $email;
+    public string $cpf      = '';
+    public string $telefone = '';
     public $department;
     public $cargo;
     public $perfil;
@@ -92,6 +94,8 @@ class ModalCreate extends SecureComponent
         $this->userId     = $user->id;
         $this->name       = $user->name;
         $this->email      = $user->email;
+        $this->cpf        = $user->cpf ?? '';
+        $this->telefone   = $user->telefone ?? '';
         $this->department = (string) $user->department_id;
         $this->cargo      = $user->position;
         $this->perfil     = (string) $user->access_profile_id;
@@ -195,6 +199,8 @@ class ModalCreate extends SecureComponent
                 User::create([
                     'name'              => strip_tags($this->name),
                     'email'             => $this->email,
+                    'cpf'               => strip_tags($this->cpf) ?: null,
+                    'telefone'          => strip_tags($this->telefone) ?: null,
                     'department_id'     => (int) $this->department ?: null,
                     'position'          => strip_tags($this->cargo),
                     'access_profile_id' => $this->perfil ?: null,
@@ -210,6 +216,8 @@ class ModalCreate extends SecureComponent
                 $data = [
                     'name'              => strip_tags($this->name),
                     'email'             => $this->email,
+                    'cpf'               => strip_tags($this->cpf) ?: null,
+                    'telefone'          => strip_tags($this->telefone) ?: null,
                     'department_id'     => (int) $this->department ?: null,
                     'position'          => strip_tags($this->cargo),
                     'access_profile_id' => $this->perfil ?: null,
@@ -268,7 +276,7 @@ class ModalCreate extends SecureComponent
 
     private function resetForm(): void
     {
-        $this->reset(['name', 'email', 'department', 'cargo', 'perfil', 'password', 'ativo', 'userId']);
+        $this->reset(['name', 'email', 'cpf', 'telefone', 'department', 'cargo', 'perfil', 'password', 'ativo', 'userId']);
         $this->ativo                  = true;
         $this->departmentsWithManager = [];
         $this->managerWarning         = null;

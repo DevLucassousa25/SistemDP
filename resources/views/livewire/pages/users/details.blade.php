@@ -21,14 +21,14 @@
         };
         $roleGradient = match ($slug) {
             'administrator' => 'from-rose-500 to-rose-700',
-            'hr'            => 'from-violet-500 to-violet-700',
+            'hr'            => 'from-blue-500 to-violet-700',
             'manager'       => 'from-emerald-500 to-teal-700',
             'employee'      => 'from-blue-500 to-indigo-700',
             default         => 'from-slate-400 to-slate-600',
         };
         $roleText = match ($slug) {
             'administrator' => 'text-rose-600 bg-rose-50 ring-rose-200 dark:bg-rose-900/30 dark:ring-rose-700 dark:text-rose-300',
-            'hr'            => 'text-violet-600 bg-violet-50 ring-violet-200 dark:bg-violet-900/30 dark:ring-violet-700 dark:text-violet-300',
+            'hr'            => 'text-indigo-600 bg-violet-50 ring-violet-200 dark:bg-violet-900/30 dark:ring-violet-700 dark:text-violet-300',
             'manager'       => 'text-emerald-700 bg-emerald-50 ring-emerald-200 dark:bg-emerald-900/30 dark:ring-emerald-700 dark:text-emerald-300',
             'employee'      => 'text-blue-700 bg-blue-50 ring-blue-200 dark:bg-blue-900/30 dark:ring-blue-700 dark:text-blue-300',
             default         => 'text-slate-600 bg-slate-50 ring-slate-200 dark:bg-slate-800 dark:ring-slate-600 dark:text-slate-300',
@@ -208,7 +208,7 @@
                         $statItems = [
                             ['label' => 'Tarefas',   'value' => $this->stats['tarefas'],   'icon' => 'check-square',   'color' => 'text-blue-500',   'bg' => 'bg-blue-50 dark:bg-blue-900/20'],
                             ['label' => 'Reuniões',  'value' => $this->stats['reunioes'],  'icon' => 'calendar',       'color' => 'text-indigo-500', 'bg' => 'bg-indigo-50 dark:bg-indigo-900/20'],
-                            ['label' => 'Feed',      'value' => $this->stats['feed'],      'icon' => 'message-circle', 'color' => 'text-violet-500', 'bg' => 'bg-violet-50 dark:bg-violet-900/20'],
+                            ['label' => 'Feed',      'value' => $this->stats['feed'],      'icon' => 'message-circle', 'color' => 'text-indigo-500', 'bg' => 'bg-violet-50 dark:bg-violet-900/20'],
                             ['label' => 'Leituras',  'value' => $this->stats['leituras'],  'icon' => 'book-open',      'color' => 'text-teal-500',   'bg' => 'bg-teal-50 dark:bg-teal-900/20'],
                             ['label' => 'Feedbacks', 'value' => $this->stats['feedbacks'], 'icon' => 'trending-up',    'color' => 'text-rose-500',   'bg' => 'bg-rose-50 dark:bg-rose-900/20'],
                             ['label' => 'Pesquisas', 'value' => $this->stats['pesquisas'], 'icon' => 'bar-chart-2',    'color' => 'text-amber-500',  'bg' => 'bg-amber-50 dark:bg-amber-900/20'],

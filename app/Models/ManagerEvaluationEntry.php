@@ -97,6 +97,26 @@ class ManagerEvaluationEntry extends Model
         };
     }
 
+    /**
+     * Label legível do valor efetivo: usa a nota calibrada se existir, senão a original.
+     */
+    public function getEffectiveDisplayValueAttribute(): string
+    {
+        $criterion = $this->criterion;
+        $effective = $this->effectiveScore;
+
+        if (! $criterion) {
+            return (string) $effective;
+        }
+
+        return match ($criterion->response_type ?? 'scale') {
+            'scale'           => $effective . '/5',
+            'boolean'         => $effective ? 'Sim' : 'Não',
+            'multiple_choice' => $this->getOptionLabel($effective, $criterion),
+            default           => (string) $effective,
+        };
+    }
+
     private function normalizeMultipleChoice(int $score, EvaluationCriterion $criterion): float
     {
         $options = $criterion->options ?? [];

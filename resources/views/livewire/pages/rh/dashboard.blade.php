@@ -29,7 +29,7 @@
             @php
                 $cards = [
                     ['label' => 'Candidatos',      'value' => $stats['total_candidatos'],  'icon' => 'users',         'color' => 'from-blue-500 to-indigo-600'],
-                    ['label' => 'Vagas abertas',   'value' => $stats['vagas_abertas'],     'icon' => 'briefcase',     'color' => 'from-violet-500 to-purple-600'],
+                    ['label' => 'Vagas abertas',   'value' => $stats['vagas_abertas'],     'icon' => 'briefcase',     'color' => 'from-blue-500 to-indigo-600'],
                     ['label' => 'Processos ativos','value' => $stats['processos_ativos'],  'icon' => 'git-branch',    'color' => 'from-teal-500 to-cyan-600'],
                     ['label' => 'Testes feitos',   'value' => $stats['testes_realizados'], 'icon' => 'clipboard-list','color' => 'from-orange-500 to-amber-600'],
                     ['label' => 'Taxa aprovação',  'value' => $stats['taxa_aprovacao'].'%','icon' => 'check-circle',  'color' => 'from-green-500 to-emerald-600'],
@@ -117,7 +117,7 @@
                                 $medal  = $medals[$pos] ?? ($pos + 1) . 'º';
                                 $parts  = explode(' ', trim($r->name));
                                 $init   = strtoupper(substr($parts[0],0,1) . (isset($parts[1]) ? substr($parts[1],0,1) : ''));
-                                $colors = ['bg-indigo-500','bg-violet-500','bg-teal-500','bg-rose-500','bg-amber-500'];
+                                $colors = ['bg-indigo-500','bg-indigo-600','bg-teal-500','bg-rose-500','bg-amber-500'];
                                 $bg     = $colors[abs(crc32($r->name)) % count($colors)];
                             @endphp
                             <div class="flex items-center gap-3">
@@ -145,7 +145,7 @@
                             $sl = ['publicada' => 'Publicada', 'rascunho' => 'Rascunho', 'pausada' => 'Pausada', 'encerrada' => 'Encerrada'];
                         @endphp
                         <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition">
-                            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shrink-0">
+                            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
                                 <x-lucide-briefcase class="w-4 h-4 text-white" />
                             </div>
                             <div class="flex-1 min-w-0">

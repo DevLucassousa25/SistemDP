@@ -341,9 +341,9 @@
                                             'bg-white dark:bg-slate-700/60 border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400',
                                     ],
                                     'violet' => [
-                                        'sel' => 'bg-violet-500 border-violet-500 text-white',
+                                        'sel' => 'bg-indigo-600 border-indigo-500 text-white',
                                         'def' =>
-                                            'bg-white dark:bg-slate-700/60 border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-violet-400 hover:text-violet-600 dark:hover:text-violet-400',
+                                            'bg-white dark:bg-slate-700/60 border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400',
                                     ],
                                 ];
                             @endphp

@@ -40,7 +40,7 @@
         {{-- Header do dropdown --}}
         <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700">
             <div class="flex items-center gap-2">
-                <span class="w-6 h-6 rounded-md bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shrink-0">
+                <span class="w-6 h-6 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
                     <x-lucide-bell class="w-3 h-3 text-white" />
                 </span>
                 <span class="text-sm lato-bold text-slate-800 dark:text-slate-100">Notificações</span>
@@ -57,7 +57,7 @@
                         wire:click="marcarTodasLidas"
                         type="button"
                         title="Marcar todas como lidas"
-                        class="p-1.5 rounded-lg text-slate-400 hover:text-violet-600 dark:hover:text-violet-400
+                        class="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400
                                hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer"
                     >
                         <x-lucide-check-check class="w-3.5 h-3.5" />
@@ -89,7 +89,7 @@
                         'green'  => 'from-green-500 to-emerald-600',
                         'red'    => 'from-red-500 to-rose-600',
                         'indigo' => 'from-indigo-500 to-indigo-600',
-                        'violet' => 'from-violet-500 to-purple-600',
+                        'violet' => 'from-blue-500 to-indigo-600',
                         'teal'   => 'from-teal-500 to-cyan-600',
                         'amber'  => 'from-amber-500 to-orange-500',
                         'rose'   => 'from-rose-500 to-pink-600',
@@ -156,7 +156,7 @@
                                 wire:click="marcarLida('{{ $notif->id }}')"
                                 type="button"
                                 title="Marcar como lida"
-                                class="p-1 rounded-lg text-slate-400 hover:text-violet-600 dark:hover:text-violet-400
+                                class="p-1 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400
                                        hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer"
                             >
                                 <x-lucide-check class="w-3 h-3" />
@@ -176,7 +176,7 @@
 
                     {{-- Indicador de não lida --}}
                     @if(!$lida)
-                        <div class="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0 mt-2"></div>
+                        <div class="w-1.5 h-1.5 rounded-full bg-indigo-600 shrink-0 mt-2"></div>
                     @endif
                 </div>
 

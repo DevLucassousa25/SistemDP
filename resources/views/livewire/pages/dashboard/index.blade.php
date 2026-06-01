@@ -47,7 +47,7 @@
                 ['label' => 'Tarefas pendentes', 'value' => $se['tarefas_pendentes'],    'icon' => 'clock',          'color' => 'from-orange-500 to-amber-500',  'href' => route('tarefas')],
                 ['label' => 'Em progresso',       'value' => $se['tarefas_em_progresso'], 'icon' => 'loader',         'color' => 'from-blue-500 to-indigo-600',   'href' => route('tarefas')],
                 ['label' => 'Concluídas',         'value' => $se['tarefas_concluidas'],   'icon' => 'check-circle-2', 'color' => 'from-green-500 to-emerald-600', 'href' => route('tarefas')],
-                ['label' => 'Reuniões hoje',      'value' => $se['reunioes_hoje'],        'icon' => 'video',          'color' => 'from-violet-500 to-purple-600', 'href' => route('reunioes')],
+                ['label' => 'Reuniões hoje',      'value' => $se['reunioes_hoje'],        'icon' => 'video',          'color' => 'from-blue-500 to-indigo-600', 'href' => route('reunioes')],
             ];
         @endphp
 
@@ -121,15 +121,15 @@
                 <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-sm lato-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
-                            <x-lucide-calendar class="w-4 h-4 text-violet-500" /> Próximas reuniões
+                            <x-lucide-calendar class="w-4 h-4 text-indigo-500" /> Próximas reuniões
                         </h2>
                         <a href="{{ route('reunioes') }}" class="text-xs text-blue-500 hover:underline lato-regular">Ver todas</a>
                     </div>
                     @forelse($this->minhasReunioes as $reuniao)
                         <div class="flex items-start gap-3 py-3 border-b border-slate-100 dark:border-slate-700 last:border-0">
                             <div class="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-900/30 flex flex-col items-center justify-center shrink-0">
-                                <span class="text-[10px] lato-bold text-violet-600 dark:text-violet-400 leading-none">{{ $reuniao->start_time->format('d') }}</span>
-                                <span class="text-[8px] text-violet-500 uppercase">{{ $reuniao->start_time->format('M') }}</span>
+                                <span class="text-[10px] lato-bold text-indigo-600 dark:text-indigo-400 leading-none">{{ $reuniao->start_time->format('d') }}</span>
+                                <span class="text-[8px] text-indigo-500 uppercase">{{ $reuniao->start_time->format('M') }}</span>
                             </div>
                             <div class="min-w-0">
                                 <p class="text-sm lato-regular text-slate-700 dark:text-slate-200 truncate">{{ $reuniao->title }}</p>
@@ -203,7 +203,7 @@
             $sg = $this->statsGerente;
             $gerCards = [
                 ['label' => 'Funcionários no time',  'value' => $sg['funcionarios'],           'icon' => 'users',          'color' => 'from-blue-500 to-indigo-600',   'href' => route('time')],
-                ['label' => 'Tarefas do time',       'value' => $sg['tarefas_time_total'],      'icon' => 'list-checks',    'color' => 'from-violet-500 to-purple-600', 'href' => route('tarefas')],
+                ['label' => 'Tarefas do time',       'value' => $sg['tarefas_time_total'],      'icon' => 'list-checks',    'color' => 'from-blue-500 to-indigo-600', 'href' => route('tarefas')],
                 ['label' => 'Tarefas atrasadas',     'value' => $sg['tarefas_time_atrasadas'],  'icon' => 'alert-triangle', 'color' => 'from-orange-500 to-red-500',    'href' => route('tarefas')],
                 ['label' => 'Feedbacks em aberto',   'value' => $sg['feedbacks_abertos'],       'icon' => 'message-circle', 'color' => 'from-teal-500 to-cyan-600',    'href' => route('feedback')],
                 ['label' => 'Reuniões esta semana',  'value' => $sg['reunioes_semana'],          'icon' => 'calendar',       'color' => 'from-pink-500 to-rose-600',    'href' => route('reunioes')],
@@ -335,7 +335,7 @@
             $sr = $this->statsRh;
             $rhCards = [
                 ['label' => 'Funcionários ativos',    'value' => $sr['total_funcionarios'],    'icon' => 'users',          'color' => 'from-blue-500 to-indigo-600',    'href' => route('users')],
-                ['label' => 'Gerentes ativos',        'value' => $sr['total_gerentes'],         'icon' => 'shield-check',   'color' => 'from-violet-500 to-purple-600',  'href' => route('users')],
+                ['label' => 'Gerentes ativos',        'value' => $sr['total_gerentes'],         'icon' => 'shield-check',   'color' => 'from-blue-500 to-indigo-600',  'href' => route('users')],
                 ['label' => 'Vagas abertas',          'value' => $sr['vagas_abertas'],          'icon' => 'briefcase',      'color' => 'from-teal-500 to-cyan-600',      'href' => route('rh.curriculos', ['aba' => 'vagas'])],
                 ['label' => 'Pesquisas ativas',       'value' => $sr['pesquisas_ativas'],       'icon' => 'clipboard-list', 'color' => 'from-orange-500 to-amber-500',   'href' => route('pesquisas')],
                 ['label' => 'Manifestações abertas',  'value' => $sr['manifestacoes_abertas'],  'icon' => 'alert-circle',   'color' => 'from-rose-500 to-pink-600',      'href' => route('ouvidoria')],

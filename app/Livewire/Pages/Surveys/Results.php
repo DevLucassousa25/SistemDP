@@ -34,6 +34,11 @@ class Results extends SecureComponent
         }
 
         $this->surveyId = $id;
+
+        $this->dispatch('breadcrumb-set', items: [
+            ['label' => 'Pesquisas', 'icon' => 'clipboard-list', 'url' => route('pesquisas')],
+            ['label' => $survey->title, 'url' => null],
+        ]);
     }
 
     // ──────────────────────────────────────────────────────────────────

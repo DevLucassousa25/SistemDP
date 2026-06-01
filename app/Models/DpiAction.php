@@ -14,7 +14,7 @@ class DpiAction extends Model
         'target_date', 'status', 'order',
         'attachment_path', 'attachment_name',
         'validated_by', 'validated_at',
-        'task_id',
+        'task_id', 'treinamento_id',
     ];
 
     protected $casts = [
@@ -37,6 +37,11 @@ class DpiAction extends Model
     public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class, 'task_id');
+    }
+
+    public function treinamento(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Treinamento::class, 'treinamento_id');
     }
 
     // ── Accessors ─────────────────────────────────────────────────────

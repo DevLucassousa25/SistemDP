@@ -11,7 +11,7 @@
             'account'  => ['bg' => 'bg-slate-100 dark:bg-slate-700',   'text' => 'text-slate-500 dark:text-slate-400',   'ring' => 'ring-slate-200 dark:ring-slate-600'],
             'task'     => ['bg' => 'bg-blue-50 dark:bg-blue-900/30',    'text' => 'text-blue-600 dark:text-blue-400',     'ring' => 'ring-blue-100 dark:ring-blue-800'],
             'meeting'  => ['bg' => 'bg-indigo-50 dark:bg-indigo-900/30','text' => 'text-indigo-600 dark:text-indigo-400', 'ring' => 'ring-indigo-100 dark:ring-indigo-800'],
-            'feed'     => ['bg' => 'bg-violet-50 dark:bg-violet-900/30','text' => 'text-violet-600 dark:text-violet-400', 'ring' => 'ring-violet-100 dark:ring-violet-800'],
+            'feed'     => ['bg' => 'bg-violet-50 dark:bg-violet-900/30','text' => 'text-indigo-600 dark:text-indigo-400', 'ring' => 'ring-violet-100 dark:ring-violet-800'],
             'read'     => ['bg' => 'bg-teal-50 dark:bg-teal-900/30',   'text' => 'text-teal-600 dark:text-teal-400',     'ring' => 'ring-teal-100 dark:ring-teal-800'],
             'feedback' => ['bg' => 'bg-rose-50 dark:bg-rose-900/30',   'text' => 'text-rose-600 dark:text-rose-400',     'ring' => 'ring-rose-100 dark:ring-rose-800'],
             'survey'   => ['bg' => 'bg-amber-50 dark:bg-amber-900/30', 'text' => 'text-amber-600 dark:text-amber-400',   'ring' => 'ring-amber-100 dark:ring-amber-800'],
@@ -194,7 +194,7 @@
                     @foreach ([
                         ['label' => 'Tarefas',    'class' => 'bg-blue-500'],
                         ['label' => 'Reuniões',   'class' => 'bg-indigo-500'],
-                        ['label' => 'Feed',       'class' => 'bg-violet-500'],
+                        ['label' => 'Feed',       'class' => 'bg-indigo-600'],
                         ['label' => 'Leituras',   'class' => 'bg-teal-500'],
                         ['label' => 'Feedback',   'class' => 'bg-rose-500'],
                         ['label' => 'Pesquisa',   'class' => 'bg-amber-500'],

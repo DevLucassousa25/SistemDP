@@ -43,6 +43,88 @@
             <!-- Header -->
             <livewire:layout.header />
 
+            <!-- Breadcrumb -->
+            @php
+                $routeName = request()->route()?->getName() ?? '';
+                $breadcrumbMap = [
+                    'dashboard'                   => [['label'=>'Dashboard',          'icon'=>'layout-dashboard', 'url'=>null]],
+                    'feed'                        => [['label'=>'Feed Social',         'icon'=>'newspaper',        'url'=>null]],
+                    'feed.profile'                => [['label'=>'Feed Social',         'icon'=>'newspaper',        'url'=>route('feed')],          ['label'=>'Perfil',            'url'=>null]],
+                    'communities'                 => [['label'=>'Comunidades',          'icon'=>'users',            'url'=>null]],
+                    'communities.show'            => [['label'=>'Comunidades',          'icon'=>'users',            'url'=>route('communities')],   ['label'=>'Comunidade',        'url'=>null]],
+                    'publicacoes'                 => [['label'=>'Publicações',          'icon'=>'book-open',        'url'=>null]],
+                    'dpi'                         => [['label'=>'DPI',                  'icon'=>'target',           'url'=>null]],
+                    'okrs'                        => [['label'=>'OKRs',                 'icon'=>'flag',             'url'=>null]],
+                    'tarefas'                     => [['label'=>'Tarefas',              'icon'=>'check-square',     'url'=>null]],
+                    'avaliacoes'                  => [['label'=>'Avaliações',           'icon'=>'star',             'url'=>null]],
+                    'feedback'                    => [['label'=>'Feedbacks',            'icon'=>'message-circle',   'url'=>null]],
+                    'treinamentos'                => [['label'=>'Treinamentos',         'icon'=>'graduation-cap',   'url'=>null]],
+                    'treinamentos.curso'          => [['label'=>'Treinamentos',         'icon'=>'graduation-cap',   'url'=>route('treinamentos')], ['label'=>'Curso',             'url'=>null]],
+                    'treinamentos.gestao'         => [['label'=>'Treinamentos',         'icon'=>'graduation-cap',   'url'=>route('treinamentos')], ['label'=>'Gestão',            'url'=>null]],
+                    'treinamentos.trilhas'        => [['label'=>'Treinamentos',         'icon'=>'graduation-cap',   'url'=>route('treinamentos')], ['label'=>'Trilhas',           'url'=>null]],
+                    'treinamentos.relatorios'     => [['label'=>'Treinamentos',         'icon'=>'graduation-cap',   'url'=>route('treinamentos')], ['label'=>'Relatórios',        'url'=>null]],
+                    'pesquisas'                   => [['label'=>'Pesquisas',            'icon'=>'clipboard-list',   'url'=>null]],
+                    'pesquisas.resultados'        => [['label'=>'Pesquisas',            'icon'=>'clipboard-list',   'url'=>route('pesquisas')],    ['label'=>'Resultados',        'url'=>null]],
+                    'pesquisas.comparativo'       => [['label'=>'Pesquisas',            'icon'=>'clipboard-list',   'url'=>route('pesquisas')],    ['label'=>'Comparativo',       'url'=>null]],
+                    'pesquisas.ranking-gerentes'  => [['label'=>'Pesquisas',            'icon'=>'clipboard-list',   'url'=>route('pesquisas')],    ['label'=>'Ranking Gerentes',  'url'=>null]],
+                    'pesquisas.responder'         => [['label'=>'Pesquisas',            'icon'=>'clipboard-list',   'url'=>route('pesquisas')],    ['label'=>'Responder',         'url'=>null]],
+                    'reunioes'                    => [['label'=>'Reuniões',             'icon'=>'video',            'url'=>null]],
+                    'reunioes.details'            => [['label'=>'Reuniões',             'icon'=>'video',            'url'=>route('reunioes')],     ['label'=>'Detalhes',          'url'=>null]],
+                    'rooms'                       => [['label'=>'Salas',               'icon'=>'door-open',        'url'=>null]],
+                    'rooms.details'               => [['label'=>'Salas',               'icon'=>'door-open',        'url'=>route('rooms')],        ['label'=>'Sala',              'url'=>null]],
+                    'calendario'                  => [['label'=>'Calendário',           'icon'=>'calendar',         'url'=>null]],
+                    'ouvidoria'                   => [['label'=>'Ouvidoria',            'icon'=>'megaphone',        'url'=>null]],
+                    'ouvidoria.details'           => [['label'=>'Ouvidoria',            'icon'=>'megaphone',        'url'=>route('ouvidoria')],    ['label'=>'Chamado',           'url'=>null]],
+                    'time'                        => [['label'=>'Meu Time',             'icon'=>'users-round',      'url'=>null]],
+                    'organograma'                 => [['label'=>'Organograma',          'icon'=>'network',          'url'=>null]],
+                    'solicitacoes'                => [['label'=>'Solicitações RH',      'icon'=>'inbox',            'url'=>null]],
+                    'profile'                     => [['label'=>'Meu Perfil',           'icon'=>'user',             'url'=>null]],
+                    'humor.pessoal'               => [['label'=>'Meu Humor',            'icon'=>'smile',            'url'=>null]],
+                    'rh.curriculos'               => [['label'=>'Portal R&S',           'icon'=>'users-round',      'url'=>null],                  ['label'=>'Dashboard',         'url'=>null]],
+                    'rh.humor-equipes'            => [['label'=>'Humor das Equipes',    'icon'=>'smile',            'url'=>null]],
+                    'users'                       => [['label'=>'Usuários',             'icon'=>'users',            'url'=>null]],
+                    'users.details'               => [['label'=>'Usuários',             'icon'=>'users',            'url'=>route('users')],        ['label'=>'Perfil',            'url'=>null]],
+                ];
+                $breadcrumbItems = $breadcrumbMap[$routeName] ?? [['label'=>'PeopleHub','icon'=>'home','url'=>null]];
+            @endphp
+            <nav class="shrink-0 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 lg:px-6 transition-colors duration-200"
+                 x-data="{ items: @js($breadcrumbItems) }"
+                 @breadcrumb-set.window="items = $event.detail.items ?? $event.detail">
+                <ol class="flex items-center gap-0.5 h-9 text-xs">
+
+                    {{-- Home sempre linkado --}}
+                    <li class="flex items-center">
+                        <a href="{{ route('dashboard') }}"
+                           class="flex items-center justify-center w-6 h-6 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                            <x-lucide-house class="w-3.5 h-3.5" />
+                        </a>
+                    </li>
+
+                    {{-- Itens dinâmicos via Alpine --}}
+                    <template x-for="(item, index) in items" :key="index">
+                        <li class="flex items-center gap-0.5">
+                            <x-lucide-chevron-right class="w-3 h-3 text-slate-300 dark:text-slate-600 shrink-0" />
+                            <template x-if="item.url">
+                                <a :href="item.url"
+                                   class="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition lato-regular truncate max-w-[180px]">
+                                    <template x-if="item.icon && index === 0">
+                                        <span x-html="'<svg class=\'w-3 h-3 shrink-0\'></svg>'"></span>
+                                    </template>
+                                    <span x-text="item.label"></span>
+                                </a>
+                            </template>
+                            <template x-if="!item.url">
+                                <span class="flex items-center gap-1 px-1.5 py-0.5 rounded-md text-slate-700 dark:text-slate-200 lato-bold truncate max-w-[220px]"
+                                      :class="index === items.length - 1 ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400 dark:text-slate-500'">
+                                    <span x-text="item.label"></span>
+                                </span>
+                            </template>
+                        </li>
+                    </template>
+
+                </ol>
+            </nav>
+
             <!-- Conteúdo da página -->
             <main class="flex-1 min-h-0 overflow-y-auto bg-[#F8FAFC] dark:bg-slate-900 transition-colors duration-200">
                 {{ $slot }}
@@ -75,7 +157,7 @@
                 green:  'from-green-500 to-emerald-600',
                 red:    'from-red-500 to-rose-600',
                 indigo: 'from-indigo-500 to-indigo-600',
-                violet: 'from-violet-500 to-purple-600',
+                violet: 'from-blue-500 to-indigo-600',
                 teal:   'from-teal-500 to-cyan-600',
                 amber:  'from-amber-500 to-orange-500',
                 rose:   'from-rose-500 to-pink-600',

@@ -1289,10 +1289,10 @@
                 <div class="flex items-center justify-between mb-2">
                     <p class="text-[11px] text-slate-400 lato-regular uppercase tracking-wide">Recorrentes</p>
                     <span class="w-7 h-7 rounded-lg bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center">
-                        <x-lucide-repeat class="w-3.5 h-3.5 text-violet-500" />
+                        <x-lucide-repeat class="w-3.5 h-3.5 text-indigo-500" />
                     </span>
                 </div>
-                <p class="text-2xl lato-bold text-violet-600 dark:text-violet-400">{{ $r['recorrentes'] }}</p>
+                <p class="text-2xl lato-bold text-indigo-600 dark:text-indigo-400">{{ $r['recorrentes'] }}</p>
                 <p class="text-[10px] text-slate-400 lato-regular mt-0.5">de {{ $r['total'] }} tarefas</p>
             </div>
         </div>

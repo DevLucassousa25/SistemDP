@@ -8,11 +8,17 @@ class RhTeste extends Model
 {
     protected $table = 'rh_testes';
 
-    protected $fillable = ['created_by', 'vaga_id', 'titulo', 'descricao', 'instrucoes', 'tempo_limite_minutos', 'randomizar_questoes', 'randomizar_opcoes', 'nota_aprovacao', 'ativo'];
+    protected $fillable = ['created_by', 'vaga_id', 'data_inicio', 'data_fim', 'titulo', 'descricao', 'instrucoes', 'tempo_limite_minutos', 'randomizar_questoes', 'randomizar_opcoes', 'nota_aprovacao', 'ativo'];
 
     protected function casts(): array
     {
-        return ['randomizar_questoes' => 'boolean', 'randomizar_opcoes' => 'boolean', 'ativo' => 'boolean'];
+        return [
+            'randomizar_questoes' => 'boolean',
+            'randomizar_opcoes'   => 'boolean',
+            'ativo'               => 'boolean',
+            'data_inicio'         => 'datetime',
+            'data_fim'            => 'datetime',
+        ];
     }
 
     public function creator()

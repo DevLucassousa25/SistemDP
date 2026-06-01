@@ -56,9 +56,10 @@
             </p>
         </div>
         <button @click="novaModal = true" type="button"
-                class="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl
-                       bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600
-                       text-white text-sm lato-bold shadow-sm shadow-amber-200 dark:shadow-amber-900/30 transition">
+                class="cursor-pointer inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl
+                       w-full sm:w-auto
+                       bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700
+                       text-white text-sm lato-bold shadow-sm shadow-indigo-200 dark:shadow-indigo-900/30 transition">
             <x-lucide-plus class="w-4 h-4" />
             Nova Solicitação
         </button>
@@ -113,7 +114,7 @@
             <p class="text-base lato-bold text-slate-700 dark:text-slate-200">Nenhuma solicitação ainda</p>
             <p class="text-sm text-slate-400 mt-1 mb-5">Clique em "Nova Solicitação" para começar</p>
             <button @click="novaModal = true" type="button"
-                    class="cursor-pointer px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm lato-bold transition shadow-sm">
+                    class="cursor-pointer px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm lato-bold transition shadow-sm shadow-indigo-200 dark:shadow-indigo-900/30">
                 Fazer primeira solicitação
             </button>
         </div>
@@ -427,13 +428,9 @@
                 wire:confirm="Tem certeza que deseja cancelar esta solicitação?"
                 class="cursor-pointer w-full py-2.5 rounded-xl border border-rose-200 dark:border-rose-700/40
                        text-rose-500 dark:text-rose-400 text-sm lato-bold
-                       hover:bg-rose-50 dark:hover:bg-rose-900/20 transition">
-            Cancelar solicitação
-        </button>
+                Cancelar solicitação
+            </button>
+        @endif
     </div>
-    @endif
-
-</div>{{-- /drawer panel --}}
-@endif{{-- /drawer --}}
-
-</div>{{-- /root único --}}
+@endif
+{{-- /modalDetalhe --}}

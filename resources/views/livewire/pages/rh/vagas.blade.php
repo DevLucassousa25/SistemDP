@@ -1,7 +1,7 @@
 @php
     if (!function_exists('rhVagaBg')) {
         function rhVagaBg(string $n): string {
-            $pal = ['bg-indigo-500','bg-violet-500','bg-teal-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
+            $pal = ['bg-indigo-500','bg-indigo-600','bg-teal-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
             return $pal[abs(crc32($n)) % count($pal)];
         }
     }

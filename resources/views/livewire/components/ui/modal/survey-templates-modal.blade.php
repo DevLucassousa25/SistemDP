@@ -85,7 +85,7 @@
                                         $iconBg    = match($template->category) {
                                             'nps'      => 'from-blue-500 to-indigo-500',
                                             'clima'    => 'from-emerald-500 to-teal-500',
-                                            'feedback' => 'from-violet-500 to-purple-600',
+                                            'feedback' => 'from-blue-500 to-indigo-600',
                                             'rh'       => 'from-amber-500 to-orange-500',
                                             default    => 'from-slate-400 to-slate-500',
                                         };
@@ -236,7 +236,7 @@
                             <div class="space-y-1.5">
                                 <label class="text-xs lato-bold text-slate-600 dark:text-slate-300 uppercase tracking-wide">Categoria <span class="text-red-500">*</span></label>
                                 <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                                    @foreach(['nps' => ['NPS','from-blue-500 to-indigo-500'], 'clima' => ['Clima','from-emerald-500 to-teal-500'], 'feedback' => ['Feedback','from-violet-500 to-purple-600'], 'rh' => ['RH','from-amber-500 to-orange-500'], 'custom' => ['Personalizado','from-slate-400 to-slate-500']] as $val => [$label, $gradient])
+                                    @foreach(['nps' => ['NPS','from-blue-500 to-indigo-500'], 'clima' => ['Clima','from-emerald-500 to-teal-500'], 'feedback' => ['Feedback','from-blue-500 to-indigo-600'], 'rh' => ['RH','from-amber-500 to-orange-500'], 'custom' => ['Personalizado','from-slate-400 to-slate-500']] as $val => [$label, $gradient])
                                         <label @class([
                                             'flex flex-col items-center gap-1.5 p-2.5 rounded-lg border cursor-pointer transition',
                                             'border-indigo-300 bg-indigo-50 dark:bg-indigo-900/20 dark:border-indigo-700/50' => $formCategory === $val,
@@ -570,7 +570,7 @@
                         <div class="space-y-1.5">
                             <label class="text-xs lato-bold text-slate-600 dark:text-slate-300 uppercase tracking-wide">Categoria <span class="text-red-500">*</span></label>
                             <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                                @foreach(['nps' => ['NPS','from-blue-500 to-indigo-500'], 'clima' => ['Clima','from-emerald-500 to-teal-500'], 'feedback' => ['Feedback','from-violet-500 to-purple-600'], 'rh' => ['RH','from-amber-500 to-orange-500'], 'custom' => ['Personalizado','from-slate-400 to-slate-500']] as $val => [$label, $gradient])
+                                @foreach(['nps' => ['NPS','from-blue-500 to-indigo-500'], 'clima' => ['Clima','from-emerald-500 to-teal-500'], 'feedback' => ['Feedback','from-blue-500 to-indigo-600'], 'rh' => ['RH','from-amber-500 to-orange-500'], 'custom' => ['Personalizado','from-slate-400 to-slate-500']] as $val => [$label, $gradient])
                                     <label @class([
                                         'flex flex-col items-center gap-1.5 p-2.5 rounded-lg border cursor-pointer transition',
                                         'border-amber-300 bg-amber-50 dark:bg-amber-900/10 dark:border-amber-700/50' => $templateCategory === $val,

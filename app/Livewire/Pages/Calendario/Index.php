@@ -191,10 +191,10 @@ class Index extends SecureComponent
 
         if ($this->isEditing && $this->editingId) {
             CalendarioEvento::findOrFail($this->editingId)->update($payload);
-            $this->toastNotif('Evento atualizado com sucesso.');
+            $this->toastNotif('Evento atualizado', 'O evento foi atualizado com sucesso.', 'calendar-check', 'blue');
         } else {
             CalendarioEvento::create($payload);
-            $this->toastNotif('Evento criado com sucesso.');
+            $this->toastNotif('Evento criado', 'O evento foi criado com sucesso.', 'calendar-plus', 'blue');
         }
 
         $this->diaSelecionado = $dados['formData'];
@@ -209,7 +209,7 @@ class Index extends SecureComponent
     {
         $this->requireRhOrAdmin();
         CalendarioEvento::findOrFail($id)->delete();
-        $this->toastNotif('Evento removido.');
+        $this->toastNotif('Evento removido', 'O evento foi excluído com sucesso.', 'trash-2', 'red');
         unset($this->mapaEventos, $this->eventosDiaSelecionado);
     }
 

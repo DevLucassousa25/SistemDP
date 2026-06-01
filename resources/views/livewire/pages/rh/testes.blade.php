@@ -449,7 +449,7 @@
                                 <x-lucide-circle-dot class="w-3.5 h-3.5" /> Objetiva
                             </button>
                             <button wire:click="addQuestao('discursiva')" type="button"
-                                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-300 text-xs lato-bold hover:bg-violet-100 dark:hover:bg-violet-900/50 transition">
+                                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-violet-50 dark:bg-violet-900/30 text-indigo-600 dark:text-violet-300 text-xs lato-bold hover:bg-violet-100 dark:hover:bg-violet-900/50 transition">
                                 <x-lucide-pencil-line class="w-3.5 h-3.5" /> Discursiva
                             </button>
                         </div>
@@ -467,7 +467,7 @@
                         <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 space-y-3">
                             {{-- Cabeçalho da questão --}}
                             <div class="flex items-start gap-3">
-                                <span class="shrink-0 w-6 h-6 rounded-lg {{ $q['tipo'] === 'objetiva' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300' : 'bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-300' }} text-xs lato-black flex items-center justify-center mt-0.5">
+                                <span class="shrink-0 w-6 h-6 rounded-lg {{ $q['tipo'] === 'objetiva' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-300' : 'bg-violet-100 dark:bg-violet-900/40 text-indigo-600 dark:text-violet-300' }} text-xs lato-black flex items-center justify-center mt-0.5">
                                     {{ $qi + 1 }}
                                 </span>
                                 <div class="flex-1 min-w-0 space-y-2">
@@ -581,7 +581,7 @@
                 @forelse ($this->curriculosBusca as $cvBusca)
                 @php
                     $initsB  = collect(explode(' ', $cvBusca->nome))->map(fn($w) => strtoupper($w[0] ?? ''))->take(2)->join('');
-                    $colorsB = ['bg-indigo-500','bg-violet-500','bg-blue-500','bg-teal-500','bg-emerald-500','bg-pink-500'];
+                    $colorsB = ['bg-indigo-500','bg-indigo-600','bg-blue-500','bg-teal-500','bg-emerald-500','bg-pink-500'];
                     $bgB     = $colorsB[crc32($cvBusca->nome) % count($colorsB)];
                 @endphp
                 <div class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-900 transition">

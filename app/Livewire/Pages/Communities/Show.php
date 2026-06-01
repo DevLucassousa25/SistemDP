@@ -73,6 +73,11 @@ class Show extends SecureComponent
         if (! $sysAdmin && ! $community->isMember(Auth::id())) {
             abort(403, 'Você não é membro desta comunidade.');
         }
+
+        $this->dispatch('breadcrumb-set', items: [
+            ['label' => 'Comunidades', 'icon' => 'users', 'url' => route('communities')],
+            ['label' => $community->name, 'url' => null],
+        ]);
     }
 
     // ── Computeds ─────────────────────────────────────────────────────
@@ -208,6 +213,21 @@ class Show extends SecureComponent
 
     public function createPost(): void
     {
+        // Limpa arquivos temporários inválidos/corrompidos antes de validar
+        if (!empty($this->newPostImages)) {
+            $valid = [];
+            foreach ((array) $this->newPostImages as $img) {
+                try {
+                    if ($img && method_exists($img, 'getSize') && $img->getSize() !== false) {
+                        $valid[] = $img;
+                    }
+                } catch (\Throwable) {
+                    // arquivo temporário inválido — ignora silenciosamente
+                }
+            }
+            $this->newPostImages = $valid;
+        }
+
         $rules = [
             'newPostContent'  => 'required|string|min:1|max:2000',
             'newPostImages'   => 'nullable|array|max:4',

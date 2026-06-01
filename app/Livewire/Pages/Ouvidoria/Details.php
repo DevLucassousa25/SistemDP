@@ -61,6 +61,11 @@ class Details extends SecureComponent
         $this->manifestacao   = $query->firstOrFail();
         $this->manifestacaoId = $id;
 
+        $this->dispatch('breadcrumb-set', items: [
+            ['label' => 'Ouvidoria', 'icon' => 'message-square-warning', 'url' => route('ouvidoria')],
+            ['label' => 'Manifestação #' . strtoupper(substr($id, 0, 8)), 'url' => null],
+        ]);
+
         // Sincroniza estado de auto-encerramento local com o modelo
         $this->autoEncerramentoDesativado = (bool) $this->manifestacao->auto_encerramento_desativado;
         $this->prazoPersonalizadoInput    = $this->manifestacao->prazo_personalizado_horas !== null

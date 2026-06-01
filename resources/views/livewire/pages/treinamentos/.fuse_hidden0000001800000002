@@ -1,0 +1,515 @@
+<div class="flex h-[calc(100vh-4rem)] overflow-hidden" x-data>
+
+    {{-- ══════════════════════════════════════════════════════════════════
+         SIDEBAR DE AULAS (esquerda)
+    ══════════════════════════════════════════════════════════════════ --}}
+    <aside class="w-72 shrink-0 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden hidden lg:flex">
+        {{-- Cabeçalho do curso --}}
+        <div class="p-4 border-b border-slate-200 dark:border-slate-700">
+            <a href="{{ route('treinamentos') }}" wire:navigate
+               class="flex items-center gap-1.5 text-xs text-slate-400 hover:text-violet-600 dark:hover:text-violet-400 mb-3 lato-regular transition">
+                <x-lucide-arrow-left class="w-3.5 h-3.5" /> Voltar ao catálogo
+            </a>
+            <h2 class="text-sm font-bold text-slate-800 dark:text-white lato-bold leading-snug line-clamp-2">
+                {{ $this->treinamento->titulo }}
+            </h2>
+            <div class="mt-2">
+                <div class="flex justify-between text-xs text-slate-400 mb-1">
+                    <span class="lato-regular">Progresso geral</span>
+                    <span class="lato-bold">{{ $this->inscricao->progresso }}%</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-violet-500 to-purple-600 rounded-full transition-all duration-500"
+                         style="width: {{ $this->inscricao->progresso }}%"></div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Abas --}}
+        <div class="flex border-b border-slate-200 dark:border-slate-700">
+            <button wire:click="$set('aba','aulas')"
+                class="flex-1 py-2.5 text-xs lato-bold transition
+                    {{ $aba === 'aulas' ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-500' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200' }}">
+                Aulas
+            </button>
+            @if($this->treinamento->teste)
+            <button wire:click="$set('aba','teste')"
+                class="flex-1 py-2.5 text-xs lato-bold transition
+                    {{ $aba === 'teste' ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-500' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200' }}">
+                Teste
+            </button>
+            @endif
+            <button wire:click="$set('aba','duvidas')"
+                class="flex-1 py-2.5 text-xs lato-bold transition
+                    {{ $aba === 'duvidas' ? 'text-violet-600 dark:text-violet-400 border-b-2 border-violet-500' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200' }}">
+                Dúvidas
+            </button>
+        </div>
+
+        {{-- Lista de aulas --}}
+        @if($aba === 'aulas')
+        <nav class="overflow-y-auto flex-1 p-2">
+            @foreach($this->treinamento->aulas as $i => $aula)
+                @php $concluida = isset($this->progressoMap[$aula->id]) && $this->progressoMap[$aula->id]['concluida']; @endphp
+                <button wire:click="selecionarAula({{ $aula->id }})"
+                    class="w-full text-left flex items-start gap-3 p-3 rounded-xl mb-1 transition
+                        {{ $aulaAtualId === $aula->id
+                            ? 'bg-violet-50 dark:bg-violet-500/10 border border-violet-200 dark:border-violet-500/30'
+                            : 'hover:bg-slate-50 dark:hover:bg-slate-700/50' }}">
+                    {{-- Ícone de status --}}
+                    <div class="w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-xs lato-bold mt-0.5
+                        {{ $concluida ? 'bg-emerald-500 text-white' : ($aulaAtualId === $aula->id ? 'bg-violet-500 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-400') }}">
+                        @if($concluida)
+                            <x-lucide-check class="w-3.5 h-3.5" />
+                        @else
+                            {{ $i + 1 }}
+                        @endif
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs lato-bold text-slate-700 dark:text-slate-200 leading-snug line-clamp-2
+                            {{ $aulaAtualId === $aula->id ? 'text-violet-700 dark:text-violet-300' : '' }}">
+                            {{ $aula->titulo }}
+                        </p>
+                        <p class="text-xs text-slate-400 lato-regular mt-0.5">
+                            <x-lucide-clock class="w-3 h-3 inline -mt-0.5" /> {{ $aula->duracao_formatada }}
+                        </p>
+                    </div>
+                </button>
+            @endforeach
+        </nav>
+        @endif
+
+        {{-- Prazo de conclusão --}}
+        @if($this->inscricao->prazo_conclusao && $this->inscricao->status !== 'concluido')
+        @php
+            $diasRestantes = now()->startOfDay()->diffInDays($this->inscricao->prazo_conclusao, false);
+            $prazoCor = $diasRestantes < 0 ? 'red' : ($diasRestantes <= 3 ? 'amber' : 'blue');
+        @endphp
+        <div class="p-3 border-t border-slate-200 dark:border-slate-700">
+            <div class="bg-{{ $prazoCor }}-50 dark:bg-{{ $prazoCor }}-900/20 rounded-xl p-3 flex items-center gap-2">
+                <x-lucide-calendar-clock class="w-5 h-5 text-{{ $prazoCor }}-500 shrink-0" />
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs lato-bold text-{{ $prazoCor }}-700 dark:text-{{ $prazoCor }}-300">
+                        @if($diasRestantes < 0) Prazo vencido @elseif($diasRestantes === 0) Prazo hoje! @else {{ $diasRestantes }}d restantes @endif
+                    </p>
+                    <p class="text-xs text-{{ $prazoCor }}-500 lato-regular">{{ $this->inscricao->prazo_conclusao->format('d/m/Y') }}</p>
+                </div>
+            </div>
+        </div>
+        @endif
+
+        {{-- Certificado (se emitido) --}}
+        @if($this->inscricao->certificado)
+        <div class="p-3 border-t border-slate-200 dark:border-slate-700">
+            <div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-3 flex items-start gap-2">
+                <x-lucide-award class="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs lato-bold text-amber-700 dark:text-amber-300">Certificado emitido!</p>
+                    <p class="text-xs text-amber-500 font-mono truncate">{{ $this->inscricao->certificado->codigo }}</p>
+                    <a href="{{ route('treinamentos.certificado', $this->inscricao->id) }}" target="_blank"
+                       class="mt-1.5 flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 hover:underline lato-bold">
+                        <x-lucide-download class="w-3 h-3" /> Baixar PDF
+                    </a>
+                </div>
+            </div>
+            {{-- Avaliação de reação --}}
+            @if($this->inscricao->status === 'concluido' && !$this->inscricao->avaliacaoReacao)
+            <button wire:click="abrirModalAvaliacao"
+                class="mt-2 w-full flex items-center justify-center gap-1.5 border border-amber-200 dark:border-amber-700 text-amber-600 dark:text-amber-400 text-xs px-3 py-1.5 rounded-lg hover:bg-amber-50 dark:hover:bg-amber-900/20 transition lato-bold">
+                <x-lucide-star class="w-3.5 h-3.5" /> Avaliar curso
+            </button>
+            @elseif($this->inscricao->avaliacaoReacao)
+            <div class="mt-2 flex items-center gap-1 justify-center">
+                @for($s=1;$s<=5;$s++)
+                    <x-lucide-star class="w-3.5 h-3.5 {{ $s <= $this->inscricao->avaliacaoReacao->nota ? 'text-amber-400 fill-amber-400' : 'text-slate-300' }}" />
+                @endfor
+                <span class="text-xs text-slate-400 lato-regular ml-1">Avaliado</span>
+            </div>
+            @endif
+        </div>
+        @endif
+    </aside>
+
+    {{-- ══════════════════════════════════════════════════════════════════
+         CONTEÚDO PRINCIPAL
+    ══════════════════════════════════════════════════════════════════ --}}
+    <main class="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900">
+
+        {{-- ──── ABA: AULAS ───────────────────────────────────────────── --}}
+        @if($aba === 'aulas' && $this->aulaAtual)
+            @php $aula = $this->aulaAtual; $concluida = isset($this->progressoMap[$aula->id]) && $this->progressoMap[$aula->id]['concluida']; @endphp
+
+            {{-- Player de vídeo --}}
+            @if($aula->video_url || $aula->video_arquivo)
+                <div class="bg-black w-full" style="aspect-ratio: 16/9; max-height: 55vh;">
+                    @if($aula->video_embed_url)
+                        <iframe
+                            src="{{ $aula->video_embed_url }}"
+                            class="w-full h-full"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen>
+                        </iframe>
+                    @elseif($aula->video_arquivo)
+                        <video class="w-full h-full" controls>
+                            <source src="{{ asset('storage/'.$aula->video_arquivo) }}" />
+                            Seu navegador não suporta o elemento de vídeo.
+                        </video>
+                    @endif
+                </div>
+            @else
+                <div class="bg-gradient-to-br from-violet-600 to-purple-800 w-full flex items-center justify-center" style="aspect-ratio: 16/9; max-height: 40vh;">
+                    <x-lucide-play-circle class="w-16 h-16 text-white/30" />
+                </div>
+            @endif
+
+            {{-- Info da aula --}}
+            <div class="p-5 lg:p-8 max-w-4xl mx-auto">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    <div class="flex-1">
+                        <h1 class="text-xl lg:text-2xl font-bold text-slate-800 dark:text-white lato-black">
+                            {{ $aula->titulo }}
+                        </h1>
+                        @if($aula->descricao)
+                            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400 lato-regular leading-relaxed">
+                                {{ $aula->descricao }}
+                            </p>
+                        @endif
+                        <div class="mt-3 flex flex-wrap gap-3 text-xs text-slate-400 lato-regular">
+                            <span><x-lucide-clock class="w-3.5 h-3.5 inline -mt-0.5" /> {{ $aula->duracao_formatada }}</span>
+                            @if($aula->material_pdf)
+                                <a href="{{ asset('storage/'.$aula->material_pdf) }}" target="_blank"
+                                   class="flex items-center gap-1 text-violet-600 dark:text-violet-400 hover:underline lato-bold">
+                                    <x-lucide-file-text class="w-3.5 h-3.5" /> Material PDF
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="flex gap-2 shrink-0">
+                        @if(!$concluida)
+                            <button wire:click="marcarAulaConcluida({{ $aula->id }})"
+                                class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm px-4 py-2 rounded-lg transition lato-bold">
+                                <x-lucide-check-circle class="w-4 h-4" />
+                                Marcar como concluída
+                            </button>
+                        @else
+                            <span class="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-sm px-4 py-2 rounded-lg lato-bold">
+                                <x-lucide-check-circle class="w-4 h-4" /> Concluída
+                            </span>
+                        @endif
+                        <button wire:click="proximaAula"
+                            class="flex items-center gap-2 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-sm px-4 py-2 rounded-lg transition lato-regular">
+                            Próxima <x-lucide-chevron-right class="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Dúvidas rápidas --}}
+                <div class="mt-8 border-t border-slate-200 dark:border-slate-700 pt-6">
+                    <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 lato-bold mb-3">
+                        Tem alguma dúvida sobre esta aula?
+                    </h3>
+                    <div class="flex gap-3">
+                        <input wire:model="novaDuvida" type="text"
+                            placeholder="Escreva sua dúvida aqui…"
+                            class="flex-1 text-sm px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 lato-regular" />
+                        <button wire:click="enviarDuvida"
+                            class="flex items-center gap-2 bg-violet-500 hover:bg-violet-600 text-white text-sm px-4 py-2.5 rounded-lg transition lato-bold">
+                            <x-lucide-send class="w-4 h-4" />
+                            Enviar
+                        </button>
+                    </div>
+                    @error('novaDuvida')
+                        <p class="text-xs text-red-500 mt-1 lato-regular">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+        {{-- ──── ABA: TESTE ───────────────────────────────────────────── --}}
+        @elseif($aba === 'teste')
+            @php $teste = $this->treinamento->teste; @endphp
+            <div class="p-6 lg:p-10 max-w-3xl mx-auto">
+
+                {{-- Resultado do teste --}}
+                @if($testeEnviado && $resultadoTeste)
+                    <div class="text-center mb-8">
+                        @if($resultadoTeste['aprovado'])
+                            <div class="w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto mb-4">
+                                <x-lucide-check-circle class="w-10 h-10 text-emerald-500" />
+                            </div>
+                            <h2 class="text-2xl font-bold text-emerald-600 lato-black">Parabéns! Você foi aprovado!</h2>
+                        @else
+                            <div class="w-20 h-20 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
+                                <x-lucide-x-circle class="w-10 h-10 text-red-500" />
+                            </div>
+                            <h2 class="text-2xl font-bold text-red-600 lato-black">Não foi dessa vez…</h2>
+                        @endif
+                        <p class="text-slate-500 dark:text-slate-400 mt-2 lato-regular">
+                            Você acertou <strong>{{ $resultadoTeste['acertos'] }}</strong> de <strong>{{ $resultadoTeste['total'] }}</strong> questões
+                        </p>
+                        <div class="mt-4 inline-flex items-center gap-3 bg-white dark:bg-slate-800 rounded-2xl px-6 py-4 shadow-sm border border-slate-200 dark:border-slate-700">
+                            <span class="text-4xl font-black lato-black
+                                {{ $resultadoTeste['aprovado'] ? 'text-emerald-500' : 'text-red-500' }}">
+                                {{ number_format($resultadoTeste['nota'], 1) }}%
+                            </span>
+                            <div class="text-left">
+                                <p class="text-xs text-slate-400 lato-regular">Nota mínima: {{ $resultadoTeste['nota_minima'] }}%</p>
+                                <p class="text-xs lato-bold {{ $resultadoTeste['aprovado'] ? 'text-emerald-500' : 'text-red-500' }}">
+                                    {{ $resultadoTeste['aprovado'] ? 'Aprovado' : 'Reprovado' }}
+                                </p>
+                            </div>
+                        </div>
+                        @if($this->inscricao->certificado)
+                        <div class="mt-6 bg-amber-50 dark:bg-amber-900/20 rounded-2xl p-5 border border-amber-200 dark:border-amber-700/40">
+                            <x-lucide-award class="w-8 h-8 text-amber-500 mx-auto mb-2" />
+                            <p class="text-sm font-semibold text-amber-700 dark:text-amber-300 lato-bold">Certificado emitido!</p>
+                            <p class="text-xs text-amber-500 font-mono mt-1">{{ $this->inscricao->certificado->codigo }}</p>
+                            <a href="{{ route('treinamentos') }}?aba=certificados" wire:navigate
+                               class="mt-3 inline-block text-xs text-amber-600 hover:underline lato-bold">
+                                Ver meus certificados →
+                            </a>
+                        </div>
+                        @endif
+                        @php
+                            $tentativasUsadas = $this->inscricao->tentativas()->where('teste_id', $teste->id)->count();
+                            $tentativasRestantes = $teste->tentativas_maximas - $tentativasUsadas;
+                        @endphp
+                        @if(!$resultadoTeste['aprovado'] && $tentativasRestantes > 0)
+                        <button wire:click="iniciarTeste"
+                            class="mt-6 flex items-center gap-2 bg-violet-500 hover:bg-violet-600 text-white text-sm px-6 py-2.5 rounded-lg transition lato-bold mx-auto">
+                            <x-lucide-refresh-cw class="w-4 h-4" />
+                            Tentar novamente ({{ $tentativasRestantes }} tentativa{{ $tentativasRestantes > 1 ? 's' : '' }} restante{{ $tentativasRestantes > 1 ? 's' : '' }})
+                        </button>
+                        @endif
+                    </div>
+
+                {{-- Teste em andamento --}}
+                @elseif($testeAtivo)
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-white lato-black mb-1">{{ $teste->titulo }}</h2>
+                    @if($teste->descricao)
+                        <p class="text-sm text-slate-500 dark:text-slate-400 lato-regular mb-6">{{ $teste->descricao }}</p>
+                    @endif
+
+                    <div class="space-y-6">
+                        @foreach($teste->questoes as $qi => $questao)
+                        <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
+                            <p class="text-sm font-semibold text-slate-700 dark:text-slate-200 lato-bold mb-4">
+                                <span class="text-violet-500">{{ $qi + 1 }}.</span> {{ $questao->enunciado }}
+                            </p>
+                            <div class="space-y-2">
+                                @foreach($questao->opcoes as $opcao)
+                                <label class="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition border
+                                    {{ isset($respostas[$questao->id]) && $respostas[$questao->id] == $opcao->id
+                                        ? 'border-violet-400 bg-violet-50 dark:bg-violet-500/10'
+                                        : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50' }}">
+                                    <input type="radio"
+                                        name="questao_{{ $questao->id }}"
+                                        value="{{ $opcao->id }}"
+                                        wire:click="responder({{ $questao->id }}, {{ $opcao->id }})"
+                                        {{ isset($respostas[$questao->id]) && $respostas[$questao->id] == $opcao->id ? 'checked' : '' }}
+                                        class="accent-violet-500 w-4 h-4 shrink-0" />
+                                    <span class="text-sm text-slate-700 dark:text-slate-200 lato-regular">{{ $opcao->texto }}</span>
+                                </label>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+
+                    <div class="mt-8 flex items-center justify-between">
+                        <p class="text-xs text-slate-400 lato-regular">
+                            {{ count($respostas) }} / {{ $teste->questoes->count() }} respondidas
+                        </p>
+                        <button wire:click="enviarTeste"
+                            wire:confirm="Tem certeza que deseja enviar o teste?"
+                            @if(count($respostas) < $teste->questoes->count()) disabled @endif
+                            class="flex items-center gap-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm px-6 py-2.5 rounded-lg transition lato-bold">
+                            <x-lucide-send class="w-4 h-4" />
+                            Enviar teste
+                        </button>
+                    </div>
+
+                {{-- Tela inicial do teste --}}
+                @else
+                    @php
+                        $tentativasUsadas = $this->inscricao->tentativas()->where('teste_id', $teste->id)->count();
+                        $tentativasRestantes = $teste->tentativas_maximas - $tentativasUsadas;
+                        $melhorNota = $this->inscricao->tentativas()->where('teste_id', $teste->id)->max('nota');
+                    @endphp
+                    <div class="text-center">
+                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center mx-auto mb-5">
+                            <x-lucide-clipboard-check class="w-10 h-10 text-white" />
+                        </div>
+                        <h2 class="text-2xl font-bold text-slate-800 dark:text-white lato-black">{{ $teste->titulo }}</h2>
+                        @if($teste->descricao)
+                            <p class="text-slate-500 dark:text-slate-400 mt-2 lato-regular">{{ $teste->descricao }}</p>
+                        @endif
+
+                        <div class="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                            <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                                <p class="text-xl lato-black text-slate-800 dark:text-white">{{ $teste->questoes->count() }}</p>
+                                <p class="text-xs text-slate-400 lato-regular">Questões</p>
+                            </div>
+                            <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                                <p class="text-xl lato-black text-slate-800 dark:text-white">{{ $teste->nota_minima }}%</p>
+                                <p class="text-xs text-slate-400 lato-regular">Nota mínima</p>
+                            </div>
+                            <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                                <p class="text-xl lato-black text-slate-800 dark:text-white">{{ $tentativasRestantes }}</p>
+                                <p class="text-xs text-slate-400 lato-regular">Tentativas restantes</p>
+                            </div>
+                            <div class="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                                <p class="text-xl lato-black {{ $melhorNota >= $teste->nota_minima ? 'text-emerald-500' : 'text-slate-800 dark:text-white' }}">
+                                    {{ $melhorNota ? number_format($melhorNota, 1).'%' : '—' }}
+                                </p>
+                                <p class="text-xs text-slate-400 lato-regular">Melhor nota</p>
+                            </div>
+                        </div>
+
+                        @if($tentativasRestantes > 0)
+                        <button wire:click="iniciarTeste"
+                            class="mt-8 flex items-center gap-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 shadow-md shadow-violet-500/20 text-white text-sm px-8 py-3 rounded-xl transition lato-bold mx-auto">
+                            <x-lucide-play class="w-4 h-4" />
+                            Iniciar teste
+                        </button>
+                        @else
+                        <p class="mt-8 text-sm text-red-500 lato-regular">Você esgotou todas as tentativas para este teste.</p>
+                        @endif
+                    </div>
+                @endif
+            </div>
+
+        {{-- ──── ABA: DÚVIDAS ─────────────────────────────────────────── --}}
+        @elseif($aba === 'duvidas')
+            <div class="p-6 lg:p-10 max-w-3xl mx-auto">
+                <h2 class="text-xl font-bold text-slate-800 dark:text-white lato-black mb-1">Minhas Dúvidas</h2>
+                <p class="text-sm text-slate-400 lato-regular mb-6">Envie suas dúvidas para o instrutor responder</p>
+
+                {{-- Form nova dúvida --}}
+                <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 mb-6">
+                    <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 lato-bold mb-3">Nova dúvida</h3>
+                    <textarea wire:model="novaDuvida" rows="3"
+                        placeholder="Descreva sua dúvida com detalhes…"
+                        class="w-full text-sm px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500 lato-regular resize-none"></textarea>
+                    @error('novaDuvida')
+                        <p class="text-xs text-red-500 mt-1 lato-regular">{{ $message }}</p>
+                    @enderror
+                    <div class="mt-3 flex justify-end">
+                        <button wire:click="enviarDuvida"
+                            class="flex items-center gap-2 bg-violet-500 hover:bg-violet-600 text-white text-sm px-4 py-2 rounded-lg transition lato-bold">
+                            <x-lucide-send class="w-4 h-4" /> Enviar dúvida
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Lista de dúvidas --}}
+                <div class="space-y-4">
+                    @forelse($this->duvidas as $duvida)
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <div class="p-4 flex items-start gap-3">
+                            <div class="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
+                                <x-lucide-help-circle class="w-4 h-4 text-violet-500" />
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex flex-wrap items-center gap-2 mb-1">
+                                    @if($duvida->aula)
+                                        <span class="text-xs bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 px-2 py-0.5 rounded-full lato-regular">
+                                            {{ $duvida->aula->titulo }}
+                                        </span>
+                                    @endif
+                                    <span class="text-xs px-2 py-0.5 rounded-full lato-bold
+                                        {{ $duvida->status === 'respondida'
+                                            ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400'
+                                            : 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' }}">
+                                        {{ $duvida->status === 'respondida' ? 'Respondida' : 'Aguardando resposta' }}
+                                    </span>
+                                    <span class="text-xs text-slate-400 lato-regular ml-auto">{{ $duvida->created_at->diffForHumans() }}</span>
+                                </div>
+                                <p class="text-sm text-slate-700 dark:text-slate-200 lato-regular">{{ $duvida->pergunta }}</p>
+                            </div>
+                        </div>
+                        @if($duvida->respostas->isNotEmpty())
+                        <div class="border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-4 space-y-3">
+                            @foreach($duvida->respostas as $resp)
+                            <div class="flex items-start gap-3">
+                                <div class="w-7 h-7 rounded-full bg-violet-500 flex items-center justify-center shrink-0">
+                                    <x-lucide-user class="w-3.5 h-3.5 text-white" />
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2 mb-0.5">
+                                        <p class="text-xs lato-bold text-violet-600 dark:text-violet-400">{{ $resp->usuario->name }}</p>
+                                        <span class="text-xs bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 px-1.5 py-0.5 rounded-full lato-regular">Instrutor</span>
+                                        <span class="text-xs text-slate-400 lato-regular ml-auto">{{ $resp->created_at->diffForHumans() }}</span>
+                                    </div>
+                                    <p class="text-sm text-slate-600 dark:text-slate-300 lato-regular">{{ $resp->resposta }}</p>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        @endif
+                    </div>
+                    @empty
+                    <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+                        <x-lucide-help-circle class="w-10 h-10 mb-3 opacity-40" />
+                        <p class="text-sm lato-bold">Nenhuma dúvida enviada ainda</p>
+                    </div>
+                    @endforelse
+                </div>
+            </div>
+        @endif
+
+    </main>
+
+    {{-- ══════════════════════════════════════════════════════════════════
+         MODAL: AVALIAÇÃO DE REAÇÃO
+    ══════════════════════════════════════════════════════════════════ --}}
+    @if($modalAvaliacao)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" wire:click="$set('modalAvaliacao',false)"></div>
+        <div class="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-md p-6 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center mx-auto mb-4">
+                <x-lucide-star class="w-8 h-8 text-white" />
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-white lato-black mb-1">
+                Como foi o curso?
+            </h3>
+            <p class="text-sm text-slate-400 dark:text-slate-500 lato-regular mb-5">
+                Sua avaliação ajuda a melhorar os treinamentos
+            </p>
+
+            {{-- Estrelas --}}
+            <div class="flex justify-center gap-2 mb-5">
+                @for($s = 1; $s <= 5; $s++)
+                <button wire:click="setNota({{ $s }})"
+                    class="w-10 h-10 rounded-full flex items-center justify-center transition text-2xl
+                        {{ $avaliacaoNota >= $s ? 'text-amber-400 scale-110' : 'text-slate-200 dark:text-slate-700 hover:text-amber-300' }}">
+                    ★
+                </button>
+                @endfor
+            </div>
+            @if($avaliacaoNota > 0)
+            <p class="text-xs text-amber-600 dark:text-amber-400 lato-bold mb-4">
+                {{ ['','Muito ruim 😞','Ruim 😕','Regular 😐','Bom 😊','Excelente! 🤩'][$avaliacaoNota] }}
+            </p>
+            @endif
+
+            <textarea wire:model="avaliacaoComentario" rows="3"
+                placeholder="Deixe um comentário opcional…"
+                class="w-full text-sm px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400 lato-regular resize-none mb-4"></textarea>
+
+            <div class="flex gap-3">
+                <button wire:click="$set('modalAvaliacao',false)"
+                    class="flex-1 px-4 py-2.5 text-sm border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition lato-regular">
+                    Agora não
+                </button>
+                <button wire:click="salvarAvaliacao"
+                    @if($avaliacaoNota === 0) disabled @endif
+                    class="flex-1 px-4 py-2.5 text-sm bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-lg transition lato-bold">
+                    Enviar avaliação
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+</div>

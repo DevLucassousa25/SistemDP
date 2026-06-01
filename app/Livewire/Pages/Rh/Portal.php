@@ -19,6 +19,8 @@ use App\Models\RhCandidatoTeste;
 use App\Models\RhCurriculo as Curriculo;
 use App\Models\AccessProfile;
 use App\Models\Department;
+use App\Models\Equipamento;
+use App\Models\EquipamentoAtribuicao;
 use App\Models\RhDesligamento;
 use App\Models\RhDesligamentoChecklist;
 use App\Models\RhEntrevistaDesligamento;
@@ -34,6 +36,8 @@ use App\Models\RhSolicitacao;
 use App\Models\OkrKeyResult;
 use App\Models\ManagerEvaluation;
 use App\Models\SurveyResponse;
+use App\Models\SuccessionPosition;
+use App\Models\SuccessionCandidate;
 use App\Notifications\CandidatoContratadoNotification;
 use App\Livewire\Concerns\EnviaNotificacoes;
 use App\Models\ConfiguracaoEmpresa;
@@ -61,12 +65,42 @@ class Portal extends SecureComponent
         $this->requireAuth();
         $this->requireRhOrAdmin();
         $this->resetEtapasPadrao();
+        $this->dispatchBreadcrumb();
     }
 
     public function setAba(string $aba): void
     {
         $this->aba = $aba;
         $this->resetPage();
+        $this->dispatchBreadcrumb();
+    }
+
+    public function updatedAba(): void
+    {
+        $this->dispatchBreadcrumb();
+    }
+
+    private function dispatchBreadcrumb(): void
+    {
+        $abaLabels = [
+            'dashboard'          => 'Dashboard',
+            'curriculos'         => 'Currículos',
+            'vagas'              => 'Vagas',
+            'pipeline'           => 'Pipeline',
+            'testes'             => 'Testes Online',
+            'desligamentos'      => 'Desligamentos',
+            'onboarding'         => 'Onboarding',
+            'relatorio-turnover' => 'Turnover',
+            'clima-unificado'    => 'Clima Unificado',
+            'solicitacoes'       => 'Solicitações RH',
+            'mapa-competencias'  => 'Mapa de Competências',
+            'people-analytics'   => 'People Analytics',
+            'humor-equipes'      => 'Humor das Equipes',
+        ];
+        $this->dispatch('breadcrumb-set', items: [
+            ['label' => 'Portal R&S', 'icon' => 'users-round', 'url' => route('rh.curriculos')],
+            ['label' => $abaLabels[$this->aba] ?? $this->aba, 'url' => null],
+        ]);
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -532,6 +566,13 @@ class Portal extends SecureComponent
         $this->alertSuccess('Vaga encerrada.');
     }
 
+    public function preencherVaga(int $id): void
+    {
+        RhVaga::findOrFail($id)->update(['status' => 'preenchida']);
+        unset($this->vagas, $this->vagaDrawerData, $this->dashboardStats, $this->candidatosPorVaga);
+        $this->alertSuccess('Vaga marcada como preenchida! 🎉');
+    }
+
     public function openVagaDrawer(int $id): void { $this->vagaDrawerId = $id; $this->vagaDrawer = true; unset($this->vagaDrawerData); }
 
     public function confirmDeleteVaga(int $id): void { $this->vagaDeleteId = $id; $this->vagaDeleteModal = true; }
@@ -772,6 +813,9 @@ class Portal extends SecureComponent
         // 3. Mover candidato para etapa de aprovação
         $this->_executarMoverCandidato($cand, $nova, $this->contratarEtapaId);
 
+        // 3a. Verificar se a vaga atingiu a quota de aprovados
+        $this->_verificarEAutoPreencherVaga((int) $cand->vaga_id);
+
         // 4. Criar registro de onboarding
         $onboarding = RhOnboarding::create([
             'candidatura_id' => $this->contratarCandId,
@@ -838,6 +882,34 @@ class Portal extends SecureComponent
         ]);
 
         unset($this->kanban, $this->pipeDrawerCand);
+    }
+
+    /**
+     * Verifica se a vaga atingiu a quota de candidatos aprovados.
+     * Se sim, muda o status para 'preenchida' automaticamente.
+     */
+    private function _verificarEAutoPreencherVaga(int $vagaId): void
+    {
+        if (!$vagaId) return;
+
+        $vaga = RhVaga::find($vagaId);
+        if (!$vaga || !in_array($vaga->status, ['publicada', 'pausada'])) return;
+
+        $totalAprovados = RhCandidatura::where('vaga_id', $vagaId)
+            ->where('status', 'aprovado')
+            ->count();
+
+        $meta = (int) ($vaga->vagas_disponiveis ?? 1);
+        if ($meta < 1) $meta = 1;
+
+        if ($totalAprovados >= $meta) {
+            $vaga->update(['status' => 'preenchida']);
+            unset($this->vagas, $this->vagaDrawerData, $this->dashboardStats, $this->candidatosPorVaga);
+            $this->alertSuccess(
+                '🎉 Vaga preenchida automaticamente!',
+                "\"{$vaga->titulo}\" — {$totalAprovados}/{$meta} candidato(s) aprovado(s)."
+            );
+        }
     }
 
     public function addPipeComentario(): void
@@ -920,6 +992,8 @@ class Portal extends SecureComponent
     public int    $tNota          = 60;
     public bool   $tAtivo         = true;
     public ?int   $tVagaId        = null;
+    public string $tDataInicio    = '';
+    public string $tDataFim       = '';
     public array  $questoes        = [];
 
     public bool   $testeDrawer    = false;
@@ -969,10 +1043,34 @@ class Portal extends SecureComponent
     #[Computed]
     public function curriculosBuscaEnvio()
     {
-        if (!$this->enviarSearch || strlen($this->enviarSearch) < 2) return collect();
+        // Se há vaga vinculada ao teste, filtra apenas candidatos dessa vaga na etapa "teste"
+        if ($this->enviarVagaId) {
+            // Busca IDs das etapas da vaga cujo nome contém "teste"
+            $etapasTesteIds = \App\Models\RhVagaEtapa::where('vaga_id', $this->enviarVagaId)
+                ->whereRaw('LOWER(nome) LIKE ?', ['%teste%'])
+                ->pluck('id');
 
-        $curriculos = RhCurriculo::where('nome','ilike',"%{$this->enviarSearch}%")
-            ->orWhere('email','ilike',"%{$this->enviarSearch}%")->limit(10)->get();
+            $candidaturas = \App\Models\RhCandidatura::where('vaga_id', $this->enviarVagaId)
+                ->whereIn('etapa_id', $etapasTesteIds)
+                ->where('status', 'ativo')
+                ->with('curriculo')
+                ->get();
+
+            $curriculos = $candidaturas->map->curriculo->filter();
+
+            // Aplica filtro de busca se digitado
+            if ($this->enviarSearch && strlen($this->enviarSearch) >= 2) {
+                $q = mb_strtolower($this->enviarSearch);
+                $curriculos = $curriculos->filter(fn($cv) =>
+                    str_contains(mb_strtolower($cv->nome ?? ''), $q) ||
+                    str_contains(mb_strtolower($cv->email ?? ''), $q)
+                );
+            }
+        } else {
+            if (!$this->enviarSearch || strlen($this->enviarSearch) < 2) return collect();
+            $curriculos = RhCurriculo::where('nome','ilike',"%{$this->enviarSearch}%")
+                ->orWhere('email','ilike',"%{$this->enviarSearch}%")->limit(10)->get();
+        }
 
         if ($this->enviarTesteId && $curriculos->isNotEmpty()) {
             // Marca quais já têm tentativa não-expirada para este teste
@@ -984,7 +1082,7 @@ class Portal extends SecureComponent
             $curriculos->each(fn($cv) => $cv->teste_status = $jaEnviados->get($cv->id));
         }
 
-        return $curriculos;
+        return $curriculos->values();
     }
 
     public function openTesteCreate(): void { $this->resetTesteForm(); $this->testeEditId = null; $this->testeModal = true; }
@@ -1002,6 +1100,8 @@ class Portal extends SecureComponent
         $this->tNota        = $t->nota_aprovacao;
         $this->tAtivo       = $t->ativo;
         $this->tVagaId      = $t->vaga_id;
+        $this->tDataInicio  = $t->data_inicio ? $t->data_inicio->format('Y-m-d\TH:i') : '';
+        $this->tDataFim     = $t->data_fim    ? $t->data_fim->format('Y-m-d\TH:i')    : '';
         $this->questoes     = $t->questoes->map(fn($q) => [
             'enunciado'=>$q->enunciado,'tipo'=>$q->tipo,'peso'=>$q->peso,
             'opcoes'=>$q->opcoes->map(fn($o) => ['texto'=>$o->texto,'correta'=>$o->correta])->toArray(),
@@ -1012,13 +1112,25 @@ class Portal extends SecureComponent
     public function saveTeste(): void
     {
         $this->requireRhOrAdmin();
-        $this->validate(['tTitulo'=>'required|string|max:200','tTempo'=>'required|integer|min:1|max:480']);
+        $this->validate([
+            'tTitulo'    => 'required|string|max:200',
+            'tTempo'     => 'required|integer|min:1|max:480',
+            'tDataInicio'=> 'nullable|date',
+            'tDataFim'   => 'nullable|date|after_or_equal:tDataInicio',
+        ]);
         $data = [
-            'created_by'=>Auth::id(),'vaga_id'=>$this->tVagaId ?: null,
-            'titulo'=>$this->sanitize($this->tTitulo),
-            'descricao'=>$this->sanitize($this->tDescricao),'instrucoes'=>$this->sanitize($this->tInstrucoes),
-            'tempo_limite_minutos'=>$this->tTempo,'randomizar_questoes'=>$this->tRandomQ,
-            'randomizar_opcoes'=>$this->tRandomO,'nota_aprovacao'=>$this->tNota,'ativo'=>$this->tAtivo,
+            'created_by'           => Auth::id(),
+            'vaga_id'              => $this->tVagaId ?: null,
+            'data_inicio'          => $this->tDataInicio ?: null,
+            'data_fim'             => $this->tDataFim ?: null,
+            'titulo'               => $this->sanitize($this->tTitulo),
+            'descricao'            => $this->sanitize($this->tDescricao),
+            'instrucoes'           => $this->sanitize($this->tInstrucoes),
+            'tempo_limite_minutos' => $this->tTempo,
+            'randomizar_questoes'  => $this->tRandomQ,
+            'randomizar_opcoes'    => $this->tRandomO,
+            'nota_aprovacao'       => $this->tNota,
+            'ativo'                => $this->tAtivo,
         ];
         if ($this->testeEditId) {
             $teste = RhTeste::findOrFail($this->testeEditId);
@@ -1052,7 +1164,7 @@ class Portal extends SecureComponent
 
     private function resetTesteForm(): void
     {
-        $this->tTitulo=$this->tDescricao=$this->tInstrucoes='';
+        $this->tTitulo=$this->tDescricao=$this->tInstrucoes=$this->tDataInicio=$this->tDataFim='';
         $this->tTempo=60; $this->tNota=60; $this->tVagaId=null;
         $this->tRandomQ=$this->tRandomO=false; $this->tAtivo=true; $this->questoes=[];
     }
@@ -1532,6 +1644,185 @@ class Portal extends SecureComponent
             ->paginate(15, pageName: 'demPage');
     }
 
+    public function openDemDrawer(int $id): void
+    {
+        $this->demDrawerId  = $id;
+        $this->demDrawer    = true;
+        $this->demDrawerTab = 'processo';
+        unset($this->demDrawerData);
+
+        // Auto-criar itens do checklist padrão se ainda não existirem
+        if (!RhDesligamentoChecklist::where('desligamento_id', $id)->exists()) {
+            $defaults = [
+                ['titulo' => 'Comunicar desligamento ao time',          'responsavel' => 'gestao',     'ordem' => 1],
+                ['titulo' => 'Revogar acessos ao sistema',              'responsavel' => 'ti',         'ordem' => 2],
+                ['titulo' => 'Recolher equipamentos',                   'responsavel' => 'ti',         'ordem' => 3],
+                ['titulo' => 'Recolher crachá de identificação',        'responsavel' => 'rh',         'ordem' => 4],
+                ['titulo' => 'Realizar entrevista de desligamento',     'responsavel' => 'rh',         'ordem' => 5],
+                ['titulo' => 'Calcular e homologar verbas rescisórias', 'responsavel' => 'financeiro', 'ordem' => 6],
+                ['titulo' => 'Dar baixa na carteira de trabalho',       'responsavel' => 'rh',         'ordem' => 7],
+                ['titulo' => 'Enviar documentação ao funcionário',      'responsavel' => 'rh',         'ordem' => 8],
+            ];
+            foreach ($defaults as $item) {
+                RhDesligamentoChecklist::create(array_merge($item, [
+                    'desligamento_id' => $id,
+                    'status'          => 'pendente',
+                ]));
+            }
+            unset($this->demDrawerData);
+        }
+    }
+
+    public function atualizarRecontratavel(bool $valor): void
+    {
+        $this->requireRhOrAdmin();
+        if (!$this->demDrawerId) return;
+        RhDesligamento::where('id', $this->demDrawerId)->update(['recontratavel' => $valor]);
+        unset($this->demDrawerData, $this->desligamentos, $this->demStats);
+        $this->alertSuccess('Recontratável', 'Classificação atualizada.');
+    }
+
+    public function limparRecontratavel(): void
+    {
+        $this->requireRhOrAdmin();
+        if (!$this->demDrawerId) return;
+        RhDesligamento::where('id', $this->demDrawerId)->update(['recontratavel' => null]);
+        unset($this->demDrawerData, $this->desligamentos, $this->demStats);
+        $this->alertSuccess('Recontratável', 'Classificação removida.');
+    }
+
+    public function enviarEntrevista(): void
+    {
+        $this->requireRhOrAdmin();
+        if (!$this->demDrawerId) return;
+
+        $des = RhDesligamento::findOrFail($this->demDrawerId);
+        $entrevista = $des->entrevista;
+
+        if (!$entrevista) {
+            RhEntrevistaDesligamento::create([
+                'desligamento_id' => $des->id,
+                'token'           => \Illuminate\Support\Str::uuid(),
+                'enviado_at'      => now(),
+            ]);
+            $msg = 'Link de entrevista gerado com sucesso.';
+        } else {
+            $entrevista->update(['enviado_at' => now()]);
+            $msg = 'Link reenviado com sucesso.';
+        }
+
+        unset($this->demDrawerData);
+        $this->alertSuccess('Entrevista', $msg);
+    }
+
+    public function concluirDesligamento(): void
+    {
+        $this->requireRhOrAdmin();
+        if (!$this->demDrawerId) return;
+        RhDesligamento::where('id', $this->demDrawerId)->update([
+            'status'       => 'concluido',
+            'concluido_at' => now(),
+        ]);
+        unset($this->demDrawerData, $this->desligamentos, $this->demStats, $this->demTurnoverData);
+        $this->alertSuccess('Desligamento', 'Processo concluído com sucesso.');
+    }
+
+    public function toggleChecklist(int $itemId): void
+    {
+        $this->requireRhOrAdmin();
+        $item = RhDesligamentoChecklist::findOrFail($itemId);
+        if ($item->status === 'concluido') {
+            $item->update(['status' => 'pendente', 'concluido_by' => null, 'concluido_at' => null]);
+        } else {
+            $item->update(['status' => 'concluido', 'concluido_by' => Auth::id(), 'concluido_at' => now()]);
+        }
+        unset($this->demDrawerData);
+    }
+
+    public function openVerbasModal(int $id): void
+    {
+        $this->requireRhOrAdmin();
+        $des = RhDesligamento::with(['funcionario', 'verbas'])->findOrFail($id);
+        $this->verbasDesligId       = $id;
+        $this->vTipoDesligamento    = $des->tipo;
+        $this->vDataDemissao        = $des->data_ultimo_dia?->format('Y-m-d') ?? '';
+        $this->vAvisoPrevioTipo     = $des->aviso_previo_tipo ?? 'indenizado';
+        $this->vAvisoPrevioDias     = $des->aviso_previo_dias ?? 0;
+
+        // Pré-preenche com verbas existentes se houver
+        if ($des->verbas) {
+            $vb = $des->verbas;
+            $this->vSalarioBase       = (string) $vb->salario_base;
+            $this->vDataAdmissao      = $vb->data_admissao?->format('Y-m-d') ?? '';
+            $this->vSaldoFgts         = (string) $vb->saldo_fgts;
+            $this->vNumeroDependentes = (int) ($vb->numero_dependentes ?? 0);
+            $this->vOutrosCreditos    = (string) ($vb->outros_creditos ?? '');
+            $this->vDescontos         = (string) ($vb->descontos ?? '');
+            $this->vObservacoes       = $vb->observacoes ?? '';
+            $this->vTemFeriasVencidas = (bool) $vb->ferias_vencidas;
+        } else {
+            $this->vSalarioBase = $this->vDataAdmissao = $this->vSaldoFgts = '';
+            $this->vOutrosCreditos = $this->vDescontos = $this->vObservacoes = '';
+            $this->vNumeroDependentes = 0;
+            $this->vTemFeriasVencidas = false;
+        }
+
+        $this->verbasCalculadas = null;
+        $this->verbasModal      = true;
+    }
+
+    public function calcularVerbas(): void
+    {
+        $this->requireRhOrAdmin();
+        $this->validate([
+            'vSalarioBase'   => 'required|numeric|min:0.01',
+            'vDataAdmissao'  => 'required|date',
+            'vDataDemissao'  => 'required|date|after:vDataAdmissao',
+        ]);
+
+        $result = RhVerbaRescisoria::calcular(
+            salarioBase:      (float) $this->vSalarioBase,
+            dataAdmissao:     $this->vDataAdmissao,
+            dataDemissao:     $this->vDataDemissao,
+            tipo:             $this->vTipoDesligamento,
+            avisoPrevioTipo:  $this->vAvisoPrevioTipo,
+            avisoPrevioDias:  (int) $this->vAvisoPrevioDias,
+            temFeriasVencidas: $this->vTemFeriasVencidas,
+            saldoFgts:        $this->vSaldoFgts !== '' ? (float) $this->vSaldoFgts : 0.0,
+            numeroDependentes: $this->vNumeroDependentes,
+            outrosCreditos:   $this->vOutrosCreditos !== '' ? (float) $this->vOutrosCreditos : 0.0,
+            descontosExtras:  $this->vDescontos !== '' ? (float) $this->vDescontos : 0.0,
+        );
+
+        $this->verbasCalculadas = $result;
+    }
+
+    public function saveVerbas(): void
+    {
+        $this->requireRhOrAdmin();
+        if (!$this->verbasDesligId || !$this->verbasCalculadas) return;
+
+        $des = RhDesligamento::findOrFail($this->verbasDesligId);
+
+        RhVerbaRescisoria::updateOrCreate(
+            ['desligamento_id' => $des->id],
+            array_merge($this->verbasCalculadas, [
+                'desligamento_id'   => $des->id,
+                'salario_base'      => $this->vSalarioBase,
+                'data_admissao'     => $this->vDataAdmissao,
+                'data_demissao'     => $this->vDataDemissao,
+                'numero_dependentes'=> $this->vNumeroDependentes,
+                'observacoes'       => $this->vObservacoes ?: null,
+            ])
+        );
+
+        $this->verbasModal      = false;
+        $this->verbasCalculadas = null;
+        $this->verbasDesligId   = null;
+        unset($this->demDrawerData, $this->desligamentos, $this->demStats, $this->demTurnoverData);
+        $this->alertSuccess('Verbas', 'Verbas rescisórias salvas com sucesso.');
+    }
+
     #[Computed]
     public function demDrawerData(): ?RhDesligamento
     {
@@ -1540,6 +1831,38 @@ class Portal extends SecureComponent
             'funcionario.department', 'rhUser',
             'checklist.concluidoPor', 'entrevista', 'verbas',
         ])->find($this->demDrawerId);
+    }
+
+    #[Computed]
+    public function demEquipamentos()
+    {
+        if (!$this->demDrawerId) return collect();
+        $des = RhDesligamento::find($this->demDrawerId);
+        if (!$des) return collect();
+
+        return EquipamentoAtribuicao::with(['equipamento'])
+            ->where('user_id', $des->user_id)
+            ->where('tipo', 'entrega')
+            ->whereNull('data_devolucao')
+            ->orderBy('data_entrega')
+            ->get();
+    }
+
+    public function devolverEquipamento(int $atribuicaoId, string $condicao = 'bom'): void
+    {
+        $this->requireRhOrAdmin();
+
+        $atrib = EquipamentoAtribuicao::with('equipamento')->findOrFail($atribuicaoId);
+
+        $atrib->update([
+            'data_devolucao'      => now()->toDateString(),
+            'condicao_devolucao'  => $condicao,
+        ]);
+
+        $atrib->equipamento?->update(['status' => 'disponivel']);
+
+        unset($this->demEquipamentos, $this->demDrawerData);
+        $this->alertSuccess('Equipamento devolvido', $atrib->equipamento?->nome . ' marcado como disponível.');
     }
 
     #[Computed]
@@ -2201,5 +2524,276 @@ class Portal extends SecureComponent
     public function departamentos()
     {
         return Department::orderBy('name')->get(['id', 'name']);
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // ABA: PLANO DE SUCESSÃO
+    // ══════════════════════════════════════════════════════════════════
+
+    // ── Filtros ────────────────────────────────────────────────────────
+    public string $sucFiltroRisco   = '';
+    public string $sucFiltroDept    = '';
+    public string $sucBusca         = '';
+
+    // ── Modal: Posição Crítica ─────────────────────────────────────────
+    public bool   $sucPosModal      = false;
+    public string $sucPosModo       = 'criar'; // criar | editar
+    public ?int   $sucPosEditId     = null;
+
+    public string $sucPosTitle      = '';
+    public string $sucPosDesc       = '';
+    public ?int   $sucPosDeptId     = null;
+    public ?int   $sucPosHolderId   = null;
+    public string $sucPosRisk       = 'alto';
+    public int    $sucPosTimeFill   = 6;
+    public string $sucPosNotes      = '';
+
+    // ── Modal: Candidato ───────────────────────────────────────────────
+    public bool   $sucCandModal     = false;
+    public string $sucCandModo      = 'criar';
+    public ?int   $sucCandEditId    = null;
+    public ?int   $sucCandPosId     = null;   // posição selecionada para adicionar candidato
+
+    public ?int   $sucCandUserId    = null;
+    public string $sucCandReadiness = '1_a_3_anos';
+    public int    $sucCandPriority  = 1;
+    public ?int   $sucCandDpiId     = null;
+    public string $sucCandNotes     = '';
+
+    // ── Modal: detalhe da posição ──────────────────────────────────────
+    public ?int   $sucPosDetalheId  = null;
+
+    // ── Computed ───────────────────────────────────────────────────────
+
+    #[Computed]
+    public function successionPositions(): \Illuminate\Support\Collection
+    {
+        return SuccessionPosition::with([
+                'department',
+                'currentHolder',
+                'candidates' => fn ($q) => $q->with(['user', 'dpiPlan']),
+            ])
+            ->where('is_active', true)
+            ->when($this->sucFiltroRisco, fn ($q) => $q->where('risk_level', $this->sucFiltroRisco))
+            ->when($this->sucFiltroDept,  fn ($q) => $q->where('department_id', $this->sucFiltroDept))
+            ->when($this->sucBusca,       fn ($q) => $q->where('title', 'ilike', '%' . $this->sucBusca . '%'))
+            ->orderByRaw("CASE risk_level WHEN 'critico' THEN 1 WHEN 'alto' THEN 2 ELSE 3 END")
+            ->orderBy('title')
+            ->get();
+    }
+
+    #[Computed]
+    public function sucPosDetalhe(): ?SuccessionPosition
+    {
+        if (! $this->sucPosDetalheId) return null;
+        return SuccessionPosition::with([
+            'department', 'currentHolder',
+            'candidates' => fn ($q) => $q->with(['user.department', 'dpiPlan']),
+        ])->find($this->sucPosDetalheId);
+    }
+
+    #[Computed]
+    public function sucStats(): array
+    {
+        $positions  = SuccessionPosition::where('is_active', true)->get();
+        $total      = $positions->count();
+        $criticas   = $positions->where('risk_level', 'critico')->count();
+        $cobertas   = SuccessionPosition::where('is_active', true)
+            ->whereHas('candidates')->count();
+        $descobertas = $total - $cobertas;
+
+        $prontos = SuccessionCandidate::where('readiness', 'pronto_agora')->count();
+
+        return compact('total', 'criticas', 'cobertas', 'descobertas', 'prontos');
+    }
+
+    #[Computed]
+    public function sucAllUsers(): \Illuminate\Support\Collection
+    {
+        return User::where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'position', 'department_id']);
+    }
+
+    #[Computed]
+    public function sucDpiPlans(): \Illuminate\Support\Collection
+    {
+        if (! $this->sucCandUserId) return collect();
+        return DpiPlan::where('user_id', $this->sucCandUserId)
+            ->whereIn('status', ['aprovado', 'enviado', 'concluido'])
+            ->latest()
+            ->get(['id', 'year', 'status']);
+    }
+
+    // ── Ações — Posições ───────────────────────────────────────────────
+
+    public function sucAbrirModalPos(string $modo = 'criar', ?int $id = null): void
+    {
+        $this->requireRhOrAdmin();
+        $this->sucResetPosForm();
+        $this->sucPosModo   = $modo;
+        $this->sucPosEditId = $id;
+
+        if ($modo === 'editar' && $id) {
+            $pos = SuccessionPosition::findOrFail($id);
+            $this->sucPosTitle    = $pos->title;
+            $this->sucPosDesc     = $pos->description ?? '';
+            $this->sucPosDeptId   = $pos->department_id;
+            $this->sucPosHolderId = $pos->current_holder_id;
+            $this->sucPosRisk     = $pos->risk_level;
+            $this->sucPosTimeFill = $pos->time_to_fill_months;
+            $this->sucPosNotes    = $pos->notes ?? '';
+        }
+
+        $this->sucPosModal = true;
+    }
+
+    public function sucSalvarPos(): void
+    {
+        $this->requireRhOrAdmin();
+        $this->validate([
+            'sucPosTitle'    => 'required|string|max:200',
+            'sucPosRisk'     => 'required|in:critico,alto,medio',
+            'sucPosTimeFill' => 'required|integer|min:1|max:120',
+        ], ['sucPosTitle.required' => 'O título da posição é obrigatório.']);
+
+        $dados = [
+            'title'                => $this->sanitize($this->sucPosTitle),
+            'description'          => $this->sanitize($this->sucPosDesc),
+            'department_id'        => $this->sucPosDeptId ?: null,
+            'current_holder_id'    => $this->sucPosHolderId ?: null,
+            'risk_level'           => $this->sucPosRisk,
+            'time_to_fill_months'  => $this->sucPosTimeFill,
+            'notes'                => $this->sanitize($this->sucPosNotes),
+        ];
+
+        if ($this->sucPosModo === 'editar' && $this->sucPosEditId) {
+            SuccessionPosition::findOrFail($this->sucPosEditId)->update($dados);
+            $this->alertSuccess('Posição atualizada!');
+        } else {
+            $dados['created_by'] = Auth::id();
+            SuccessionPosition::create($dados);
+            $this->alertSuccess('Posição crítica criada!');
+        }
+
+        $this->sucPosModal = false;
+        $this->sucResetPosForm();
+        unset($this->successionPositions, $this->sucStats);
+    }
+
+    public function sucExcluirPos(int $id): void
+    {
+        $this->requireRhOrAdmin();
+        SuccessionPosition::findOrFail($id)->delete();
+        if ($this->sucPosDetalheId === $id) $this->sucPosDetalheId = null;
+        unset($this->successionPositions, $this->sucStats, $this->sucPosDetalhe);
+        $this->alertSuccess('Posição removida.');
+    }
+
+    public function sucVerDetalhe(?int $id): void
+    {
+        $this->sucPosDetalheId = ($this->sucPosDetalheId === $id) ? null : $id;
+        unset($this->sucPosDetalhe);
+    }
+
+    // ── Ações — Candidatos ─────────────────────────────────────────────
+
+    public function sucAbrirModalCand(int $posId, string $modo = 'criar', ?int $candId = null): void
+    {
+        $this->requireRhOrAdmin();
+        $this->sucResetCandForm();
+        $this->sucCandModo   = $modo;
+        $this->sucCandPosId  = $posId;
+        $this->sucCandEditId = $candId;
+
+        if ($modo === 'editar' && $candId) {
+            $c = SuccessionCandidate::findOrFail($candId);
+            $this->sucCandUserId    = $c->user_id;
+            $this->sucCandReadiness = $c->readiness;
+            $this->sucCandPriority  = $c->priority;
+            $this->sucCandDpiId     = $c->dpi_plan_id;
+            $this->sucCandNotes     = $c->notes ?? '';
+        } else {
+            // Sugere prioridade como próximo número disponível
+            $this->sucCandPriority = SuccessionCandidate::where('position_id', $posId)->count() + 1;
+        }
+
+        $this->sucCandModal = true;
+    }
+
+    public function sucSalvarCand(): void
+    {
+        $this->requireRhOrAdmin();
+        $this->validate([
+            'sucCandUserId'    => 'required|exists:users,id',
+            'sucCandReadiness' => 'required|in:pronto_agora,6_a_12_meses,1_a_3_anos',
+            'sucCandPriority'  => 'required|integer|min:1|max:10',
+        ], ['sucCandUserId.required' => 'Selecione um colaborador.']);
+
+        $dados = [
+            'position_id' => $this->sucCandPosId,
+            'user_id'     => $this->sucCandUserId,
+            'readiness'   => $this->sucCandReadiness,
+            'priority'    => $this->sucCandPriority,
+            'dpi_plan_id' => $this->sucCandDpiId ?: null,
+            'notes'       => $this->sanitize($this->sucCandNotes),
+        ];
+
+        if ($this->sucCandModo === 'editar' && $this->sucCandEditId) {
+            SuccessionCandidate::findOrFail($this->sucCandEditId)->update($dados);
+            $this->alertSuccess('Candidato atualizado!');
+        } else {
+            // Verifica duplicidade
+            $exists = SuccessionCandidate::where('position_id', $this->sucCandPosId)
+                ->where('user_id', $this->sucCandUserId)->exists();
+            if ($exists) {
+                $this->alertError('Este colaborador já é candidato para esta posição.');
+                return;
+            }
+            $dados['created_by'] = Auth::id();
+            SuccessionCandidate::create($dados);
+            $this->alertSuccess('Candidato adicionado!');
+        }
+
+        $this->sucCandModal = false;
+        $this->sucResetCandForm();
+        unset($this->successionPositions, $this->sucStats, $this->sucPosDetalhe);
+    }
+
+    public function sucExcluirCand(int $id): void
+    {
+        $this->requireRhOrAdmin();
+        SuccessionCandidate::findOrFail($id)->delete();
+        unset($this->successionPositions, $this->sucStats, $this->sucPosDetalhe);
+        $this->alertSuccess('Candidato removido.');
+    }
+
+    public function sucLimparFiltros(): void
+    {
+        $this->sucFiltroRisco = '';
+        $this->sucFiltroDept  = '';
+        $this->sucBusca       = '';
+        unset($this->successionPositions);
+    }
+
+    // ── Reset forms ────────────────────────────────────────────────────
+
+    private function sucResetPosForm(): void
+    {
+        $this->sucPosTitle = $this->sucPosDesc = $this->sucPosNotes = '';
+        $this->sucPosDeptId = $this->sucPosHolderId = $this->sucPosEditId = null;
+        $this->sucPosRisk     = 'alto';
+        $this->sucPosTimeFill = 6;
+        $this->resetValidation();
+    }
+
+    private function sucResetCandForm(): void
+    {
+        $this->sucCandUserId = $this->sucCandDpiId = $this->sucCandEditId = $this->sucCandPosId = null;
+        $this->sucCandReadiness = '1_a_3_anos';
+        $this->sucCandPriority  = 1;
+        $this->sucCandNotes     = '';
+        unset($this->sucDpiPlans);
+        $this->resetValidation();
     }
 }

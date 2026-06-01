@@ -3,7 +3,7 @@
     $me     = Auth::user();
     $meParts = explode(' ', trim($me->name ?? '?'));
     $meInit  = strtoupper(substr($meParts[0], 0, 1) . (isset($meParts[1]) ? substr($meParts[1], 0, 1) : ''));
-    $pal     = ['bg-indigo-500','bg-violet-500','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
+    $pal     = ['bg-indigo-500','bg-indigo-600','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
     $meBg    = $pal[abs(crc32($me->name ?? '')) % count($pal)];
 
     if (!function_exists('feedInitials')) {
@@ -14,7 +14,7 @@
     }
     if (!function_exists('feedBg')) {
         function feedBg(string $name): string {
-            $pal2 = ['bg-indigo-500','bg-violet-500','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
+            $pal2 = ['bg-indigo-500','bg-indigo-600','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
             return $pal2[abs(crc32($name)) % count($pal2)];
         }
     }
@@ -46,7 +46,24 @@
      }"
      @open-lightbox.window="openLightbox($event.detail.src, $event.detail.alt)"
      @keydown.escape.window="if(lightbox.open) closeLightbox()"
-     @click="if($event.target.dataset.hashtag) $wire.setHashtag($event.target.dataset.hashtag)">
+     @click="if($event.target.dataset.hashtag) $wire.setHashtag($event.target.dataset.hashtag)"
+     @post-created.window="
+         const targetId = $event.detail.postId;
+         const tryScroll = (attempts) => {
+             const el = document.querySelector('[data-feed-post-id=\'' + targetId + '\']');
+             if (el) {
+                 el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                 el.classList.add('feed-post-flash');
+                 setTimeout(() => el.classList.remove('feed-post-flash'), 2500);
+             } else if (attempts > 0) {
+                 setTimeout(() => tryScroll(attempts - 1), 200);
+             } else {
+                 window.scrollTo({ top: 0, behavior: 'smooth' });
+             }
+         };
+         setTimeout(() => tryScroll(8), 300);
+     "
+     @new-posts-available.window="if (window.scrollY < 300) $wire.refreshFeed()">
 
     <div class="max-w-6xl mx-auto">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
@@ -174,7 +191,7 @@
                             </div>
 
                             {{-- Preview de imagens --}}
-                            <template x-if="previewUrls.length > 0">
+                            <template x-if="expanded && previewUrls.length > 0">
                                 <div class="mt-3">
                                     {{-- Carrossel --}}
                                     <div class="relative rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-900 aspect-video group">
@@ -277,11 +294,17 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-xs text-slate-400 lato-regular">{{ strlen($newPostContent) }}/2000</span>
-                            <button wire:click="createPost" type="button" wire:loading.attr="disabled"
+                            <button wire:click="createPost" @click="clearImages(); expanded = false; showPoll = false;" type="button" wire:loading.attr="disabled"
                                     class="px-5 py-2 text-xs lato-bold rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white
                                            hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 transition shadow-sm">
-                                <span wire:loading.remove wire:target="createPost">Publicar</span>
-                                <span wire:loading wire:target="createPost">Publicando…</span>
+                                <span wire:loading wire:target="createPost">
+                                    <x-lucide-loader-2 class="w-4 h-4 animate-spin" />
+                                </span>
+
+                                 <span wire:loading.remove wire:target="createPost" class="flex items-center gap-1.5">
+                                        <x-lucide-circle-check class="w-4 h-4" />
+                                        Confirmar
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -1281,6 +1304,28 @@
                class="mt-3 text-white/70 text-sm text-center lato-regular"></p>
         </div>
     </div>
+
+    <style>
+    @keyframes feedFlash {
+        0%   { box-shadow: 0 0 0 0   rgb(99 102 241 / 0);   background-color: transparent; }
+        15%  { box-shadow: 0 0 0 4px rgb(99 102 241 / 0.5); background-color: rgb(238 242 255 / 0.6); }
+        80%  { box-shadow: 0 0 0 2px rgb(99 102 241 / 0.2); background-color: rgb(238 242 255 / 0.2); }
+        100% { box-shadow: 0 0 0 0   transparent;            background-color: transparent; }
+    }
+    .dark .feed-post-flash {
+        animation: feedFlashDark 2.5s ease-out forwards;
+    }
+    .feed-post-flash {
+        animation: feedFlash 2.5s ease-out forwards;
+        border-radius: 1rem;
+    }
+    @keyframes feedFlashDark {
+        0%   { box-shadow: 0 0 0 0   rgb(99 102 241 / 0);   background-color: transparent; }
+        15%  { box-shadow: 0 0 0 4px rgb(99 102 241 / 0.5); background-color: rgb(49 46 129 / 0.3); }
+        80%  { box-shadow: 0 0 0 2px rgb(99 102 241 / 0.2); background-color: rgb(49 46 129 / 0.1); }
+        100% { box-shadow: 0 0 0 0   transparent;            background-color: transparent; }
+    }
+    </style>
 
     @script
     <script>

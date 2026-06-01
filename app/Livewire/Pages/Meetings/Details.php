@@ -54,6 +54,11 @@ class Details extends SecureComponent
         }
 
         $this->meetingId = $id;
+
+        $this->dispatch('breadcrumb-set', items: [
+            ['label' => 'Reuniões', 'icon' => 'calendar', 'url' => route('reunioes')],
+            ['label' => $meeting->title, 'url' => null],
+        ]);
     }
 
     // ──────────────────────────────────────────────────────────────────

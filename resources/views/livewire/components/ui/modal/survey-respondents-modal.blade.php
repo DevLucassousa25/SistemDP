@@ -17,7 +17,7 @@
                     <div class="flex items-start gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 sm:py-5">
 
                         <div class="shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl
-                                    {{ $isAnonymous ? 'bg-gradient-to-br from-slate-500 to-slate-600' : 'bg-gradient-to-br from-violet-500 to-purple-600' }}
+                                    {{ $isAnonymous ? 'bg-gradient-to-br from-slate-500 to-slate-600' : 'bg-gradient-to-br from-blue-500 to-indigo-600' }}
                                     flex items-center justify-center shadow-sm">
                             @if ($isAnonymous)
                                 <x-lucide-eye-off class="w-5 h-5 sm:w-6 sm:h-6 text-white" />
@@ -56,7 +56,7 @@
                         @else
                             <span class="inline-flex items-center gap-1.5 text-[11px] lato-bold px-2.5 py-1 rounded-full
                                          bg-violet-50 text-violet-700 border border-violet-200
-                                         dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-700/40">
+                                         dark:bg-violet-900/20 dark:text-indigo-400 dark:border-violet-700/40">
                                 <x-lucide-eye class="w-3 h-3" />
                                 Respostas identificadas
                             </span>
@@ -148,7 +148,7 @@
                                         ->take(2)
                                         ->implode('');
                                     $colors = [
-                                        'from-violet-500 to-purple-600',
+                                        'from-blue-500 to-indigo-600',
                                         'from-emerald-500 to-teal-500',
                                         'from-blue-500 to-indigo-600',
                                         'from-rose-500 to-pink-600',
@@ -198,7 +198,7 @@
                                         <div class="shrink-0 w-6 h-6 flex items-center justify-center
                                                     rounded-lg text-slate-400 dark:text-slate-500">
                                             @if ($expanded)
-                                                <x-lucide-chevron-up class="w-4 h-4 text-violet-500" />
+                                                <x-lucide-chevron-up class="w-4 h-4 text-indigo-500" />
                                             @else
                                                 <x-lucide-chevron-down class="w-4 h-4" />
                                             @endif

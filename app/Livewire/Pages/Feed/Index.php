@@ -331,6 +331,21 @@ class Index extends SecureComponent
 
     public function createPost(): void
     {
+        // Limpa arquivos temporários inválidos/corrompidos antes de validar
+        if (!empty($this->newPostImages)) {
+            $valid = [];
+            foreach ((array) $this->newPostImages as $img) {
+                try {
+                    if ($img && method_exists($img, 'getSize') && $img->getSize() !== false) {
+                        $valid[] = $img;
+                    }
+                } catch (\Throwable) {
+                    // arquivo temporário inválido — ignora silenciosamente
+                }
+            }
+            $this->newPostImages = $valid;
+        }
+
         $this->validate([
             'newPostContent'   => 'required|string|min:1|max:2000',
             'newPostImages'    => 'nullable|array|max:4',
@@ -378,10 +393,12 @@ class Index extends SecureComponent
 
         $this->reset(['newPostContent', 'newPostImages', 'postBoxExpanded',
                       'showPollCreator', 'pollQuestion', 'pollOptions', 'pollDuration']);
-        $this->pollOptions = ['', ''];
+        $this->pollOptions  = ['', ''];
         $this->pollDuration = '7';
+        $this->newPostsBanner = 0;
+        $this->loadedCount  = 15;
         unset($this->feedItems, $this->totalFeedCount);
-        $this->dispatch('post-created');
+        $this->dispatch('post-created', postId: $post->id);
     }
 
     public function addPollOption(): void
@@ -832,6 +849,8 @@ class Index extends SecureComponent
         $diff = $total - $this->totalFeedCount;
         if ($diff > 0) {
             $this->newPostsBanner = $diff;
+            // Despacha evento para o Alpine auto-aplicar o refresh com animação
+            $this->dispatch('new-posts-available', count: $diff);
         }
     }
 

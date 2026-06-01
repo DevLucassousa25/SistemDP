@@ -6,7 +6,7 @@
     <div class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 lg:px-8 py-6">
         <div class="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center shadow-sm">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-pink-500 flex items-center justify-center shadow-sm">
                     <x-lucide-heart-pulse class="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -36,17 +36,17 @@
                     <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">De</label>
                     <input type="date" wire:model="dataInicio"
                            class="px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700
-                                  bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-400">
+                                  bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-400">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Até</label>
                     <input type="date" wire:model="dataFim"
                            class="px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700
-                                  bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-400">
+                                  bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-400">
                 </div>
                 <button wire:click="aplicarCustom"
-                        class="px-4 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-violet-500 to-pink-500
-                               hover:from-violet-600 hover:to-pink-600 text-white shadow-sm transition cursor-pointer">
+                        class="px-4 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-blue-500 to-pink-500
+                               hover:from-blue-500 hover:to-pink-600 text-white shadow-sm transition cursor-pointer">
                     Aplicar
                 </button>
                 @error('dataInicio') <p class="text-xs text-rose-500 self-end">{{ $message }}</p> @enderror
@@ -67,7 +67,7 @@
             <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-4">
                 <div class="flex items-center gap-2 mb-2">
                     <div class="w-8 h-8 rounded-lg bg-violet-50 dark:bg-violet-900/30 flex items-center justify-center">
-                        <x-lucide-calendar-check class="w-4 h-4 text-violet-500" />
+                        <x-lucide-calendar-check class="w-4 h-4 text-indigo-500" />
                     </div>
                     <span class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Check-ins</span>
                 </div>
@@ -135,7 +135,7 @@
         @if($this->stats['total'] > 0)
         <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
             <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2">
-                <x-lucide-trending-up class="w-4 h-4 text-violet-500" />
+                <x-lucide-trending-up class="w-4 h-4 text-indigo-500" />
                 <h2 class="text-sm font-bold text-slate-700 dark:text-slate-200">Evolução do Humor</h2>
                 <span class="ml-auto text-xs text-slate-400">
                     {{ \Carbon\Carbon::parse($dataInicio)->format('d/m/Y') }} — {{ \Carbon\Carbon::parse($dataFim)->format('d/m/Y') }}

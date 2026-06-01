@@ -47,13 +47,14 @@ class Index extends SecureComponent
     public int    $compNivelMeta    = 3;
 
     // Formulário inline de ação (dentro do modal)
-    public bool   $showInlineForm           = false;
-    public string $inlineActionTitle        = '';
-    public string $inlineActionType         = 'curso';
-    public string $inlineActionDate         = '';
-    public string $inlineActionDesc         = '';
-    public ?int   $editingInlineActionId    = null;
-    public ?int   $editingInlineActionIndex = null;
+    public bool   $showInlineForm              = false;
+    public string $inlineActionTitle           = '';
+    public string $inlineActionType            = 'curso';
+    public string $inlineActionDate            = '';
+    public string $inlineActionDesc            = '';
+    public ?int   $inlineActionTreinamentoId   = null;
+    public ?int   $editingInlineActionId       = null;
+    public ?int   $editingInlineActionIndex    = null;
 
     // Ações pendentes (apenas para nova competência, antes de salvar)
     public array $pendingActions = [];
@@ -153,7 +154,7 @@ class Index extends SecureComponent
     #[Computed]
     public function myPlan(): ?DpiPlan
     {
-        return DpiPlan::with(['goals.actions', 'creator'])
+        return DpiPlan::with(['goals.actions.treinamento', 'creator'])
             ->where('user_id', Auth::id())
             ->where('year', $this->selectedYear)
             ->first();
@@ -164,7 +165,7 @@ class Index extends SecureComponent
     {
         if (! $this->teamUserId) return null;
 
-        return DpiPlan::with(['goals.actions', 'user', 'creator'])
+        return DpiPlan::with(['goals.actions.treinamento', 'user', 'creator'])
             ->where('user_id', $this->teamUserId)
             ->where('year', $this->selectedYear)
             ->first();
@@ -584,13 +585,22 @@ class Index extends SecureComponent
         ];
     }
 
+    /** Cursos ativos disponíveis para vincular a uma ação DPI */
+    #[Computed]
+    public function treinamentosDisponiveis()
+    {
+        return \App\Models\Treinamento::where('status', 'ativo')
+            ->orderBy('titulo')
+            ->get(['id', 'titulo', 'nivel', 'carga_horaria']);
+    }
+
     /** Ações da competência em edição (apenas quando editGoalId está definido) */
     #[Computed]
     public function editingGoalActions()
     {
         if (! $this->editGoalId) return collect();
 
-        return DpiGoal::with(['actions' => fn ($q) => $q->orderBy('order')->orderBy('id')])
+        return DpiGoal::with(['actions' => fn ($q) => $q->with('treinamento')->orderBy('order')->orderBy('id')])
             ->findOrFail($this->editGoalId)
             ->actions;
     }
@@ -950,13 +960,14 @@ class Index extends SecureComponent
 
             foreach ($this->pendingActions as $i => $pa) {
                 DpiAction::create([
-                    'dpi_goal_id' => $goal->id,
-                    'title'       => $pa['title'],
-                    'type'        => $pa['type'],
-                    'target_date' => $pa['date'] ?: null,
-                    'description' => $pa['desc'] ?: null,
-                    'status'      => 'pendente',
-                    'order'       => $i + 1,
+                    'dpi_goal_id'    => $goal->id,
+                    'title'          => $pa['title'],
+                    'type'           => $pa['type'],
+                    'target_date'    => $pa['date'] ?: null,
+                    'description'    => $pa['desc'] ?: null,
+                    'treinamento_id' => $pa['treinamento_id'] ?? null,
+                    'status'         => 'pendente',
+                    'order'          => $i + 1,
                 ]);
             }
 
@@ -983,26 +994,28 @@ class Index extends SecureComponent
     public function editInlineAction(int $actionId): void
     {
         $action = DpiAction::findOrFail($actionId);
-        $this->editingInlineActionId    = $actionId;
-        $this->editingInlineActionIndex = null;
-        $this->inlineActionTitle = $action->title;
-        $this->inlineActionType  = $action->type;
-        $this->inlineActionDate  = $action->target_date?->format('Y-m-d') ?? '';
-        $this->inlineActionDesc  = $action->description ?? '';
-        $this->showInlineForm    = true;
+        $this->editingInlineActionId      = $actionId;
+        $this->editingInlineActionIndex   = null;
+        $this->inlineActionTitle          = $action->title;
+        $this->inlineActionType           = $action->type;
+        $this->inlineActionDate           = $action->target_date?->format('Y-m-d') ?? '';
+        $this->inlineActionDesc           = $action->description ?? '';
+        $this->inlineActionTreinamentoId  = $action->treinamento_id;
+        $this->showInlineForm             = true;
     }
 
     public function editPendingAction(int $index): void
     {
         $pa = $this->pendingActions[$index] ?? null;
         if (! $pa) return;
-        $this->editingInlineActionIndex = $index;
-        $this->editingInlineActionId    = null;
-        $this->inlineActionTitle = $pa['title'];
-        $this->inlineActionType  = $pa['type'];
-        $this->inlineActionDate  = $pa['date'];
-        $this->inlineActionDesc  = $pa['desc'];
-        $this->showInlineForm    = true;
+        $this->editingInlineActionIndex  = $index;
+        $this->editingInlineActionId     = null;
+        $this->inlineActionTitle         = $pa['title'];
+        $this->inlineActionType          = $pa['type'];
+        $this->inlineActionDate          = $pa['date'];
+        $this->inlineActionDesc          = $pa['desc'];
+        $this->inlineActionTreinamentoId = $pa['treinamento_id'] ?? null;
+        $this->showInlineForm            = true;
     }
 
     public function saveInlineAction(): void
@@ -1019,31 +1032,36 @@ class Index extends SecureComponent
             'inlineActionType'  => 'tipo',
         ]);
 
+        $treinamentoId = ($this->inlineActionType === 'curso') ? $this->inlineActionTreinamentoId : null;
+
         $payload = [
-            'title' => $this->sanitize($this->inlineActionTitle),
-            'type'  => $this->inlineActionType,
-            'date'  => $this->inlineActionDate,
-            'desc'  => $this->sanitize($this->inlineActionDesc),
+            'title'          => $this->sanitize($this->inlineActionTitle),
+            'type'           => $this->inlineActionType,
+            'date'           => $this->inlineActionDate,
+            'desc'           => $this->sanitize($this->inlineActionDesc),
+            'treinamento_id' => $treinamentoId,
         ];
 
         if ($this->editGoalId) {
             if ($this->editingInlineActionId) {
                 DpiAction::findOrFail($this->editingInlineActionId)->update([
-                    'title'       => $payload['title'],
-                    'type'        => $payload['type'],
-                    'target_date' => $payload['date'] ?: null,
-                    'description' => $payload['desc'] ?: null,
+                    'title'          => $payload['title'],
+                    'type'           => $payload['type'],
+                    'target_date'    => $payload['date'] ?: null,
+                    'description'    => $payload['desc'] ?: null,
+                    'treinamento_id' => $payload['treinamento_id'],
                 ]);
             } else {
                 $goal = DpiGoal::findOrFail($this->editGoalId);
                 DpiAction::create([
-                    'dpi_goal_id' => $goal->id,
-                    'title'       => $payload['title'],
-                    'type'        => $payload['type'],
-                    'target_date' => $payload['date'] ?: null,
-                    'description' => $payload['desc'] ?: null,
-                    'status'      => 'pendente',
-                    'order'       => $goal->actions()->max('order') + 1,
+                    'dpi_goal_id'    => $goal->id,
+                    'title'          => $payload['title'],
+                    'type'           => $payload['type'],
+                    'target_date'    => $payload['date'] ?: null,
+                    'description'    => $payload['desc'] ?: null,
+                    'treinamento_id' => $payload['treinamento_id'],
+                    'status'         => 'pendente',
+                    'order'          => $goal->actions()->max('order') + 1,
                 ]);
             }
             unset($this->editingGoalActions);
@@ -1075,6 +1093,11 @@ class Index extends SecureComponent
             Storage::disk('local')->delete($action->attachment_path);
         }
 
+        // Remove a tarefa vinculada se existir
+        if ($action->task_id) {
+            Task::find($action->task_id)?->delete();
+        }
+
         $action->delete();
         unset($this->editingGoalActions, $this->myPlan, $this->teamPlan);
     }
@@ -1096,10 +1119,13 @@ class Index extends SecureComponent
         if ($this->deleteType === 'goal') {
             $goal = DpiGoal::findOrFail($this->deleteId);
             $this->requireCanEditPlan($goal->plan->user_id);
-            // Remove arquivos das ações filhas
+            // Remove arquivos e tarefas vinculadas das ações filhas
             foreach ($goal->actions as $a) {
                 if ($a->attachment_path) {
                     Storage::disk('local')->delete($a->attachment_path);
+                }
+                if ($a->task_id) {
+                    Task::find($a->task_id)?->delete();
                 }
             }
             $goal->delete();
@@ -1109,6 +1135,10 @@ class Index extends SecureComponent
             $this->requireCanEditPlan($action->goal->plan->user_id);
             if ($action->attachment_path) {
                 Storage::disk('local')->delete($action->attachment_path);
+            }
+            // Remove a tarefa vinculada se existir
+            if ($action->task_id) {
+                Task::find($action->task_id)?->delete();
             }
             $action->delete();
             $this->alertSuccess('Ação removida.');
@@ -1317,13 +1347,14 @@ class Index extends SecureComponent
 
     public function resetInlineActionForm(): void
     {
-        $this->inlineActionTitle        = '';
-        $this->inlineActionType         = 'curso';
-        $this->inlineActionDate         = '';
-        $this->inlineActionDesc         = '';
-        $this->editingInlineActionId    = null;
-        $this->editingInlineActionIndex = null;
-        $this->showInlineForm           = false;
+        $this->inlineActionTitle           = '';
+        $this->inlineActionType            = 'curso';
+        $this->inlineActionDate            = '';
+        $this->inlineActionDesc            = '';
+        $this->inlineActionTreinamentoId   = null;
+        $this->editingInlineActionId       = null;
+        $this->editingInlineActionIndex    = null;
+        $this->showInlineForm              = false;
     }
 
     // ═════════════════════════════════════════════════════════════════
@@ -1339,9 +1370,30 @@ class Index extends SecureComponent
         $action = DpiAction::with(['goal.plan.user'])->findOrFail($actionId);
         $plan   = $action->goal->plan;
 
+        // Se já há task_id, verifica se a tarefa ainda existe
         if ($action->task_id) {
-            $this->alertInfo('Já vinculada', 'Esta ação já possui uma tarefa associada.');
-            return;
+            $existingTask = Task::find($action->task_id);
+
+            if ($existingTask) {
+                // Verifica se título e responsável batem com os dados do DPI
+                $expectedTitle = '[DPI] ' . $action->title;
+                if ($existingTask->title === $expectedTitle && $existingTask->assigned_to === $action->goal->plan->user_id) {
+                    $this->alertInfo('Tarefa já existe', 'Esta ação já possui uma tarefa vinculada com as mesmas informações.');
+                    return;
+                }
+
+                // Título mudou — atualiza a tarefa existente em vez de criar outra
+                $existingTask->update([
+                    'title'    => '[DPI] ' . $action->title,
+                    'due_date' => $action->target_date,
+                ]);
+                unset($this->myPlan, $this->teamPlan);
+                $this->alertInfo('Tarefa atualizada', 'A tarefa vinculada foi atualizada com as informações atuais.');
+                return;
+            }
+
+            // task_id órfão (tarefa foi excluída externamente) — limpa e recria
+            $action->update(['task_id' => null]);
         }
 
         $priority = match($action->goal->priority) {
@@ -1375,15 +1427,20 @@ class Index extends SecureComponent
     }
 
     /**
-     * Remove o vínculo entre a ação DPI e a tarefa (não exclui a tarefa).
+     * Remove o vínculo entre a ação DPI e exclui a tarefa vinculada.
      */
     public function detachTaskFromAction(int $actionId): void
     {
         $this->requireRole(['administrator', 'hr', 'manager']);
         $action = DpiAction::findOrFail($actionId);
+
+        if ($action->task_id) {
+            Task::find($action->task_id)?->delete();
+        }
+
         $action->update(['task_id' => null]);
         unset($this->myPlan, $this->teamPlan);
-        $this->alertInfo('Vínculo removido', 'A tarefa foi desvinculada da ação DPI.');
+        $this->alertSuccess('Tarefa excluída.');
     }
 
     // ═════════════════════════════════════════════════════════════════

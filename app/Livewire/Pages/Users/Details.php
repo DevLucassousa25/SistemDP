@@ -34,6 +34,10 @@ class Details extends SecureComponent
         $this->requireRhOrAdmin();
         $this->userId = $id;
         $this->loadUser();
+        $this->dispatch('breadcrumb-set', items: [
+            ['label' => 'Usuários', 'icon' => 'users', 'url' => route('users')],
+            ['label' => $this->user->name ?? 'Perfil', 'url' => null],
+        ]);
     }
 
     public function loadUser(): void

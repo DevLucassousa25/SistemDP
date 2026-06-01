@@ -241,7 +241,7 @@
                                 @php
                                     $respCls = match ($tarefa->responsavel) {
                                         'rh'         => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-                                        'ti'         => 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
+                                        'ti'         => 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-indigo-400',
                                         'gestao'     => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
                                         'financeiro' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
                                         default      => 'bg-slate-100 text-slate-600',
@@ -313,6 +313,50 @@
                         @error('novaTarefaTitulo')
                             <p class="text-xs text-red-500 mt-1 lato-regular">{{ $message }}</p>
                         @enderror
+                    </div>
+
+                    {{-- ── Equipamentos vinculados ── --}}
+                    @php $eqsOnb = $this->drawerEquipamentos; @endphp
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 lato-bold uppercase tracking-wide">Equipamentos Entregues</p>
+                            @if ($eqsOnb->count() > 0)
+                            <span class="text-[10px] px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-indigo-400 lato-bold">
+                                {{ $eqsOnb->count() }} {{ $eqsOnb->count() === 1 ? 'item' : 'itens' }}
+                            </span>
+                            @endif
+                        </div>
+                        @if ($eqsOnb->isEmpty())
+                            <div class="flex items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-dashed border-slate-200 dark:border-slate-600">
+                                <x-lucide-package class="w-4 h-4 text-slate-300 shrink-0" />
+                                <p class="text-xs text-slate-400 lato-regular">Nenhum equipamento entregue ainda. Faça o registro no módulo <strong>Equipamentos</strong>.</p>
+                            </div>
+                        @else
+                            @php
+                                $catIconsOnb = ['notebook'=>'laptop-2','desktop'=>'monitor','monitor'=>'monitor-dot','teclado'=>'keyboard','mouse'=>'mouse-pointer-2','headset'=>'headphones','cracha'=>'id-card','epi'=>'hard-hat','celular'=>'smartphone','cadeira'=>'sofa','outros'=>'package'];
+                                $condLblOnb  = ['novo'=>'Novo','bom'=>'Bom','regular'=>'Regular','danificado'=>'Danificado'];
+                            @endphp
+                            <div class="space-y-2">
+                                @foreach ($eqsOnb as $atrib)
+                                @php $eq = $atrib->equipamento; @endphp
+                                <div class="flex items-center gap-3 p-3 rounded-xl bg-violet-50 dark:bg-violet-900/10 border border-violet-100 dark:border-violet-800/30">
+                                    <div class="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center shrink-0">
+                                        <x-dynamic-component :component="'lucide-'.($catIconsOnb[$eq?->categoria] ?? 'package')"
+                                            class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-xs lato-bold text-slate-700 dark:text-slate-200 truncate">{{ $eq?->nome ?? '—' }}</p>
+                                        <p class="text-[10px] text-slate-400 lato-regular">
+                                            {{ ucfirst($eq?->categoria ?? '') }}
+                                            · {{ $condLblOnb[$atrib->condicao_entrega] ?? $atrib->condicao_entrega }}
+                                            · {{ $atrib->data_entrega?->format('d/m/Y') ?? '—' }}
+                                        </p>
+                                    </div>
+                                    <x-lucide-check class="w-4 h-4 text-indigo-500 shrink-0" />
+                                </div>
+                                @endforeach
+                            </div>
+                        @endif
                     </div>
 
                     {{-- Observações --}}

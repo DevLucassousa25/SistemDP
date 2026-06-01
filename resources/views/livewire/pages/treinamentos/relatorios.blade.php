@@ -1,0 +1,353 @@
+<div class="p-4 sm:p-6 lg:p-8">
+
+    {{-- ───── Cabeçalho ──────────────────────────────────────────────────── --}}
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <h1 class="text-2xl lg:text-3xl font-bold text-slate-800 dark:text-white lato-black">
+                Relatórios de Treinamentos
+            </h1>
+            <p class="text-sm text-slate-400 mt-1 lato-regular">Analytics e indicadores do programa de capacitação</p>
+        </div>
+        <button wire:click="exportarExcel"
+            class="cursor-pointer flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm px-4 py-2.5 rounded-lg transition lato-bold shadow-sm">
+            <x-lucide-download class="w-4 h-4" /> Exportar Excel
+        </button>
+    </div>
+
+    {{-- ───── Filtros ─────────────────────────────────────────────────────── --}}
+    <div class="mb-6 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-3 flex flex-wrap items-end gap-3">
+
+        {{-- Ícone de filtro --}}
+        <div class="flex items-center gap-1.5 text-xs lato-bold text-slate-400 dark:text-slate-500 pr-2 border-r border-slate-200 dark:border-slate-700 self-center hidden sm:flex">
+            <x-lucide-sliders-horizontal class="w-3.5 h-3.5" />
+            Filtros
+        </div>
+
+        {{-- De --}}
+        <div class="flex flex-col gap-1">
+            <label class="text-[10px] lato-bold text-slate-400 uppercase tracking-wider">De</label>
+            <div class="relative">
+                <x-lucide-calendar class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                <input wire:model.live="periodoInicio" type="date"
+                    class="pl-8 pr-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400 lato-regular transition" />
+            </div>
+        </div>
+
+        {{-- Separador --}}
+        <x-lucide-arrow-right class="w-3 h-3 text-slate-300 dark:text-slate-600 self-center mb-0.5 hidden sm:block" />
+
+        {{-- Até --}}
+        <div class="flex flex-col gap-1">
+            <label class="text-[10px] lato-bold text-slate-400 uppercase tracking-wider">Até</label>
+            <div class="relative">
+                <x-lucide-calendar class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                <input wire:model.live="periodoFim" type="date"
+                    class="pl-8 pr-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400 lato-regular transition" />
+            </div>
+        </div>
+
+        {{-- Separador vertical --}}
+        <div class="h-8 w-px bg-slate-200 dark:bg-slate-700 self-center hidden sm:block"></div>
+
+        {{-- Departamento --}}
+        <div x-data="{ open: false }" @click.outside="open = false" class="relative flex flex-col gap-1">
+            <label class="text-[10px] lato-bold text-slate-400 uppercase tracking-wider">Departamento</label>
+            <button @click="open = !open" type="button"
+                class="cursor-pointer flex items-center gap-2 px-3 py-2 text-xs rounded-xl border transition lato-bold whitespace-nowrap
+                    {{ $departamentoFiltro
+                        ? 'border-violet-300 dark:border-violet-700 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300'
+                        : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-800' }}">
+                <x-lucide-building-2 class="w-3.5 h-3.5 shrink-0" />
+                @if($departamentoFiltro)
+                    {{ $this->departamentos->firstWhere('id', $departamentoFiltro)?->name ?? 'Departamento' }}
+                    <button wire:click="$set('departamentoFiltro','')" @click.stop type="button"
+                        class="cursor-pointer ml-0.5 text-indigo-400 hover:text-indigo-600 transition">
+                        <x-lucide-x class="w-3 h-3" />
+                    </button>
+                @else
+                    Todos os departamentos
+                    <x-lucide-chevron-down class="w-3 h-3 text-slate-400 transition-transform ml-1" ::class="{'rotate-180':open}" />
+                @endif
+            </button>
+            <div x-show="open"
+                 x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75"
+                 x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                 class="absolute top-full left-0 mt-1.5 z-30 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-lg py-1 min-w-[200px] max-h-56 overflow-y-auto"
+                 style="display:none;">
+                <button type="button" @click="$wire.set('departamentoFiltro',''); open=false"
+                    class="cursor-pointer w-full flex items-center gap-2.5 px-3 py-2 text-xs lato-regular text-left transition
+                        {{ !$departamentoFiltro ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
+                    <span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-500 shrink-0"></span>
+                    Todos os departamentos
+                    @if(!$departamentoFiltro) <x-lucide-check class="w-3 h-3 ml-auto text-indigo-500" /> @endif
+                </button>
+                @foreach($this->departamentos as $dept)
+                <button type="button" @click="$wire.set('departamentoFiltro','{{ $dept->id }}'); open=false"
+                    class="cursor-pointer w-full flex items-center gap-2.5 px-3 py-2 text-xs lato-regular text-left transition
+                        {{ $departamentoFiltro == $dept->id ? 'bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-300' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700' }}">
+                    <span class="w-2 h-2 rounded-full bg-violet-400 shrink-0"></span>
+                    {{ $dept->name }}
+                    @if($departamentoFiltro == $dept->id) <x-lucide-check class="w-3 h-3 ml-auto text-indigo-500" /> @endif
+                </button>
+                @endforeach
+            </div>
+        </div>
+
+        {{-- Limpar filtros --}}
+        @php $filtrosAtivos = ($periodoInicio && $periodoInicio !== now()->startOfYear()->format('Y-m-d')) || ($periodoFim && $periodoFim !== now()->format('Y-m-d')) || $departamentoFiltro; @endphp
+        @if($filtrosAtivos)
+        <button wire:click="$set('periodoInicio','{{ now()->startOfYear()->format('Y-m-d') }}'); $set('periodoFim','{{ now()->format('Y-m-d') }}'); $set('departamentoFiltro','')"
+            type="button"
+            class="cursor-pointer flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 lato-regular transition self-end pb-2">
+            <x-lucide-x class="w-3 h-3" /> Limpar
+        </button>
+        @endif
+
+    </div>
+
+    {{-- ───── Abas ─────────────────────────────────────────────────────────── --}}
+    <div class="flex gap-1 bg-slate-100 dark:bg-slate-800 rounded-xl p-1 w-fit mb-6 flex-wrap">
+        @foreach(['geral'=>'Visão Geral','cursos'=>'Cursos','colaboradores'=>'Departamentos','avaliacoes'=>'Avaliações'] as $k=>$label)
+        <button wire:click="$set('aba','{{ $k }}')"
+            class="cursor-pointer px-4 py-2 text-sm rounded-lg transition lato-bold
+                {{ $aba === $k ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200' }}">
+            {{ $label }}
+        </button>
+        @endforeach
+    </div>
+
+    {{-- ══════════════════════════════════════════════════════════════════
+         ABA: VISÃO GERAL
+    ══════════════════════════════════════════════════════════════════ --}}
+    @if($aba === 'geral')
+
+        {{-- KPIs --}}
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+            @php $s = $this->statsGerais; @endphp
+            @foreach([
+                ['Total inscrições',   $s['total'],          'text-slate-700 dark:text-white',                    'bg-slate-100 dark:bg-slate-800'],
+                ['Concluídos',         $s['concluidos'],     'text-emerald-600 dark:text-emerald-400',            'bg-emerald-50 dark:bg-emerald-900/20'],
+                ['Em andamento',       $s['em_andamento'],   'text-blue-600 dark:text-blue-400',                  'bg-blue-50 dark:bg-blue-900/20'],
+                ['Taxa de conclusão',  $s['taxa_conclusao'].'%', 'text-indigo-600 dark:text-indigo-400',          'bg-violet-50 dark:bg-violet-900/20'],
+                ['Certificados',       $s['certificados'],   'text-amber-600 dark:text-amber-400',                'bg-amber-50 dark:bg-amber-900/20'],
+                ['Média notas',        $s['media_nota'] ? $s['media_nota'].'%' : '—', 'text-rose-600 dark:text-rose-400', 'bg-rose-50 dark:bg-rose-900/20'],
+            ] as [$label, $val, $fg, $bg])
+            <div class="{{ $bg }} rounded-2xl p-4">
+                <p class="text-xs text-slate-400 lato-regular">{{ $label }}</p>
+                <p class="text-2xl font-bold {{ $fg }} mt-1 lato-black">{{ $val }}</p>
+            </div>
+            @endforeach
+        </div>
+
+        {{-- Evolução mensal --}}
+        @if(count($this->inscricoesPorMes) > 0)
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 mb-6">
+            <h3 class="text-sm lato-bold text-slate-700 dark:text-slate-300 mb-4">Inscrições por Mês</h3>
+            <div class="overflow-x-auto">
+                <div class="flex items-end gap-2 min-w-max" style="height: 120px;">
+                    @php $maxVal = max(1, max(array_map('intval', array_column($this->inscricoesPorMes, 'total')))); @endphp
+                    @foreach($this->inscricoesPorMes as $m)
+                        @php $h = (int) round(($m['total'] / $maxVal) * 100); @endphp
+                        <div class="flex flex-col items-center gap-1 w-12">
+                            <span class="text-xs lato-bold text-slate-500">{{ $m['total'] }}</span>
+                            <div class="w-8 rounded-t-md bg-gradient-to-t from-blue-500 to-violet-400 transition-all duration-300"
+                                 style="height: {{ max($h, 4) }}px"></div>
+                            <span class="text-xs text-slate-400 lato-regular whitespace-nowrap">{{ $m['mes'] }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        @endif
+
+        {{-- Top 5 cursos --}}
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
+            <h3 class="text-sm lato-bold text-slate-700 dark:text-slate-300 mb-4">Top cursos por inscrições</h3>
+            <div class="space-y-3">
+                @forelse($this->topCursos->take(5) as $idx => $curso)
+                    @php $taxa = $curso->total_inscritos > 0 ? round(($curso->total_concluidos / $curso->total_inscritos) * 100) : 0; @endphp
+                    <div class="flex items-center gap-3">
+                        <span class="w-6 text-xs lato-black text-slate-400 text-center">{{ $idx + 1 }}</span>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-center mb-0.5">
+                                <p class="text-sm lato-bold text-slate-700 dark:text-slate-200 truncate">{{ $curso->titulo }}</p>
+                                <span class="text-xs lato-regular text-slate-400 shrink-0 ml-2">{{ $curso->total_inscritos }} inscritos</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="flex-1 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full" style="width: {{ $taxa }}%"></div>
+                                </div>
+                                <span class="text-xs lato-bold text-slate-400 shrink-0">{{ $taxa }}%</span>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-sm text-slate-400 lato-regular text-center py-4">Sem dados.</p>
+                @endforelse
+            </div>
+        </div>
+
+    @endif
+
+    {{-- ══════════════════════════════════════════════════════════════════
+         ABA: CURSOS
+    ══════════════════════════════════════════════════════════════════ --}}
+    @if($aba === 'cursos')
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
+                <tr>
+                    <th class="text-left px-4 py-3 text-xs lato-bold text-slate-500">Curso</th>
+                    <th class="text-left px-4 py-3 text-xs lato-bold text-slate-500 hidden sm:table-cell">Nível</th>
+                    <th class="text-left px-4 py-3 text-xs lato-bold text-slate-500 hidden md:table-cell">Carga</th>
+                    <th class="text-left px-4 py-3 text-xs lato-bold text-slate-500">Inscritos</th>
+                    <th class="text-left px-4 py-3 text-xs lato-bold text-slate-500 hidden sm:table-cell">Concluídos</th>
+                    <th class="text-left px-4 py-3 text-xs lato-bold text-slate-500">Taxa</th>
+                    <th class="text-left px-4 py-3 text-xs lato-bold text-slate-500 hidden lg:table-cell">Média Nota</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                @forelse($this->detalhesCursos as $c)
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
+                    <td class="px-4 py-3 lato-bold text-slate-700 dark:text-slate-200">{{ $c['titulo'] }}</td>
+                    <td class="px-4 py-3 hidden sm:table-cell">
+                        @php $cores = ['Basico'=>'emerald','Intermediario'=>'amber','Avancado'=>'rose']; $cor = $cores[$c['nivel']] ?? 'slate'; @endphp
+                        <span class="px-2 py-0.5 text-xs rounded-full lato-bold bg-{{ $cor }}-100 dark:bg-{{ $cor }}-900/30 text-{{ $cor }}-700 dark:text-{{ $cor }}-300">{{ $c['nivel'] }}</span>
+                    </td>
+                    <td class="px-4 py-3 text-xs text-slate-400 lato-regular hidden md:table-cell">{{ $c['carga_horaria'] }}</td>
+                    <td class="px-4 py-3 text-xs text-slate-500 lato-bold">{{ $c['inscritos'] }}</td>
+                    <td class="px-4 py-3 text-xs text-emerald-600 dark:text-emerald-400 lato-bold hidden sm:table-cell">{{ $c['concluidos'] }}</td>
+                    <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-16 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full
+                                    {{ $c['taxa_conclusao'] >= 70 ? 'bg-emerald-500' : ($c['taxa_conclusao'] >= 40 ? 'bg-amber-500' : 'bg-red-500') }}"
+                                    style="width: {{ $c['taxa_conclusao'] }}%"></div>
+                            </div>
+                            <span class="text-xs lato-bold text-slate-500">{{ $c['taxa_conclusao'] }}%</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-xs text-slate-400 lato-regular hidden lg:table-cell">{{ $c['media_nota'] }}{{ is_numeric($c['media_nota']) ? '%' : '' }}</td>
+                </tr>
+                @empty
+                <tr><td colspan="7" class="py-10 text-center text-slate-400 lato-regular text-sm">Nenhum curso com inscrições.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    @endif
+
+    {{-- ══════════════════════════════════════════════════════════════════
+         ABA: DEPARTAMENTOS
+    ══════════════════════════════════════════════════════════════════ --}}
+    @if($aba === 'colaboradores')
+    <div class="space-y-3">
+        @forelse($this->rankingDepartamentos as $idx => $d)
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center shrink-0">
+                    <span class="text-sm lato-black text-indigo-600 dark:text-indigo-400">{{ $idx + 1 }}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h3 class="text-sm lato-bold text-slate-700 dark:text-slate-200">{{ $d['departamento'] }}</h3>
+                        <span class="text-xs text-slate-400 lato-regular">{{ $d['total_colaboradores'] }} colaboradores</span>
+                    </div>
+                    <div class="flex items-center gap-3 mt-2">
+                        <div class="flex-1 h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div class="h-full rounded-full transition-all duration-300
+                                {{ $d['taxa_conclusao'] >= 70 ? 'bg-gradient-to-r from-emerald-400 to-emerald-600' : ($d['taxa_conclusao'] >= 40 ? 'bg-gradient-to-r from-amber-400 to-amber-600' : 'bg-gradient-to-r from-red-400 to-red-600') }}"
+                                style="width: {{ $d['taxa_conclusao'] }}%"></div>
+                        </div>
+                        <span class="text-sm lato-black text-slate-600 dark:text-slate-300 shrink-0">{{ $d['taxa_conclusao'] }}%</span>
+                    </div>
+                    <div class="flex gap-4 mt-1 text-xs text-slate-400 lato-regular">
+                        <span>{{ $d['inscritos'] }} inscrições</span>
+                        <span class="text-emerald-600 dark:text-emerald-400 lato-bold">{{ $d['concluidos'] }} concluídos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @empty
+        <div class="flex flex-col items-center justify-center py-16 text-slate-400">
+            <x-lucide-building-2 class="w-10 h-10 mb-3 opacity-40" />
+            <p class="text-sm lato-bold">Nenhum dado de departamento disponível</p>
+        </div>
+        @endforelse
+    </div>
+    @endif
+
+    {{-- ══════════════════════════════════════════════════════════════════
+         ABA: AVALIAÇÕES DE REAÇÃO
+    ══════════════════════════════════════════════════════════════════ --}}
+    @if($aba === 'avaliacoes')
+
+        {{-- Médias por curso --}}
+        @if(count($this->mediaAvaliacoes) > 0)
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 mb-6">
+            <h3 class="text-sm lato-bold text-slate-700 dark:text-slate-300 mb-4">Média de satisfação por curso</h3>
+            <div class="space-y-3">
+                @foreach($this->mediaAvaliacoes as $item)
+                <div class="flex items-center gap-3">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm lato-bold text-slate-700 dark:text-slate-200 truncate mb-1">{{ $item['titulo'] }}</p>
+                        <div class="flex items-center gap-2">
+                            {{-- Estrelas --}}
+                            <div class="flex gap-0.5">
+                                @for($i = 1; $i <= 5; $i++)
+                                    <span class="{{ $i <= round($item['media']) ? 'text-amber-400' : 'text-slate-200 dark:text-slate-600' }}">★</span>
+                                @endfor
+                            </div>
+                            <span class="text-sm lato-black text-slate-600 dark:text-slate-300">{{ number_format($item['media'], 1) }}</span>
+                            <span class="text-xs text-slate-400 lato-regular">({{ $item['total'] }} avaliação(ões))</span>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        {{-- Lista de avaliações recentes --}}
+        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
+                <h3 class="text-sm lato-bold text-slate-700 dark:text-slate-300">Avaliações individuais</h3>
+            </div>
+            <div class="divide-y divide-slate-100 dark:divide-slate-700">
+                @forelse($this->avaliacoes as $av)
+                <div class="px-5 py-4">
+                    <div class="flex flex-col sm:flex-row sm:items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-700 flex items-center justify-center shrink-0 text-white text-xs lato-bold">
+                            {{ substr($av->inscricao->usuario->name, 0, 1) }}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <p class="text-sm lato-bold text-slate-700 dark:text-slate-200">{{ $av->inscricao->usuario->name }}</p>
+                                    <p class="text-xs text-indigo-500 dark:text-indigo-400 lato-regular">{{ $av->inscricao->treinamento->titulo }}</p>
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <span class="text-lg {{ $i <= $av->nota ? 'text-amber-400' : 'text-slate-200 dark:text-slate-600' }}">★</span>
+                                    @endfor
+                                </div>
+                            </div>
+                            @if($av->comentario)
+                                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400 lato-regular italic">"{{ $av->comentario }}"</p>
+                            @endif
+                            <p class="mt-1 text-xs text-slate-300 dark:text-slate-600 lato-regular">{{ $av->created_at->format('d/m/Y') }}</p>
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="py-12 text-center text-slate-400">
+                    <x-lucide-star class="w-10 h-10 mx-auto mb-3 opacity-40" />
+                    <p class="text-sm lato-bold">Nenhuma avaliação de reação recebida</p>
+                </div>
+                @endforelse
+            </div>
+        </div>
+    @endif
+
+</div>

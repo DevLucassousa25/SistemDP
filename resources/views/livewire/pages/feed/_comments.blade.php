@@ -7,14 +7,14 @@
     }
     if (!function_exists('cmtBg')) {
         function cmtBg(string $name): string {
-            $pal = ['bg-indigo-500','bg-violet-500','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
+            $pal = ['bg-indigo-500','bg-indigo-600','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
             return $pal[abs(crc32($name)) % count($pal)];
         }
     }
     $me      = Auth::user();
     $meParts = explode(' ', trim($me->name ?? '?'));
     $meInit  = strtoupper(substr($meParts[0],0,1).(isset($meParts[1])?substr($meParts[1],0,1):''));
-    $pal2    = ['bg-indigo-500','bg-violet-500','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
+    $pal2    = ['bg-indigo-500','bg-indigo-600','bg-pink-500','bg-teal-500','bg-amber-500','bg-orange-500','bg-cyan-500','bg-rose-500'];
     $meBg    = $pal2[abs(crc32($me->name ?? '')) % count($pal2)];
 @endphp
 
