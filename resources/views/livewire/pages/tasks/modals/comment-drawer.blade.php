@@ -81,8 +81,14 @@
                                     @if ($comment->user_id === auth()->id())
                                         <button type="button" wire:click="deleteComment({{ $comment->id }})"
                                                 class="ml-auto opacity-0 group-hover/comment:opacity-100 transition text-slate-300
-                                                       hover:text-red-500 cursor-pointer p-0.5 rounded">
-                                            <x-lucide-trash-2 class="w-3 h-3" />
+                                                       hover:text-red-500 cursor-pointer p-0.5 rounded disabled:opacity-60"
+                                            wire:loading.attr="disabled">
+                                            <span wire:loading.remove wire:target="deleteComment" class="flex items-center gap-1.5">
+                                                <x-lucide-trash-2 class="w-3 h-3" />
+                                            </span>
+                                            <span wire:loading wire:target="deleteComment" class="flex items-center gap-1.5">
+                                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                            </span>
                                         </button>
                                     @endif
                                 </div>

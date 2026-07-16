@@ -9,28 +9,100 @@
                     <p class="text-sm text-slate-400 lato-regular mt-0.5">Gerencie candidatos por etapa</p>
                 </div>
                 <div class="flex items-center gap-3 flex-wrap">
-                    <div class="relative group">
-                        <x-lucide-briefcase class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-colors
-                            {{ $pipelineVagaId ? 'text-blue-500' : 'text-slate-400 group-focus-within:text-blue-500' }}" />
-                        <select wire:model.live="pipelineVagaId"
-                                class="appearance-none pl-10 pr-10 py-2.5 text-sm rounded-xl border shadow-sm transition-all duration-200 focus:outline-none cursor-pointer
-                                       lato-bold min-w-[220px]
+                    {{-- Dropdown customizado de vagas --}}
+                    <div class="relative" x-data="{ vagaOpen: false }" @click.outside="vagaOpen = false">
+                        <button @click="vagaOpen = !vagaOpen" type="button"
+                                class="cursor-pointer inline-flex items-center gap-2.5 pl-3.5 pr-3 py-2.5 rounded-xl border shadow-sm transition-all duration-200 min-w-[220px] text-left
                                        {{ $pipelineVagaId
-                                           ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-600 ring-2 ring-blue-400/20'
-                                           : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-400/30 focus:border-blue-400' }}">
-                            <option value="">Selecionar vaga...</option>
+                                           ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-600 ring-2 ring-blue-400/20'
+                                           : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-blue-300' }}">
+                            <x-lucide-briefcase class="w-4 h-4 shrink-0 {{ $pipelineVagaId ? 'text-blue-500' : 'text-slate-400' }}" />
+                            <span class="flex-1 text-sm lato-bold truncate {{ $pipelineVagaId ? 'text-blue-700 dark:text-blue-300' : 'text-slate-400 dark:text-slate-500' }}">
+                                {{ $pipelineVagaId ? ($this->vagaAtualPipeline?->titulo ?? 'Vaga...') : 'Selecionar vaga...' }}
+                            </span>
+                            <span x-bind:class="vagaOpen ? 'rotate-180' : ''" class="transition-transform duration-200 shrink-0">
+                                <x-lucide-chevron-down class="w-4 h-4 {{ $pipelineVagaId ? 'text-blue-400' : 'text-slate-400' }}" />
+                            </span>
+                        </button>
+
+                        {{-- Dropdown panel --}}
+                        <div x-show="vagaOpen"
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="absolute top-full left-0 mt-1.5 w-72 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl z-30 py-1.5 max-h-72 overflow-y-auto">
+
+                            {{-- Opção: nenhuma --}}
+                            <button type="button" @click="vagaOpen = false" wire:click="$set('pipelineVagaId', '')"
+                                    class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 text-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition text-left lato-regular">
+                                <x-lucide-x class="w-4 h-4 shrink-0" />
+                                Nenhuma vaga
+                            </button>
+
+                            @if ($this->vagasParaPipeline->count())
+                            <div class="mx-3 my-1 border-t border-slate-100 dark:border-slate-700"></div>
                             @foreach ($this->vagasParaPipeline as $vp)
-                            <option value="{{ $vp->id }}">{{ $vp->titulo }}</option>
+                            @php
+                                $isSelected = (int)$pipelineVagaId === $vp->id;
+                                $statusColor = match($vp->status) {
+                                    'publicada' => 'bg-emerald-400',
+                                    'pausada'   => 'bg-amber-400',
+                                    default     => 'bg-slate-300',
+                                };
+                            @endphp
+                            <button type="button"
+                                    @click="vagaOpen = false"
+                                    wire:click="$set('pipelineVagaId', {{ $vp->id }})"
+                                    class="cursor-pointer w-full flex items-center gap-3 px-4 py-2.5 transition text-left group
+                                           {{ $isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-slate-50 dark:hover:bg-slate-700' }}">
+                                {{-- Indicador de status --}}
+                                <div class="w-2 h-2 rounded-full shrink-0 {{ $statusColor }}"></div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm truncate {{ $isSelected ? 'lato-black text-blue-700 dark:text-blue-300' : 'lato-bold text-slate-700 dark:text-slate-200' }}">
+                                        {{ $vp->titulo }}
+                                    </p>
+                                    <p class="text-[11px] lato-regular text-slate-400 mt-0.5">
+                                        {{ $vp->candidaturas_count }} candidato{{ $vp->candidaturas_count !== 1 ? 's' : '' }}
+                                        · {{ $vp->status === 'publicada' ? 'Publicada' : 'Pausada' }}
+                                    </p>
+                                </div>
+                                @if ($isSelected)
+                                <x-lucide-check class="w-4 h-4 text-blue-500 shrink-0" />
+                                @endif
+                            </button>
                             @endforeach
-                        </select>
-                        <x-lucide-chevron-down class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none transition-colors
-                            {{ $pipelineVagaId ? 'text-blue-400' : 'text-slate-400' }}" />
+                            @else
+                            <p class="px-4 py-3 text-sm text-slate-400 lato-regular text-center">Nenhuma vaga disponível</p>
+                            @endif
+                        </div>
                     </div>
                     <div class="relative">
                         <x-lucide-search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                         <input type="text" wire:model.live.debounce.300ms="pipelineSearch" placeholder="Buscar candidato..."
                                class="pl-9 pr-4 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400/30 lato-regular w-44" />
                     </div>
+
+                    {{-- Toggle: ocultar reprovados antigos --}}
+                    @php $totalOcultos = $this->totalReprovadosOcultos; @endphp
+                    <button wire:click="$toggle('pipeOcultarReprovados')" type="button"
+                            title="{{ $pipeOcultarReprovados ? 'Clique para exibir reprovados há mais de 15 dias' : 'Clique para ocultar reprovados há mais de 15 dias' }}"
+                            class="cursor-pointer inline-flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm lato-bold border transition
+                                   {{ $pipeOcultarReprovados
+                                       ? 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-700 text-rose-600 dark:text-rose-400'
+                                       : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-rose-300 hover:text-rose-500' }}">
+                        <x-lucide-user-x class="w-4 h-4" />
+                        <span class="hidden sm:inline">
+                            {{ $pipeOcultarReprovados ? 'Reprovados ocultos' : 'Mostrar reprovados' }}
+                        </span>
+                        @if ($totalOcultos > 0)
+                        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-rose-500 text-white text-[10px] lato-black leading-none">
+                            {{ $totalOcultos }}
+                        </span>
+                        @endif
+                    </button>
                 </div>
             </div>
 
@@ -73,7 +145,8 @@
                             </span>
                         </div>
 
-                        <div class="space-y-2.5 min-h-[120px]">
+                        <div class="kanban-col space-y-2.5 min-h-[120px]"
+                             data-etapa-id="{{ $colEtapa->id }}">
                             @forelse ($colCands as $cand)
                             @php
                                 $cCurr    = $cand->curriculo;
@@ -88,10 +161,15 @@
                                     default        => 3,
                                 })->first();
                             @endphp
-                            <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-3 hover:shadow-md transition cursor-pointer"
+                            <div class="kanban-card bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-3 hover:shadow-md transition cursor-grab active:cursor-grabbing"
                                  x-data="{ moveMenu: false }"
-                                 wire:click="openPipeDrawer({{ $cand->id }})" class="cursor-pointer">
+                                 data-cand-id="{{ $cand->id }}"
+                                 wire:click="openPipeDrawer({{ $cand->id }})" class="cursor-grab active:cursor-grabbing">
                                 <div class="flex items-start gap-2.5">
+                                    {{-- Drag handle --}}
+                                    <div class="drag-handle shrink-0 mt-0.5 text-slate-300 dark:text-slate-600 hover:text-slate-400 dark:hover:text-slate-400 transition cursor-grab active:cursor-grabbing" title="Arrastar card">
+                                        <x-lucide-grip-vertical class="w-4 h-4" />
+                                    </div>
                                     <div class="w-8 h-8 rounded-lg {{ $cBg }} flex items-center justify-center text-white lato-black text-xs shrink-0">{{ $cInit }}</div>
                                     <div class="flex-1 min-w-0">
                                         <p class="text-sm lato-bold text-slate-800 dark:text-white truncate">{{ $cCurr->nome ?? '—' }}</p>
@@ -209,6 +287,83 @@
 
 
 
+            {{-- Dragula: drag & drop entre colunas --}}
+            @once
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.css">
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/dragula/3.7.3/dragula.min.js" defer></script>
+            @endonce
+
+            <script>
+            (function initPipelineDragula() {
+                /** Coleta a ordem de todos os cards de uma coluna e retorna array de {id, ordem, etapa_id} */
+                function colOrdem(col) {
+                    const etapaId = parseInt(col.dataset.etapaId);
+                    return Array.from(col.querySelectorAll('.kanban-card')).map((card, idx) => ({
+                        id:       parseInt(card.dataset.candId),
+                        ordem:    idx,
+                        etapa_id: etapaId,
+                    }));
+                }
+
+                function setup() {
+                    const cols = Array.from(document.querySelectorAll('.kanban-col'));
+                    if (!cols.length || typeof dragula === 'undefined') return;
+
+                    // Destroy any previous instance to avoid duplicate handlers on Livewire re-renders
+                    if (window.__pipelineDrake) {
+                        window.__pipelineDrake.destroy();
+                    }
+
+                    window.__pipelineDrake = dragula(cols, {
+                        // Só inicia drag quando o clique é no drag-handle
+                        moves: (el, source, handle) => {
+                            return handle.closest('.drag-handle') !== null;
+                        },
+                    });
+
+                    window.__pipelineDrake.on('drop', (card, target, source) => {
+                        if (!target) return;
+
+                        const candId  = card.dataset.candId;
+                        const etapaId = target.dataset.etapaId;
+                        if (!candId || !etapaId) return;
+
+                        // Prevent wire:click from opening drawer immediately after drop
+                        card.addEventListener('click', e => e.stopImmediatePropagation(), { once: true, capture: true });
+
+                        // Coleta nova ordem da coluna destino (e origem se diferente)
+                        const itens = [...colOrdem(target)];
+                        if (source && source !== target) {
+                            itens.push(...colOrdem(source));
+                        }
+
+                        @this.atualizarOrdemKanban(itens);
+                    });
+                }
+
+                // Aguarda Dragula carregar via defer
+                function waitAndSetup() {
+                    if (typeof dragula !== 'undefined') {
+                        setup();
+                    } else {
+                        setTimeout(waitAndSetup, 80);
+                    }
+                }
+
+                // Re-init após re-renders do Livewire
+                document.addEventListener('livewire:navigated', waitAndSetup);
+
+                // Hook só pode ser registado depois que o Livewire inicializa
+                document.addEventListener('livewire:init', () => {
+                    Livewire.hook('commit', ({ succeed }) => {
+                        succeed(() => requestAnimationFrame(setup));
+                    });
+                });
+
+                waitAndSetup();
+            })();
+            </script>
+
             {{-- Drawer: detalhe da candidatura --}}
             @if ($pipeDrawer && $this->pipeDrawerCand)
             @php
@@ -235,8 +390,8 @@
                     <div class="flex items-center gap-1 mt-3 bg-slate-100 dark:bg-slate-700 rounded-xl p-1">
                         @foreach (['perfil' => 'Perfil', 'pipeline' => 'Pipeline', 'comentarios' => 'Comentários'] as $tKey => $tLbl)
                         <button @click="drawerTab = '{{ $tKey }}'" type="button"
-                                :class="cursor-pointer drawerTab === '{{ $tKey }}' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'"
-                                class="flex-1 py-1.5 text-xs lato-bold rounded-lg transition">
+                                :class="drawerTab === '{{ $tKey }}' ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700'"
+                                class="cursor-pointer flex-1 py-1.5 text-xs lato-bold rounded-lg transition">
                             {{ $tLbl }}
                         </button>
                         @endforeach
@@ -445,8 +600,14 @@
                                        wire:model="pipeNotaInput" placeholder="0 – 100"
                                        class="flex-1 px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-400/30 lato-regular" />
                                 <button wire:click="salvarNotaCand({{ $pd->id }})" type="button"
-                                        class="cursor-pointer px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm lato-bold hover:from-blue-600 hover:to-indigo-700 transition shadow-sm">
-                                    Salvar
+                                        class="cursor-pointer px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm lato-bold hover:from-blue-600 hover:to-indigo-700 transition shadow-sm disabled:opacity-60"
+                                    wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="salvarNotaCand" class="flex items-center gap-1.5">
+                                        Salvar
+                                    </span>
+                                    <span wire:loading wire:target="salvarNotaCand" class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                    </span>
                                 </button>
                             </div>
                         </div>

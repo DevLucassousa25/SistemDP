@@ -1403,8 +1403,14 @@
                                 <x-lucide-rotate-ccw class="w-3.5 h-3.5" /> Restaurar padrão
                             </button>
                             <button wire:click="salvarTermoConfig" type="button"
-                                class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs lato-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 transition shadow-sm">
-                                <x-lucide-save class="w-3.5 h-3.5" /> Salvar modelo
+                                class="cursor-pointer inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs lato-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 transition shadow-sm disabled:opacity-60"
+                                wire:loading.attr="disabled">
+                                <span wire:loading.remove wire:target="salvarTermoConfig" class="flex items-center gap-1.5">
+                                    <x-lucide-save class="w-3.5 h-3.5" /> Salvar modelo
+                                </span>
+                                <span wire:loading wire:target="salvarTermoConfig" class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                </span>
                             </button>
                         </div>
                     </div>
@@ -1801,8 +1807,14 @@
                     {{-- ── Botão salvar mobile/final ──────────────────── --}}
                     <div class="flex items-center justify-end pt-2 border-t border-slate-200 dark:border-slate-700">
                         <button wire:click="salvarTermoConfig" type="button"
-                            class="cursor-pointer inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm lato-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 transition shadow-sm">
-                            <x-lucide-save class="w-4 h-4" /> Salvar modelo do termo
+                            class="cursor-pointer inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm lato-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 transition shadow-sm disabled:opacity-60"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="salvarTermoConfig" class="flex items-center gap-1.5">
+                                <x-lucide-save class="w-4 h-4" /> Salvar modelo do termo
+                            </span>
+                            <span wire:loading wire:target="salvarTermoConfig" class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            </span>
                         </button>
                     </div>
 
@@ -2266,8 +2278,14 @@
                     Cancelar
                 </button>
                 <button wire:click="confirmarNovoTemplate" type="button"
-                    class="cursor-pointer flex-1 inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl text-sm lato-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 transition shadow-sm">
-                    <x-lucide-save class="w-4 h-4" /> Criar template
+                    class="cursor-pointer flex-1 inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl text-sm lato-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 transition shadow-sm disabled:opacity-60"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="confirmarNovoTemplate" class="flex items-center gap-1.5">
+                        <x-lucide-save class="w-4 h-4" /> Criar template
+                    </span>
+                    <span wire:loading wire:target="confirmarNovoTemplate" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>
@@ -2313,8 +2331,14 @@
                     Cancelar
                 </button>
                 <button wire:click="confirmarRenomear" type="button"
-                    class="cursor-pointer inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm lato-bold text-white bg-gradient-to-r from-slate-600 to-slate-700 hover:opacity-90 transition shadow-sm">
-                    <x-lucide-check class="w-4 h-4" /> Confirmar
+                    class="cursor-pointer inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm lato-bold text-white bg-gradient-to-r from-slate-600 to-slate-700 hover:opacity-90 transition shadow-sm disabled:opacity-60"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="confirmarRenomear" class="flex items-center gap-1.5">
+                        <x-lucide-check class="w-4 h-4" /> Confirmar
+                    </span>
+                    <span wire:loading wire:target="confirmarRenomear" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>
@@ -2590,12 +2614,18 @@
                     Cancelar
                 </button>
                 <button wire:click="salvarObsItem" type="button"
-                    class="cursor-pointer inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm lato-bold text-white transition shadow-sm"
+                    class="cursor-pointer inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm lato-bold text-white transition shadow-sm disabled:opacity-60"
                     :class="$wire.obsItemStatus === 'divergencia'
                         ? 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:opacity-90'
-                        : 'bg-gradient-to-r from-rose-500 to-red-600 hover:opacity-90'">
-                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                        : 'bg-gradient-to-r from-rose-500 to-red-600 hover:opacity-90'"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="salvarObsItem" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                     Registrar
+                    </span>
+                    <span wire:loading wire:target="salvarObsItem" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>
@@ -2671,12 +2701,18 @@
                     Cancelar
                 </button>
                 <button wire:click="executarConfirmacao" type="button"
-                    class="cursor-pointer inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm lato-bold text-white transition shadow-sm"
+                    class="cursor-pointer inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm lato-bold text-white transition shadow-sm disabled:opacity-60"
                     :class="$wire.confirmType === 'warning'
                         ? 'bg-gradient-to-r from-amber-500 to-yellow-500 hover:opacity-90'
-                        : 'bg-gradient-to-r from-rose-500 to-red-600 hover:opacity-90'">
-                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
+                        : 'bg-gradient-to-r from-rose-500 to-red-600 hover:opacity-90'"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="executarConfirmacao" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                     <span x-text="$wire.confirmLabel"></span>
+                    </span>
+                    <span wire:loading wire:target="executarConfirmacao" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>
@@ -2732,8 +2768,14 @@
                     Cancelar
                 </button>
                 <button wire:click="confirmarExcluirTemplate" type="button"
-                    class="cursor-pointer inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm lato-bold text-white bg-gradient-to-r from-rose-500 to-red-600 hover:opacity-90 transition shadow-sm">
-                    <x-lucide-trash-2 class="w-4 h-4" /> Excluir
+                    class="cursor-pointer inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm lato-bold text-white bg-gradient-to-r from-rose-500 to-red-600 hover:opacity-90 transition shadow-sm disabled:opacity-60"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="confirmarExcluirTemplate" class="flex items-center gap-1.5">
+                        <x-lucide-trash-2 class="w-4 h-4" /> Excluir
+                    </span>
+                    <span wire:loading wire:target="confirmarExcluirTemplate" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>
@@ -2827,8 +2869,14 @@
                     Cancelar
                 </button>
                 <button wire:click="confirmarEncerrarManut" type="button"
-                    class="cursor-pointer inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm lato-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 transition shadow-sm">
-                    <x-lucide-flag class="w-4 h-4" /> Encerrar
+                    class="cursor-pointer inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-sm lato-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 transition shadow-sm disabled:opacity-60"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="confirmarEncerrarManut" class="flex items-center gap-1.5">
+                        <x-lucide-flag class="w-4 h-4" /> Encerrar
+                    </span>
+                    <span wire:loading wire:target="confirmarEncerrarManut" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>
@@ -3343,9 +3391,15 @@
                 </button>
                 <button wire:click="salvarAtribuicao" type="button"
                     class="cursor-pointer flex-1 px-5 py-2.5 rounded-xl text-sm lato-bold text-white transition hover:opacity-90 flex items-center justify-center gap-2 shadow-sm
-                           {{ $modoAtribuicao === 'entrega' ? 'bg-gradient-to-r from-teal-500 to-cyan-600' : 'bg-gradient-to-r from-amber-500 to-orange-500' }}">
-                    <x-lucide-check class="w-3.5 h-3.5" />
+                           {{ $modoAtribuicao === 'entrega' ? 'bg-gradient-to-r from-teal-500 to-cyan-600' : 'bg-gradient-to-r from-amber-500 to-orange-500' }}"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="salvarAtribuicao" class="flex items-center gap-1.5">
+                        <x-lucide-check class="w-3.5 h-3.5" />
                     {{ $modoAtribuicao === 'entrega' ? 'Confirmar entrega' : 'Confirmar devolução' }}
+                    </span>
+                    <span wire:loading wire:target="salvarAtribuicao" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>
@@ -3513,9 +3567,15 @@
                 <button @click="sheetOpen = false; setTimeout(() => $wire.set('modalManutencao', false), 300)" type="button"
                     class="cursor-pointer flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-sm lato-bold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition">Cancelar</button>
                 <button wire:click="salvarManutencao" type="button"
-                    class="cursor-pointer flex-1 px-5 py-2.5 rounded-xl text-sm lato-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 transition flex items-center justify-center gap-2 shadow-sm">
-                    <x-lucide-check class="w-4 h-4" />
+                    class="cursor-pointer flex-1 px-5 py-2.5 rounded-xl text-sm lato-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:opacity-90 transition flex items-center justify-center gap-2 shadow-sm disabled:opacity-60"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="salvarManutencao" class="flex items-center gap-1.5">
+                        <x-lucide-check class="w-4 h-4" />
                     {{ $modoManutencao === 'create' ? 'Registrar' : 'Salvar alterações' }}
+                    </span>
+                    <span wire:loading wire:target="salvarManutencao" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>

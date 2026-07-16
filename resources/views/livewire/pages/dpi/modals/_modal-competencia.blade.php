@@ -303,8 +303,14 @@
                                             </button>
                                             <button wire:click="deleteInlineAction({{ $ia->id }})" type="button"
                                                     class="w-6 h-6 flex items-center justify-center rounded-lg
-                                                           text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer">
-                                                <x-lucide-trash-2 class="w-3 h-3" />
+                                                           text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer disabled:opacity-60"
+                                                wire:loading.attr="disabled">
+                                                <span wire:loading.remove wire:target="deleteInlineAction" class="flex items-center gap-1.5">
+                                                    <x-lucide-trash-2 class="w-3 h-3" />
+                                                </span>
+                                                <span wire:loading wire:target="deleteInlineAction" class="flex items-center gap-1.5">
+                                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                                </span>
                                             </button>
                                         </div>
                                     </div>
@@ -536,8 +542,14 @@
                                     <button wire:click="saveInlineAction" type="button"
                                             class="px-4 py-1.5 text-xs lato-bold rounded-lg
                                                    bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white
-                                                   shadow-sm shadow-blue-500/20 transition cursor-pointer">
-                                        {{ $editingInlineActionId || $editingInlineActionIndex !== null ? 'Salvar' : '+ Adicionar' }}
+                                                   shadow-sm shadow-blue-500/20 transition cursor-pointer disabled:opacity-60"
+                                        wire:loading.attr="disabled">
+                                        <span wire:loading.remove wire:target="saveInlineAction" class="flex items-center gap-1.5">
+                                            {{ $editingInlineActionId || $editingInlineActionIndex !== null ? 'Salvar' : '+ Adicionar' }}
+                                        </span>
+                                        <span wire:loading wire:target="saveInlineAction" class="flex items-center gap-1.5">
+                                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                        </span>
                                     </button>
                                 </div>
                             </div>
@@ -558,8 +570,14 @@
                     <button wire:click="saveGoal" type="button"
                             class="flex-1 py-2.5 text-sm lato-bold rounded-xl
                                    bg-gradient-to-r from-blue-500 to-indigo-600 text-white
-                                   shadow-md shadow-blue-500/20 transition cursor-pointer">
-                        {{ isset($goalModalMode) && $goalModalMode === 'edit' ? 'Salvar alterações' : 'Adicionar competência' }}
+                                   shadow-md shadow-blue-500/20 transition cursor-pointer disabled:opacity-60"
+                        wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="saveGoal" class="flex items-center gap-1.5">
+                            {{ isset($goalModalMode) && $goalModalMode === 'edit' ? 'Salvar alterações' : 'Adicionar competência' }}
+                        </span>
+                        <span wire:loading wire:target="saveGoal" class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        </span>
                     </button>
                 </div>
 

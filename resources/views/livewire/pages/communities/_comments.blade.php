@@ -54,8 +54,14 @@
                     </button>
                     @if ($cmt->user_id === Auth::id() || $isAdmin)
                         <button wire:click="deleteComment({{ $cmt->id }})" type="button"
-                                class="text-[10px] text-slate-400 hover:text-red-500 transition cursor-pointer">
-                            Excluir
+                                class="text-[10px] text-slate-400 hover:text-red-500 transition cursor-pointer disabled:opacity-60"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="deleteComment" class="flex items-center gap-1.5">
+                                Excluir
+                            </span>
+                            <span wire:loading wire:target="deleteComment" class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            </span>
                         </button>
                     @endif
                 </div>

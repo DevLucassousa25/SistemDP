@@ -334,8 +334,14 @@
                     <button wire:click="createCommunity" type="button"
                             class="flex-1 py-2.5 text-sm lato-bold rounded-xl
                                    bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700
-                                   text-white shadow-md shadow-blue-500/20 transition cursor-pointer">
-                        Criar Comunidade
+                                   text-white shadow-md shadow-blue-500/20 transition cursor-pointer disabled:opacity-60"
+                        wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="createCommunity" class="flex items-center gap-1.5">
+                            Criar Comunidade
+                        </span>
+                        <span wire:loading wire:target="createCommunity" class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        </span>
                     </button>
                 </div>
 

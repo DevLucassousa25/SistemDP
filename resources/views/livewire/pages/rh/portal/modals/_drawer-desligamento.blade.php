@@ -110,8 +110,14 @@
             <div class="flex items-center justify-between mb-3">
                 <p class="text-xs lato-bold text-slate-600 dark:text-slate-400">Entrevista de Desligamento</p>
                 <button wire:click="enviarEntrevista" type="button"
-                        class="cursor-pointer text-xs px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition lato-bold">
-                    {{ $dd->entrevista ? 'Reenviar Link' : 'Gerar Link' }}
+                        class="cursor-pointer text-xs px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 transition lato-bold disabled:opacity-60"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="enviarEntrevista" class="flex items-center gap-1.5">
+                        {{ $dd->entrevista ? 'Reenviar Link' : 'Gerar Link' }}
+                    </span>
+                    <span wire:loading wire:target="enviarEntrevista" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
             @if ($dd->entrevista)
@@ -488,29 +494,45 @@
                     $pendEq   = \App\Models\EquipamentoAtribuicao::where('user_id', $dd->user_id)->where('tipo','entrega')->whereNull('data_devolucao')->count();
                     $temVerbas = (bool) $dd->verbas;
                 @endphp
-                <div class="space-y-1.5 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3">
-                    <div class="flex items-center gap-2 text-xs">
-                        <x-lucide-{{ $pendCl === 0 ? 'check-circle' : 'alert-circle' }}
-                            class="w-3.5 h-3.5 shrink-0 {{ $pendCl === 0 ? 'text-emerald-500' : 'text-amber-500' }}" />
-                        <span class="{{ $pendCl === 0 ? 'text-slate-500 dark:text-slate-400' : 'text-amber-700 dark:text-amber-400 lato-bold' }}">
-                            Checklist: {{ $cl->where('status','concluido')->count() }}/{{ $cl->count() }} itens
-                            {{ $pendCl > 0 ? "($pendCl pendentes)" : 'concluídos' }}
-                        </span>
+                <div class="space-y-1.5 bg-slate-50 dark:bg-slate-700/50 rounded-xl p-3 text-xs">
+
+                    {{-- Checklist --}}
+                    <div class="flex items-center gap-2">
+                        @if ($pendCl === 0)
+                            <x-lucide-check-circle class="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+                            <span class="text-slate-500 dark:text-slate-400">
+                                Checklist: {{ $cl->where('status','concluido')->count() }}/{{ $cl->count() }} itens concluídos
+                            </span>
+                        @else
+                            <x-lucide-alert-circle class="w-3.5 h-3.5 shrink-0 text-amber-500" />
+                            <span class="text-amber-700 dark:text-amber-400 lato-bold">
+                                Checklist: {{ $cl->where('status','concluido')->count() }}/{{ $cl->count() }} itens ({{ $pendCl }} pendentes)
+                            </span>
+                        @endif
                     </div>
-                    <div class="flex items-center gap-2 text-xs">
-                        <x-lucide-{{ $pendEq === 0 ? 'check-circle' : 'alert-circle' }}
-                            class="w-3.5 h-3.5 shrink-0 {{ $pendEq === 0 ? 'text-emerald-500' : 'text-amber-500' }}" />
-                        <span class="{{ $pendEq === 0 ? 'text-slate-500 dark:text-slate-400' : 'text-amber-700 dark:text-amber-400 lato-bold' }}">
-                            Equipamentos: {{ $pendEq === 0 ? 'todos devolvidos' : "$pendEq ainda em posse" }}
-                        </span>
+
+                    {{-- Equipamentos --}}
+                    <div class="flex items-center gap-2">
+                        @if ($pendEq === 0)
+                            <x-lucide-check-circle class="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+                            <span class="text-slate-500 dark:text-slate-400">Equipamentos: todos devolvidos</span>
+                        @else
+                            <x-lucide-alert-circle class="w-3.5 h-3.5 shrink-0 text-amber-500" />
+                            <span class="text-amber-700 dark:text-amber-400 lato-bold">Equipamentos: {{ $pendEq }} ainda em posse</span>
+                        @endif
                     </div>
-                    <div class="flex items-center gap-2 text-xs">
-                        <x-lucide-{{ $temVerbas ? 'check-circle' : 'alert-circle' }}
-                            class="w-3.5 h-3.5 shrink-0 {{ $temVerbas ? 'text-emerald-500' : 'text-amber-500' }}" />
-                        <span class="{{ $temVerbas ? 'text-slate-500 dark:text-slate-400' : 'text-amber-700 dark:text-amber-400 lato-bold' }}">
-                            Verbas: {{ $temVerbas ? 'calculadas' : 'não calculadas' }}
-                        </span>
+
+                    {{-- Verbas --}}
+                    <div class="flex items-center gap-2">
+                        @if ($temVerbas)
+                            <x-lucide-check-circle class="w-3.5 h-3.5 shrink-0 text-emerald-500" />
+                            <span class="text-slate-500 dark:text-slate-400">Verbas: calculadas</span>
+                        @else
+                            <x-lucide-alert-circle class="w-3.5 h-3.5 shrink-0 text-amber-500" />
+                            <span class="text-amber-700 dark:text-amber-400 lato-bold">Verbas: não calculadas</span>
+                        @endif
                     </div>
+
                 </div>
             </div>
 

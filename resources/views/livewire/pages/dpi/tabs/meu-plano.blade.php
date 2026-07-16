@@ -25,9 +25,15 @@
                             class="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm lato-bold
                                    bg-gradient-to-r from-blue-500 to-indigo-600 text-white
                                    hover:from-blue-600 hover:to-indigo-700
-                                   shadow-lg shadow-blue-500/20 transition cursor-pointer">
-                        <x-lucide-plus class="w-4 h-4" />
+                                   shadow-lg shadow-blue-500/20 transition cursor-pointer disabled:opacity-60"
+                        wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="createPlan" class="flex items-center gap-1.5">
+                            <x-lucide-plus class="w-4 h-4" />
                         Criar Plano {{ $selectedYear }}
+                        </span>
+                        <span wire:loading wire:target="createPlan" class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        </span>
                     </button>
                 @else
                     <p class="text-sm text-slate-400 lato-regular mb-3 max-w-xs">
@@ -136,8 +142,14 @@
                             <button wire:click="submitGerentePlanToRh" type="button"
                                     class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm lato-bold
                                            bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white
-                                           shadow-md shadow-emerald-500/20 transition cursor-pointer">
-                                <x-lucide-send class="w-3.5 h-3.5" /> Finalizar e Enviar ao RH
+                                           shadow-md shadow-emerald-500/20 transition cursor-pointer disabled:opacity-60"
+                                wire:loading.attr="disabled">
+                                <span wire:loading.remove wire:target="submitGerentePlanToRh" class="flex items-center gap-1.5">
+                                    <x-lucide-send class="w-3.5 h-3.5" /> Finalizar e Enviar ao RH
+                                </span>
+                                <span wire:loading wire:target="submitGerentePlanToRh" class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                </span>
                             </button>
                         @elseif ($plan->status === 'enviado')
                             {{-- Aguardando revisão do RH --}}
@@ -151,8 +163,14 @@
                             <button wire:click="submitGerentePlanToRh" type="button"
                                     class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm lato-bold
                                            bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white
-                                           shadow-md shadow-amber-500/20 transition cursor-pointer">
-                                <x-lucide-refresh-cw class="w-3.5 h-3.5" /> Corrigido — Reenviar ao RH
+                                           shadow-md shadow-amber-500/20 transition cursor-pointer disabled:opacity-60"
+                                wire:loading.attr="disabled">
+                                <span wire:loading.remove wire:target="submitGerentePlanToRh" class="flex items-center gap-1.5">
+                                    <x-lucide-refresh-cw class="w-3.5 h-3.5" /> Corrigido — Reenviar ao RH
+                                </span>
+                                <span wire:loading wire:target="submitGerentePlanToRh" class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                </span>
                             </button>
                         @elseif ($plan->status === 'concluido')
                             {{-- Aprovado pelo RH --}}
@@ -189,8 +207,14 @@
                                 <button wire:click="submitPlan" type="button"
                                         class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm lato-bold
                                                bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white
-                                               shadow-md shadow-emerald-500/20 transition cursor-pointer">
-                                    <x-lucide-rocket class="w-3.5 h-3.5" /> Publicar Plano
+                                               shadow-md shadow-emerald-500/20 transition cursor-pointer disabled:opacity-60"
+                                    wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="submitPlan" class="flex items-center gap-1.5">
+                                        <x-lucide-rocket class="w-3.5 h-3.5" /> Publicar Plano
+                                    </span>
+                                    <span wire:loading wire:target="submitPlan" class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                    </span>
                                 </button>
                             @endif
                         @elseif ($plan->status === 'aprovado')
@@ -293,8 +317,14 @@
                                                     title="Remover competência"
                                                     class="w-7 h-7 flex items-center justify-center rounded-lg
                                                            text-slate-400 hover:text-red-500 hover:bg-red-50
-                                                           dark:hover:bg-red-900/20 transition cursor-pointer">
-                                                <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                                                           dark:hover:bg-red-900/20 transition cursor-pointer disabled:opacity-60"
+                                                wire:loading.attr="disabled">
+                                                <span wire:loading.remove wire:target="confirmDeleteGoal" class="flex items-center gap-1.5">
+                                                    <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                                                </span>
+                                                <span wire:loading wire:target="confirmDeleteGoal" class="flex items-center gap-1.5">
+                                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                                </span>
                                             </button>
                                         @endif
                                     </div>
@@ -400,8 +430,14 @@
                                                                 <button wire:click="confirmDeleteAction({{ $action->id }})" type="button"
                                                                         class="w-6 h-6 flex items-center justify-center rounded-lg
                                                                                text-slate-300 hover:text-red-500
-                                                                               hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer">
-                                                                    <x-lucide-trash-2 class="w-3 h-3" />
+                                                                               hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer disabled:opacity-60"
+                                                                    wire:loading.attr="disabled">
+                                                                    <span wire:loading.remove wire:target="confirmDeleteAction" class="flex items-center gap-1.5">
+                                                                        <x-lucide-trash-2 class="w-3 h-3" />
+                                                                    </span>
+                                                                    <span wire:loading wire:target="confirmDeleteAction" class="flex items-center gap-1.5">
+                                                                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                                                    </span>
                                                                 </button>
                                                             @endif
                                                         </div>
@@ -665,8 +701,14 @@
                                         wire:confirm="Tem certeza que deseja excluir este template?"
                                         type="button"
                                         class="p-1.5 rounded-lg text-slate-400 hover:text-red-500
-                                               hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer">
-                                    <x-lucide-trash-2 class="w-4 h-4" />
+                                               hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer disabled:opacity-60"
+                                    wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="deleteTemplate" class="flex items-center gap-1.5">
+                                        <x-lucide-trash-2 class="w-4 h-4" />
+                                    </span>
+                                    <span wire:loading wire:target="deleteTemplate" class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                    </span>
                                 </button>
                             </div>
                         @empty
@@ -909,8 +951,14 @@
                         <button wire:click="saveTemplate" type="button"
                                 class="px-4 py-2 rounded-lg text-sm lato-bold
                                        bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700
-                                       text-white shadow-sm shadow-blue-500/20 transition cursor-pointer">
-                            Salvar Template
+                                       text-white shadow-sm shadow-blue-500/20 transition cursor-pointer disabled:opacity-60"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="saveTemplate" class="flex items-center gap-1.5">
+                                Salvar Template
+                            </span>
+                            <span wire:loading wire:target="saveTemplate" class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            </span>
                         </button>
                     </div>
                     {{-- /footer --}}

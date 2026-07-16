@@ -118,8 +118,14 @@
                         </button>
                         <div class="w-px h-5 bg-slate-200 dark:bg-slate-700"></div>
                         <button wire:click="confirmDeleteTeste({{ $teste->id }})" type="button"
-                                class="cursor-pointer p-2 rounded-xl text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-                            <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                                class="cursor-pointer p-2 rounded-xl text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-60"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="confirmDeleteTeste" class="flex items-center gap-1.5">
+                                <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                            </span>
+                            <span wire:loading wire:target="confirmDeleteTeste" class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            </span>
                         </button>
                     </div>
 
@@ -673,8 +679,14 @@
                             </div>
                             @if (!$testeStatus)
                                 <button wire:click="enviarTesteCand({{ $cvE->id }})" type="button"
-                                        class="cursor-pointer shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs lato-bold hover:from-blue-600 hover:to-indigo-700 transition shadow-sm">
-                                    <x-lucide-send class="w-3 h-3" /> Enviar
+                                        class="cursor-pointer shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs lato-bold hover:from-blue-600 hover:to-indigo-700 transition shadow-sm disabled:opacity-60"
+                                    wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="enviarTesteCand" class="flex items-center gap-1.5">
+                                        <x-lucide-send class="w-3 h-3" /> Enviar
+                                    </span>
+                                    <span wire:loading wire:target="enviarTesteCand" class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                    </span>
                                 </button>
                             @elseif ($testeStatus === 'concluido')
                                 <span class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs lato-bold cursor-not-allowed">

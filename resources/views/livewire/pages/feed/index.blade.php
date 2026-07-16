@@ -759,8 +759,14 @@
                                                     <x-lucide-pencil class="w-3.5 h-3.5" /> Editar
                                                 </button>
                                                 <button wire:click="confirmDeleteFeedPost({{ $post->id }})" @click="open=false" type="button"
-                                                        class="w-full text-left px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2">
-                                                    <x-lucide-trash-2 class="w-3.5 h-3.5" /> Excluir
+                                                        class="w-full text-left px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 disabled:opacity-60"
+                                                    wire:loading.attr="disabled">
+                                                    <span wire:loading.remove wire:target="confirmDeleteFeedPost" class="flex items-center gap-1.5">
+                                                        <x-lucide-trash-2 class="w-3.5 h-3.5" /> Excluir
+                                                    </span>
+                                                    <span wire:loading wire:target="confirmDeleteFeedPost" class="flex items-center gap-1.5">
+                                                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                                    </span>
                                                 </button>
                                             @endif
                                         </div>
@@ -1167,8 +1173,14 @@
                         @if (! $pp->reads->where('user_id', Auth::id())->where('confirmed_at', '!=', null)->first())
                             <button wire:click="confirmRead({{ $pp->id }})" type="button"
                                     class="px-4 py-2 text-xs lato-bold rounded-xl bg-gradient-to-r from-green-500 to-emerald-600
-                                           text-white hover:from-green-600 hover:to-emerald-700 transition shadow-sm">
-                                ✓ Confirmar leitura
+                                           text-white hover:from-green-600 hover:to-emerald-700 transition shadow-sm disabled:opacity-60"
+                                wire:loading.attr="disabled">
+                                <span wire:loading.remove wire:target="confirmRead" class="flex items-center gap-1.5">
+                                    ✓ Confirmar leitura
+                                </span>
+                                <span wire:loading wire:target="confirmRead" class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                </span>
                             </button>
                         @else
                             <span class="px-3 py-1.5 text-xs lato-bold rounded-xl bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
@@ -1202,8 +1214,14 @@
                         Cancelar
                     </button>
                     <button wire:click="deleteFeedPost" type="button"
-                            class="px-4 py-2 text-xs lato-bold rounded-xl bg-red-500 text-white hover:bg-red-600 transition">
-                        Excluir
+                            class="px-4 py-2 text-xs lato-bold rounded-xl bg-red-500 text-white hover:bg-red-600 transition disabled:opacity-60"
+                        wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="deleteFeedPost" class="flex items-center gap-1.5">
+                            Excluir
+                        </span>
+                        <span wire:loading wire:target="deleteFeedPost" class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        </span>
                     </button>
                 </div>
             </div>
@@ -1235,8 +1253,14 @@
                         Cancelar
                     </button>
                     <button wire:click="saveEdit" type="button"
-                            class="px-5 py-2 text-xs lato-bold rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 transition shadow-sm">
-                        Salvar
+                            class="px-5 py-2 text-xs lato-bold rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 transition shadow-sm disabled:opacity-60"
+                        wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="saveEdit" class="flex items-center gap-1.5">
+                            Salvar
+                        </span>
+                        <span wire:loading wire:target="saveEdit" class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        </span>
                     </button>
                 </div>
             </div>

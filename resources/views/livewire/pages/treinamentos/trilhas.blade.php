@@ -283,8 +283,14 @@
                                 @if(auth()->user()?->isRhOuDp())
                                     <button wire:click="excluirTrilha({{ $trilha->id }})"
                                         wire:confirm="Excluir esta trilha permanentemente?"
-                                        class="cursor-pointer p-2 text-slate-300 dark:text-slate-600 hover:text-red-500 transition rounded-lg">
-                                        <x-lucide-trash-2 class="w-4 h-4" />
+                                        class="cursor-pointer p-2 text-slate-300 dark:text-slate-600 hover:text-red-500 transition rounded-lg disabled:opacity-60"
+                                        wire:loading.attr="disabled">
+                                        <span wire:loading.remove wire:target="excluirTrilha" class="flex items-center gap-1.5">
+                                            <x-lucide-trash-2 class="w-4 h-4" />
+                                        </span>
+                                        <span wire:loading wire:target="excluirTrilha" class="flex items-center gap-1.5">
+                                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                        </span>
                                     </button>
                                 @endif
                             </div>
@@ -456,8 +462,14 @@
                            text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition">Cancelar</button>
                 <button wire:click="salvarTrilha"
                     class="cursor-pointer flex-1 px-5 py-2.5 text-xs lato-bold rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600
-                           text-white hover:from-blue-600 hover:to-indigo-700 transition shadow-sm shadow-indigo-500/20">
-                    {{ $modalTrilhaModo === 'criar' ? 'Criar trilha' : 'Salvar alterações' }}
+                           text-white hover:from-blue-600 hover:to-indigo-700 transition shadow-sm shadow-indigo-500/20 disabled:opacity-60"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="salvarTrilha" class="flex items-center gap-1.5">
+                        {{ $modalTrilhaModo === 'criar' ? 'Criar trilha' : 'Salvar alterações' }}
+                    </span>
+                    <span wire:loading wire:target="salvarTrilha" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>
@@ -525,8 +537,14 @@
                            text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition">Cancelar</button>
                 <button wire:click="salvarCursoNaTrilha"
                     class="cursor-pointer flex-1 px-5 py-2.5 text-xs lato-bold rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600
-                           text-white hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 transition shadow-sm">
-                    Adicionar
+                           text-white hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 transition shadow-sm"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="salvarCursoNaTrilha" class="flex items-center gap-1.5">
+                        Adicionar
+                    </span>
+                    <span wire:loading wire:target="salvarCursoNaTrilha" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>

@@ -520,10 +520,16 @@
                                                     @mouseleave="hover = 0"
                                                     :class="(hover > 0 ? hover >= {{ $s }} : (($wire.scores[{{ $criterion->id }}] ?? 0) >= {{ $s }})) ? 'text-amber-400 scale-110' : 'text-slate-200 dark:text-slate-600'"
                                                     class="transition-all duration-150 cursor-pointer hover:scale-125 focus:outline-none"
-                                                    title="Nota {{ $s }}">
-                                                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
+                                                    title="Nota {{ $s }}"
+                                                wire:loading.attr="disabled">
+                                                <span wire:loading.remove wire:target="saveScore" class="flex items-center gap-1.5">
+                                                    <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 24 24">
                                                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                                                 </svg>
+                                                </span>
+                                                <span wire:loading wire:target="saveScore" class="flex items-center gap-1.5">
+                                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                                </span>
                                             </button>
                                             @endfor
                                             @if(isset($scores[$criterion->id]))
@@ -540,15 +546,27 @@
                                                     class="flex-1 py-2 rounded-xl text-xs lato-bold border transition cursor-pointer
                                                            {{ ($scores[$criterion->id] ?? null) === 0
                                                               ? 'bg-red-500 border-red-500 text-white'
-                                                              : 'border-slate-200 dark:border-slate-600 text-slate-500 hover:border-red-400 hover:text-red-500' }}">
-                                                Não
+                                                              : 'border-slate-200 dark:border-slate-600 text-slate-500 hover:border-red-400 hover:text-red-500' }}"
+                                                wire:loading.attr="disabled">
+                                                <span wire:loading.remove wire:target="saveScore" class="flex items-center gap-1.5">
+                                                    Não
+                                                </span>
+                                                <span wire:loading wire:target="saveScore" class="flex items-center gap-1.5">
+                                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                                </span>
                                             </button>
                                             <button type="button" wire:click="saveScore({{ $criterion->id }}, 1)"
                                                     class="flex-1 py-2 rounded-xl text-xs lato-bold border transition cursor-pointer
                                                            {{ ($scores[$criterion->id] ?? null) === 1
                                                               ? 'bg-emerald-500 border-emerald-500 text-white'
-                                                              : 'border-slate-200 dark:border-slate-600 text-slate-500 hover:border-emerald-400 hover:text-emerald-500' }}">
-                                                Sim
+                                                              : 'border-slate-200 dark:border-slate-600 text-slate-500 hover:border-emerald-400 hover:text-emerald-500' }}"
+                                                wire:loading.attr="disabled">
+                                                <span wire:loading.remove wire:target="saveScore" class="flex items-center gap-1.5">
+                                                    Sim
+                                                </span>
+                                                <span wire:loading wire:target="saveScore" class="flex items-center gap-1.5">
+                                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                                </span>
                                             </button>
                                         </div>
 
@@ -560,8 +578,14 @@
                                                     class="px-3 py-1.5 rounded-xl text-xs lato-bold border transition cursor-pointer
                                                            {{ ($scores[$criterion->id] ?? null) == $idx
                                                               ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                                                              : 'border-slate-200 dark:border-slate-600 text-slate-500 hover:border-indigo-400 hover:text-indigo-600' }}">
-                                                {{ $option }}
+                                                              : 'border-slate-200 dark:border-slate-600 text-slate-500 hover:border-indigo-400 hover:text-indigo-600' }}"
+                                                wire:loading.attr="disabled">
+                                                <span wire:loading.remove wire:target="saveScore" class="flex items-center gap-1.5">
+                                                    {{ $option }}
+                                                </span>
+                                                <span wire:loading wire:target="saveScore" class="flex items-center gap-1.5">
+                                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                                </span>
                                             </button>
                                             @endforeach
                                         </div>
@@ -975,8 +999,14 @@
                 </button>
                 @if(!$crit->is_default)
                 <button type="button" wire:click="deleteCriterion({{ $crit->id }})"
-                        class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer">
-                    <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                        class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer disabled:opacity-60"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="deleteCriterion" class="flex items-center gap-1.5">
+                        <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                    </span>
+                    <span wire:loading wire:target="deleteCriterion" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
                 @endif
             </div>
@@ -1359,8 +1389,14 @@
                                 class="flex-1 py-2.5 rounded-xl text-sm lato-bold border transition cursor-pointer
                                        {{ ($selfScores[$criterion->id] ?? null) == $i
                                           ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                                          : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-indigo-400 hover:text-indigo-600' }}">
-                            {{ $i }}
+                                          : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-indigo-400 hover:text-indigo-600' }}"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="saveSelfScore" class="flex items-center gap-1.5">
+                                {{ $i }}
+                            </span>
+                            <span wire:loading wire:target="saveSelfScore" class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            </span>
                         </button>
                         @endfor
                     </div>
@@ -1376,15 +1412,27 @@
                                 class="flex-1 py-2.5 rounded-xl text-sm lato-bold border transition cursor-pointer
                                        {{ ($selfScores[$criterion->id] ?? null) === 0
                                           ? 'bg-red-500 border-red-500 text-white shadow-sm'
-                                          : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-red-300 hover:text-red-500' }}">
-                            Não
+                                          : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-red-300 hover:text-red-500' }}"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="saveSelfScore" class="flex items-center gap-1.5">
+                                Não
+                            </span>
+                            <span wire:loading wire:target="saveSelfScore" class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            </span>
                         </button>
                         <button type="button" wire:click="saveSelfScore({{ $criterion->id }}, 1)"
                                 class="flex-1 py-2.5 rounded-xl text-sm lato-bold border transition cursor-pointer
                                        {{ ($selfScores[$criterion->id] ?? null) === 1
                                           ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
-                                          : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-emerald-300 hover:text-emerald-500' }}">
-                            Sim
+                                          : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-emerald-300 hover:text-emerald-500' }}"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="saveSelfScore" class="flex items-center gap-1.5">
+                                Sim
+                            </span>
+                            <span wire:loading wire:target="saveSelfScore" class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            </span>
                         </button>
                     </div>
 
@@ -1396,8 +1444,14 @@
                                 class="px-3 py-2 rounded-xl text-xs lato-bold border transition cursor-pointer text-center
                                        {{ ($selfScores[$criterion->id] ?? null) == $idx
                                           ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                                          : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-indigo-400 hover:text-indigo-600' }}">
-                            {{ $option }}
+                                          : 'border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-indigo-400 hover:text-indigo-600' }}"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="saveSelfScore" class="flex items-center gap-1.5">
+                                {{ $option }}
+                            </span>
+                            <span wire:loading wire:target="saveSelfScore" class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            </span>
                         </button>
                         @endforeach
                     </div>

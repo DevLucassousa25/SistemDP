@@ -19,7 +19,15 @@
                     <button wire:click="cancelarExclusao"
                         class="flex-1 px-4 py-2 text-sm lato-bold rounded-lg text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition cursor-pointer">Cancelar</button>
                     <button wire:click="excluir"
-                        class="flex-1 px-4 py-2 text-sm lato-bold rounded-lg bg-red-500 hover:bg-red-600 text-white transition cursor-pointer">Excluir</button>
+                        class="flex-1 px-4 py-2 text-sm lato-bold rounded-lg bg-red-500 hover:bg-red-600 text-white transition cursor-pointer disabled:opacity-60"
+                        wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="excluir" class="flex items-center gap-1.5">
+                            Excluir
+                        </span>
+                        <span wire:loading wire:target="excluir" class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        </span>
+                    </button>
                 </div>
             </div>
         </div>

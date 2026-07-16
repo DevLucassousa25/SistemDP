@@ -592,9 +592,15 @@
                             placeholder="Escreva sua dúvida aqui…"
                             class="flex-1 text-sm px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-400/30 focus:border-indigo-400 lato-regular transition" />
                         <button wire:click="enviarDuvida"
-                            class="cursor-pointer flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm px-4 py-2.5 rounded-xl shadow-sm shadow-indigo-500/20 transition lato-bold shrink-0">
-                            <x-lucide-send class="w-3.5 h-3.5" />
+                            class="cursor-pointer flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm px-4 py-2.5 rounded-xl shadow-sm shadow-indigo-500/20 transition lato-bold shrink-0 disabled:opacity-60"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="enviarDuvida" class="flex items-center gap-1.5">
+                                <x-lucide-send class="w-3.5 h-3.5" />
                             Enviar
+                            </span>
+                            <span wire:loading wire:target="enviarDuvida" class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            </span>
                         </button>
                     </div>
                     @error('novaDuvida')
@@ -785,8 +791,14 @@
                     @enderror
                     <div class="mt-3 flex justify-end">
                         <button wire:click="enviarDuvida"
-                            class="cursor-pointer flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm px-4 py-2 rounded-xl shadow-sm shadow-indigo-500/20 transition lato-bold">
-                            <x-lucide-send class="w-4 h-4" /> Enviar dúvida
+                            class="cursor-pointer flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm px-4 py-2 rounded-xl shadow-sm shadow-indigo-500/20 transition lato-bold disabled:opacity-60"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="enviarDuvida" class="flex items-center gap-1.5">
+                                <x-lucide-send class="w-4 h-4" /> Enviar dúvida
+                            </span>
+                            <span wire:loading wire:target="enviarDuvida" class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            </span>
                         </button>
                     </div>
                 </div>
@@ -890,8 +902,14 @@
                 </button>
                 <button wire:click="salvarAvaliacao"
                     @if($avaliacaoNota === 0) disabled @endif
-                    class="cursor-pointer flex-1 px-4 py-2.5 text-sm bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl transition lato-bold">
-                    Enviar avaliação
+                    class="cursor-pointer flex-1 px-4 py-2.5 text-sm bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl transition lato-bold"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="salvarAvaliacao" class="flex items-center gap-1.5">
+                        Enviar avaliação
+                    </span>
+                    <span wire:loading wire:target="salvarAvaliacao" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>

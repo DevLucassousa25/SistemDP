@@ -108,8 +108,14 @@
                         <x-lucide-pencil class="w-3.5 h-3.5" /> Editar
                     </button>
                     <button wire:click="confirmarExclusao({{ $curso->id }}, 'curso')"
-                        class="cursor-pointer flex items-center gap-1.5 px-3 py-2 text-xs lato-bold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-400 hover:border-red-300 hover:text-red-500 transition">
-                        <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                        class="cursor-pointer flex items-center gap-1.5 px-3 py-2 text-xs lato-bold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-400 hover:border-red-300 hover:text-red-500 transition disabled:opacity-60"
+                        wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="confirmarExclusao" class="flex items-center gap-1.5">
+                            <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                        </span>
+                        <span wire:loading wire:target="confirmarExclusao" class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        </span>
                     </button>
                 </div>
             </div>
@@ -262,8 +268,14 @@
                         <x-lucide-pencil class="w-4 h-4" />
                     </button>
                     <button wire:click="confirmarExclusao({{ $aula->id }}, 'aula')"
-                        class="cursor-pointer p-2 text-slate-400 hover:text-red-500 transition">
-                        <x-lucide-trash-2 class="w-4 h-4" />
+                        class="cursor-pointer p-2 text-slate-400 hover:text-red-500 transition disabled:opacity-60"
+                        wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="confirmarExclusao" class="flex items-center gap-1.5">
+                            <x-lucide-trash-2 class="w-4 h-4" />
+                        </span>
+                        <span wire:loading wire:target="confirmarExclusao" class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        </span>
                     </button>
                 </div>
             </div>
@@ -1185,8 +1197,14 @@
                 </button>
                 <button wire:click="salvarCurso"
                     class="cursor-pointer flex-1 px-5 py-2.5 text-xs lato-bold rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600
-                           text-white hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 transition shadow-sm">
-                    {{ $modalCursoModo === 'criar' ? 'Criar curso' : 'Salvar alterações' }}
+                           text-white hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 transition shadow-sm"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="salvarCurso" class="flex items-center gap-1.5">
+                        {{ $modalCursoModo === 'criar' ? 'Criar curso' : 'Salvar alterações' }}
+                    </span>
+                    <span wire:loading wire:target="salvarCurso" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>
@@ -1273,8 +1291,14 @@
                            text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 transition">Cancelar</button>
                 <button wire:click="salvarAula"
                     class="cursor-pointer flex-1 px-5 py-2.5 text-xs lato-bold rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600
-                           text-white hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 transition shadow-sm">
-                    {{ $modalAulaModo === 'criar' ? 'Adicionar aula' : 'Salvar' }}
+                           text-white hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 transition shadow-sm"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="salvarAula" class="flex items-center gap-1.5">
+                        {{ $modalAulaModo === 'criar' ? 'Adicionar aula' : 'Salvar' }}
+                    </span>
+                    <span wire:loading wire:target="salvarAula" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>
@@ -1496,8 +1520,14 @@
                     Cancelar
                 </button>
                 <button wire:click="salvarTeste" type="button"
-                    class="cursor-pointer flex-1 flex items-center justify-center gap-2 px-5 py-2.5 text-sm lato-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-xl transition shadow-md shadow-indigo-500/25">
-                    <x-lucide-save class="w-3.5 h-3.5" /> Salvar teste
+                    class="cursor-pointer flex-1 flex items-center justify-center gap-2 px-5 py-2.5 text-sm lato-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-xl transition shadow-md shadow-indigo-500/25 disabled:opacity-60"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="salvarTeste" class="flex items-center gap-1.5">
+                        <x-lucide-save class="w-3.5 h-3.5" /> Salvar teste
+                    </span>
+                    <span wire:loading wire:target="salvarTeste" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>
@@ -1601,8 +1631,14 @@
                 <button wire:click="salvarObrigatorio"
                     class="cursor-pointer flex-1 py-2.5 text-sm lato-bold rounded-xl
                            bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700
-                           text-white shadow-sm shadow-indigo-200/60 transition">
-                    Confirmar
+                           text-white shadow-sm shadow-indigo-200/60 transition disabled:opacity-60"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="salvarObrigatorio" class="flex items-center gap-1.5">
+                        Confirmar
+                    </span>
+                    <span wire:loading wire:target="salvarObrigatorio" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>

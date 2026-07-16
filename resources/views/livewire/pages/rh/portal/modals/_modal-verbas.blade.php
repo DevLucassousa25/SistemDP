@@ -224,8 +224,14 @@
                 </button>
                 @if ($verbasCalculadas)
                 <button wire:click="saveVerbas" type="button"
-                        class="cursor-pointer px-5 py-2 rounded-xl text-sm lato-bold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 transition flex items-center gap-2 shadow-sm">
-                    <x-lucide-save class="w-3.5 h-3.5" /> Salvar verbas
+                        class="cursor-pointer px-5 py-2 rounded-xl text-sm lato-bold text-white bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-90 transition flex items-center gap-2 shadow-sm disabled:opacity-60"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="saveVerbas" class="flex items-center gap-1.5">
+                        <x-lucide-save class="w-3.5 h-3.5" /> Salvar verbas
+                    </span>
+                    <span wire:loading wire:target="saveVerbas" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
                 @endif
             </div>

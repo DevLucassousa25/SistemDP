@@ -548,8 +548,14 @@
                                         wire:click="deleteAgendaItem({{ $item->id }})"
                                         wire:confirm="Remover este item da pauta?"
                                         class="p-1.5 rounded-md text-slate-300 dark:text-slate-600 opacity-0 group-hover:opacity-100
-                                               hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition cursor-pointer shrink-0">
-                                    <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                                               hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition cursor-pointer shrink-0 disabled:opacity-60"
+                                    wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="deleteAgendaItem" class="flex items-center gap-1.5">
+                                        <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                                    </span>
+                                    <span wire:loading wire:target="deleteAgendaItem" class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                    </span>
                                 </button>
                             @endif
                         </div>
@@ -747,8 +753,14 @@
                                         wire:click="deleteNote({{ $note->id }})"
                                         wire:confirm="Remover esta nota?"
                                         class="p-1.5 rounded-md text-slate-300 dark:text-slate-600 opacity-0 group-hover:opacity-100
-                                               hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition cursor-pointer shrink-0">
-                                    <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                                               hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition cursor-pointer shrink-0 disabled:opacity-60"
+                                    wire:loading.attr="disabled">
+                                    <span wire:loading.remove wire:target="deleteNote" class="flex items-center gap-1.5">
+                                        <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                                    </span>
+                                    <span wire:loading wire:target="deleteNote" class="flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                    </span>
                                 </button>
                             @endif
                         </div>

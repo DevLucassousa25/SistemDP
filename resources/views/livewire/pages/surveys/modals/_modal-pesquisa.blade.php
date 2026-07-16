@@ -422,8 +422,14 @@
                         <button wire:click="salvarPesquisa"
                             class="flex-1 sm:flex-none px-4 py-2 text-sm lato-bold rounded-lg text-white
                                    bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700
-                                   shadow-sm transition cursor-pointer">
-                            {{ $modalMode === 'edit' ? 'Salvar alterações' : 'Criar pesquisa' }}
+                                   shadow-sm transition cursor-pointer disabled:opacity-60"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="salvarPesquisa" class="flex items-center gap-1.5">
+                                {{ $modalMode === 'edit' ? 'Salvar alterações' : 'Criar pesquisa' }}
+                            </span>
+                            <span wire:loading wire:target="salvarPesquisa" class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            </span>
                         </button>
                     </div>
                 </div>

@@ -84,8 +84,14 @@
                     @endif
                     @if ($isMyPost || $isAdmin)
                         <button wire:click="confirmDeletePost({{ $post->id }})" @click="open=false" type="button"
-                                class="w-full text-left px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 cursor-pointer">
-                            <x-lucide-trash-2 class="w-3.5 h-3.5" /> Excluir
+                                class="w-full text-left px-3 py-2 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 cursor-pointer disabled:opacity-60"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove wire:target="confirmDeletePost" class="flex items-center gap-1.5">
+                                <x-lucide-trash-2 class="w-3.5 h-3.5" /> Excluir
+                            </span>
+                            <span wire:loading wire:target="confirmDeletePost" class="flex items-center gap-1.5">
+                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            </span>
                         </button>
                     @endif
                 </div>

@@ -167,8 +167,14 @@ es: s
                                         </button>
                                         <button wire:click="confirmDelete({{ $event->id }})"
                                                 class="w-6 h-6 flex items-center justify-center rounded-md text-slate-400
-                                                       hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition cursor-pointer">
-                                            <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                                                       hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 transition cursor-pointer disabled:opacity-60"
+                                            wire:loading.attr="disabled">
+                                            <span wire:loading.remove wire:target="confirmDelete" class="flex items-center gap-1.5">
+                                                <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                                            </span>
+                                            <span wire:loading wire:target="confirmDelete" class="flex items-center gap-1.5">
+                                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                            </span>
                                         </button>
                                     </div>
                                 @endif

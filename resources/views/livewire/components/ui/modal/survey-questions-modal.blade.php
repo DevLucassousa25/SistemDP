@@ -474,9 +474,15 @@
                                         <button wire:click="confirmarExclusao({{ $pergunta->id }})"
                                             class="w-6 h-6 flex items-center justify-center rounded text-slate-400
                                                    hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20
-                                                   transition cursor-pointer"
-                                            title="Remover">
-                                            <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                                                   transition cursor-pointer disabled:opacity-60"
+                                            title="Remover"
+                                            wire:loading.attr="disabled">
+                                            <span wire:loading.remove wire:target="confirmarExclusao" class="flex items-center gap-1.5">
+                                                <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                                            </span>
+                                            <span wire:loading wire:target="confirmarExclusao" class="flex items-center gap-1.5">
+                                                <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                            </span>
                                         </button>
                                     </div>
                                 </div>
@@ -549,8 +555,14 @@
                     </button>
                     <button wire:click="excluirPergunta"
                         class="flex-1 px-4 py-2 text-sm lato-bold rounded-lg
-                               bg-red-500 hover:bg-red-600 text-white transition cursor-pointer">
-                        Remover
+                               bg-red-500 hover:bg-red-600 text-white transition cursor-pointer disabled:opacity-60"
+                        wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="excluirPergunta" class="flex items-center gap-1.5">
+                            Remover
+                        </span>
+                        <span wire:loading wire:target="excluirPergunta" class="flex items-center gap-1.5">
+                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        </span>
                     </button>
                 </div>
             </div>

@@ -617,9 +617,10 @@ class Portal extends SecureComponent
     //  ABA: PIPELINE
     // ═══════════════════════════════════════════════════════════════════
 
-    public ?int   $pipelineVagaId   = null;
-    public string $pipelineSearch   = '';
-    public bool   $pipeDrawer       = false;
+    public ?int   $pipelineVagaId         = null;
+    public string $pipelineSearch         = '';
+    public bool   $pipeOcultarReprovados  = true;
+    public bool   $pipeDrawer             = false;
     #[Locked]
     public ?int   $pipeDrawerId     = null;
     public string $pipeComentario   = '';
@@ -669,6 +670,16 @@ class Portal extends SecureComponent
     }
 
     #[Computed]
+    public function totalReprovadosOcultos(): int
+    {
+        if (!$this->pipelineVagaId) return 0;
+        return RhCandidatura::where('vaga_id', $this->pipelineVagaId)
+            ->where('status', 'reprovado')
+            ->where('updated_at', '<', now()->subDays(15))
+            ->count();
+    }
+
+    #[Computed]
     public function kanban(): array
     {
         if (!$this->pipelineVagaId) return [];
@@ -685,6 +696,14 @@ class Portal extends SecureComponent
             ->when($this->pipelineSearch, fn($q) =>
                 $q->whereHas('curriculo', fn($s) => $s->where('nome', 'ilike', "%{$this->pipelineSearch}%"))
             )
+            ->when($this->pipeOcultarReprovados, fn($q) =>
+                $q->where(fn($w) =>
+                    $w->where('status', '!=', 'reprovado')
+                      ->orWhere('updated_at', '>=', now()->subDays(15))
+                )
+            )
+            ->orderBy('pipeline_ordem')
+            ->orderBy('id')
             ->get()->groupBy('etapa_id');
         return $etapas->map(fn($e) => [
             'etapa'        => $e,
@@ -882,6 +901,56 @@ class Portal extends SecureComponent
         ]);
 
         unset($this->kanban, $this->pipeDrawerCand);
+    }
+
+    /**
+     * Persiste a ordem dos cards no kanban após drag & drop.
+     * Recebe: [['id' => int, 'ordem' => int, 'etapa_id' => int], ...]
+     */
+    public function atualizarOrdemKanban(array $itens): void
+    {
+        $this->requireRhOrAdmin();
+
+        $moveuEtapa   = false;
+        $nomeNovaEtapa = '';
+
+        foreach ($itens as $item) {
+            $id      = (int) ($item['id']      ?? 0);
+            $ordem   = (int) ($item['ordem']   ?? 0);
+            $etapaId = (int) ($item['etapa_id'] ?? 0);
+
+            if (!$id) continue;
+
+            $cand = RhCandidatura::find($id);
+            if (!$cand || $cand->vaga_id !== $this->pipelineVagaId) continue;
+
+            $updates = ['pipeline_ordem' => $ordem];
+            if ($etapaId && $cand->etapa_id !== $etapaId) {
+                $updates['etapa_id'] = $etapaId;
+                $moveuEtapa          = true;
+                $nomeNovaEtapa       = RhVagaEtapa::find($etapaId)?->nome ?? '';
+            }
+
+            $cand->update($updates);
+        }
+
+        unset($this->kanban);
+
+        if ($moveuEtapa && $nomeNovaEtapa) {
+            $this->toastNotif(
+                'Candidato movido',
+                "Movido para a etapa \"{$nomeNovaEtapa}\" com sucesso.",
+                'kanban',
+                'green',
+            );
+        } else {
+            $this->toastNotif(
+                'Ordem actualizada',
+                'A posição do candidato foi guardada.',
+                'grip-vertical',
+                'blue',
+            );
+        }
     }
 
     /**

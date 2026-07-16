@@ -173,11 +173,17 @@
                                 <div class="px-1.5 py-1">
                                     @if ($vaga->status !== 'publicada')
                                     <button wire:click="publicarVaga({{ $vaga->id }})" @click="menu=false" type="button"
-                                            class="cursor-pointer w-full text-left px-3 py-2 text-xs text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-xl flex items-center gap-2.5 transition">
-                                        <span class="w-6 h-6 rounded-lg bg-green-50 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+                                            class="cursor-pointer w-full text-left px-3 py-2 text-xs text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-xl flex items-center gap-2.5 transition disabled:opacity-60"
+                                        wire:loading.attr="disabled">
+                                        <span wire:loading.remove wire:target="publicarVaga" class="flex items-center gap-1.5">
+                                            <span class="w-6 h-6 rounded-lg bg-green-50 dark:bg-green-900/30 flex items-center justify-center shrink-0">
                                             <x-lucide-send class="w-3.5 h-3.5 text-green-500" />
                                         </span>
                                         Publicar
+                                        </span>
+                                        <span wire:loading wire:target="publicarVaga" class="flex items-center gap-1.5">
+                                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                        </span>
                                     </button>
                                     @endif
                                     @if (!in_array($vaga->status, ['preenchida', 'encerrada']))
@@ -203,11 +209,17 @@
                                 <div class="border-t border-slate-100 dark:border-slate-700 mx-1.5"></div>
                                 <div class="px-1.5 pb-1.5 pt-1">
                                     <button wire:click="confirmDeleteVaga({{ $vaga->id }})" @click="menu=false" type="button"
-                                            class="cursor-pointer w-full text-left px-3 py-2 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl flex items-center gap-2.5 transition">
-                                        <span class="w-6 h-6 rounded-lg bg-red-50 dark:bg-red-900/30 flex items-center justify-center shrink-0">
+                                            class="cursor-pointer w-full text-left px-3 py-2 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl flex items-center gap-2.5 transition disabled:opacity-60"
+                                        wire:loading.attr="disabled">
+                                        <span wire:loading.remove wire:target="confirmDeleteVaga" class="flex items-center gap-1.5">
+                                            <span class="w-6 h-6 rounded-lg bg-red-50 dark:bg-red-900/30 flex items-center justify-center shrink-0">
                                             <x-lucide-trash-2 class="w-3.5 h-3.5 text-red-500" />
                                         </span>
                                         Excluir
+                                        </span>
+                                        <span wire:loading wire:target="confirmDeleteVaga" class="flex items-center gap-1.5">
+                                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                        </span>
                                     </button>
                                 </div>
 

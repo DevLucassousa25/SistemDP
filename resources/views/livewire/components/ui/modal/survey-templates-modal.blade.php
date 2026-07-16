@@ -148,9 +148,15 @@
                                                 <button type="button"
                                                     wire:click="excluirTemplate({{ $template->id }})"
                                                     wire:confirm="Excluir o template '{{ addslashes($template->name) }}'? Esta ação não pode ser desfeita."
-                                                    class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer shrink-0"
-                                                    title="Excluir template">
-                                                    <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                                                    class="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition cursor-pointer shrink-0 disabled:opacity-60"
+                                                    title="Excluir template"
+                                                    wire:loading.attr="disabled">
+                                                    <span wire:loading.remove wire:target="excluirTemplate" class="flex items-center gap-1.5">
+                                                        <x-lucide-trash-2 class="w-3.5 h-3.5" />
+                                                    </span>
+                                                    <span wire:loading wire:target="excluirTemplate" class="flex items-center gap-1.5">
+                                                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                                    </span>
                                                 </button>
                                             @endif
                                         </div>
@@ -380,9 +386,15 @@
                                                 Cancelar
                                             </button>
                                             <button wire:click="salvarPerguntaTemplate"
-                                                class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs lato-bold rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white transition cursor-pointer">
-                                                <x-lucide-check class="w-3.5 h-3.5" />
+                                                class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs lato-bold rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white transition cursor-pointer disabled:opacity-60"
+                                                wire:loading.attr="disabled">
+                                                <span wire:loading.remove wire:target="salvarPerguntaTemplate" class="flex items-center gap-1.5">
+                                                    <x-lucide-check class="w-3.5 h-3.5" />
                                                 {{ $editingQuestionIndex !== null ? 'Atualizar' : 'Adicionar' }}
+                                                </span>
+                                                <span wire:loading wire:target="salvarPerguntaTemplate" class="flex items-center gap-1.5">
+                                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                                </span>
                                             </button>
                                         </div>
                                     </div>

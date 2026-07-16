@@ -352,8 +352,14 @@
                                     <button wire:click="createPlanForEmployee({{ $gnu->id }})" type="button"
                                             title="Criar plano para este colaborador"
                                             class="flex items-center gap-1 text-[11px] lato-bold text-indigo-500 hover:text-indigo-700
-                                                   dark:text-indigo-400 dark:hover:text-indigo-300 transition cursor-pointer">
-                                        <x-lucide-plus class="w-3 h-3" /> Criar plano
+                                                   dark:text-indigo-400 dark:hover:text-indigo-300 transition cursor-pointer disabled:opacity-60"
+                                        wire:loading.attr="disabled">
+                                        <span wire:loading.remove wire:target="createPlanForEmployee" class="flex items-center gap-1.5">
+                                            <x-lucide-plus class="w-3 h-3" /> Criar plano
+                                        </span>
+                                        <span wire:loading wire:target="createPlanForEmployee" class="flex items-center gap-1.5">
+                                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                        </span>
                                     </button>
                                 </div>
                             @endforeach

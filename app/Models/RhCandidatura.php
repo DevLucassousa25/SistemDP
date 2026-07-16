@@ -8,7 +8,7 @@ class RhCandidatura extends Model
 {
     protected $table = 'rh_candidaturas';
 
-    protected $fillable = ['curriculo_id', 'vaga_id', 'etapa_id', 'status', 'nota_final', 'ranking_posicao', 'aprovado_at'];
+    protected $fillable = ['curriculo_id', 'vaga_id', 'etapa_id', 'status', 'nota_final', 'ranking_posicao', 'aprovado_at', 'pipeline_ordem'];
 
     protected function casts(): array
     {

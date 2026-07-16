@@ -291,8 +291,14 @@
                                 class="flex-1 px-3 py-1.5 text-xs lato-regular rounded-lg border border-slate-200 dark:border-slate-600
                                           bg-white dark:bg-slate-700 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition" />
                             <button type="button" wire:click="createTag"
-                                class="px-3 py-1.5 text-xs lato-bold bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20 text-white rounded-lg transition cursor-pointer">
-                                Criar
+                                class="px-3 py-1.5 text-xs lato-bold bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 shadow-md shadow-blue-500/20 text-white rounded-lg transition cursor-pointer disabled:opacity-60"
+                                wire:loading.attr="disabled">
+                                <span wire:loading.remove wire:target="createTag" class="flex items-center gap-1.5">
+                                    Criar
+                                </span>
+                                <span wire:loading wire:target="createTag" class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                </span>
                             </button>
                         </div>
                     </div>

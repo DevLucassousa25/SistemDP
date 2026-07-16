@@ -532,8 +532,14 @@
                             </button>
 
                             <button wire:click="confirmDelete({{ $post->id }})" type="button"
-                                    class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] lato-bold bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition cursor-pointer ml-auto">
-                                <x-lucide-trash-2 class="w-3 h-3" />
+                                    class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] lato-bold bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/40 transition cursor-pointer ml-auto disabled:opacity-60"
+                                wire:loading.attr="disabled">
+                                <span wire:loading.remove wire:target="confirmDelete" class="flex items-center gap-1.5">
+                                    <x-lucide-trash-2 class="w-3 h-3" />
+                                </span>
+                                <span wire:loading wire:target="confirmDelete" class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                </span>
                             </button>
                         </div>
 
@@ -752,12 +758,24 @@
                     Cancelar
                 </button>
                 <button wire:click="save('rascunho')" type="button"
-                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm lato-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 transition cursor-pointer">
-                    <x-lucide-file-pen-line class="w-4 h-4" /> Salvar rascunho
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm lato-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600 transition cursor-pointer disabled:opacity-60"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="save" class="flex items-center gap-1.5">
+                        <x-lucide-file-pen-line class="w-4 h-4" /> Salvar rascunho
+                    </span>
+                    <span wire:loading wire:target="save" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
                 <button wire:click="save('publicado')" type="button"
-                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm lato-bold bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white transition cursor-pointer shadow-sm">
-                    <x-lucide-globe class="w-4 h-4" /> Publicar agora
+                        class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm lato-bold bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white transition cursor-pointer shadow-sm disabled:opacity-60"
+                    wire:loading.attr="disabled">
+                    <span wire:loading.remove wire:target="save" class="flex items-center gap-1.5">
+                        <x-lucide-globe class="w-4 h-4" /> Publicar agora
+                    </span>
+                    <span wire:loading wire:target="save" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    </span>
                 </button>
             </div>
         </div>
@@ -876,8 +894,14 @@
                                             <div class="flex items-center gap-2">
                                                 <p class="text-[10px] text-slate-400 lato-regular">{{ $comment->created_at->diffForHumans() }}</p>
                                                 <button wire:click="deleteComment({{ $comment->id }})" type="button"
-                                                        class="text-slate-300 hover:text-red-400 dark:text-slate-600 dark:hover:text-red-400 transition cursor-pointer">
-                                                    <x-lucide-trash-2 class="w-3 h-3" />
+                                                        class="text-slate-300 hover:text-red-400 dark:text-slate-600 dark:hover:text-red-400 transition cursor-pointer disabled:opacity-60"
+                                                    wire:loading.attr="disabled">
+                                                    <span wire:loading.remove wire:target="deleteComment" class="flex items-center gap-1.5">
+                                                        <x-lucide-trash-2 class="w-3 h-3" />
+                                                    </span>
+                                                    <span wire:loading wire:target="deleteComment" class="flex items-center gap-1.5">
+                                                        <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                                    </span>
                                                 </button>
                                             </div>
                                         </div>
@@ -921,8 +945,14 @@
                         @php $myRead = $pv->reads->where('user_id', Auth::id())->first(); @endphp
                         @if ($pv->is_mandatory_read && (! $myRead || ! $myRead->confirmed_at))
                             <button wire:click="confirmRead({{ $pv->id }})" type="button"
-                                    class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm lato-bold bg-emerald-500 hover:bg-emerald-600 text-white transition cursor-pointer">
-                                <x-lucide-check-circle class="w-4 h-4" /> Confirmar leitura
+                                    class="flex items-center gap-2 px-4 py-2 rounded-xl text-sm lato-bold bg-emerald-500 hover:bg-emerald-600 text-white transition cursor-pointer disabled:opacity-60"
+                                wire:loading.attr="disabled">
+                                <span wire:loading.remove wire:target="confirmRead" class="flex items-center gap-1.5">
+                                    <x-lucide-check-circle class="w-4 h-4" /> Confirmar leitura
+                                </span>
+                                <span wire:loading wire:target="confirmRead" class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                </span>
                             </button>
                         @elseif ($pv->is_mandatory_read && $myRead?->confirmed_at)
                             <span class="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 lato-bold px-2">

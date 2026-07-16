@@ -88,9 +88,15 @@
                     @if($avatarFile)
                         <div class="flex gap-2 mt-3">
                             <button wire:click="salvarAvatar"
-                                    class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm lato-bold rounded-xl shadow-sm transition cursor-pointer">
-                                <x-lucide-check class="w-4 h-4" />
+                                    class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white text-sm lato-bold rounded-xl shadow-sm transition cursor-pointer disabled:opacity-60"
+                                wire:loading.attr="disabled">
+                                <span wire:loading.remove wire:target="salvarAvatar" class="flex items-center gap-1.5">
+                                    <x-lucide-check class="w-4 h-4" />
                                 Salvar foto
+                                </span>
+                                <span wire:loading wire:target="salvarAvatar" class="flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                </span>
                             </button>
                             <button wire:click="$set('avatarFile', null)"
                                     class="px-4 py-2 text-sm lato-regular text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition cursor-pointer">

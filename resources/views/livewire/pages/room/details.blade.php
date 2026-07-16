@@ -386,9 +386,15 @@
                             @if (auth()->id() === $reserva->user_id || auth()->user()->isAdmin())
                                 @if ($reserva->end_time->isFuture() || $reserva->start_time->isFuture())
                                     <button wire:click="confirmarCancelamento({{ $reserva->id }})"
-                                        class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer"
-                                        title="Cancelar reserva">
-                                        <x-lucide-x class="w-4 h-4" />
+                                        class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition cursor-pointer disabled:opacity-60"
+                                        title="Cancelar reserva"
+                                        wire:loading.attr="disabled">
+                                        <span wire:loading.remove wire:target="confirmarCancelamento" class="flex items-center gap-1.5">
+                                            <x-lucide-x class="w-4 h-4" />
+                                        </span>
+                                        <span wire:loading wire:target="confirmarCancelamento" class="flex items-center gap-1.5">
+                                            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                        </span>
                                     </button>
                                 @else
                                     <span class="text-xs text-gray-400 px-2 py-1 rounded-lg bg-gray-50"
