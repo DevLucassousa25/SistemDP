@@ -1,0 +1,87 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: development
+    container_name: sistem_dp_app
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - sistem_dp
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: sistem_dp_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - sistem_dp
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: sistem_dp_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - sistem_dp_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sistem_dp
+
+  redis:
+    image: redis:7-alpine
+    container_name: sistem_dp_redis
+    networks:
+      - sistem_dp
+
+  queue:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: development
+    container_name: sistem_dp_queue
+    command: php artisan queue:work --tries=3
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - sistem_dp
+
+  node:
+    image: node:20-alpine
+    container_name: sistem_dp_node
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "5173:5173"
+    networks:
+      - sistem_dp
+
+networks:
+  sistem_dp:
+    driver: bridge
+
+volumes:
+  sistem_dp_postgres_data:
