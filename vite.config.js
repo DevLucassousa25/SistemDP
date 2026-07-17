@@ -11,8 +11,11 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
-        watch: {
-            ignored: ['**/storage/framework/views/**'],
+        host: '0.0.0.0',   // escuta em todas as interfaces do container, não só 127.0.0.1
+        port: 5173,
+        strictPort: true,
+        hmr: {
+            host: 'localhost', // endereço que o NAVEGADOR usa para o websocket do HMR
         },
     },
 });
