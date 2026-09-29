@@ -1,60 +1,121 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SistemDP — Plataforma de Gestão de Pessoas
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema web para RH e Departamento Pessoal que reúne em um só lugar o ciclo completo do colaborador: do recrutamento ao desligamento, passando por treinamentos, avaliação de desempenho, metas e comunicação interna.
 
-## About Laravel
+Desenvolvido com **Laravel 12**, **Livewire 3** e **PostgreSQL**, com ambiente completo em **Docker**.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+<!-- Adicione aqui 2 ou 3 prints das telas principais (dashboard, pipeline de recrutamento, treinamentos) -->
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Funcionalidades
 
-## Learning Laravel
+### Recrutamento e seleção
+- Cadastro de vagas com etapas personalizáveis e página pública de candidatura
+- Pipeline de candidatos em quadro, com histórico e comentários por candidatura
+- Banco de currículos com extração automática de texto de PDF/DOCX (processada em fila) para busca por conteúdo
+- Testes online para candidatos, acessados por link com token
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Ciclo do colaborador
+- **Onboarding** com tarefas por novo colaborador
+- **Desligamento** com checklist, entrevista de desligamento por link e cálculo de verbas rescisórias (CLT)
+- Solicitações dos funcionários ao RH/DP com acompanhamento de status
+- Organograma, departamentos e perfis de acesso (Administrador, RH, CEO, gestor, colaborador)
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Desenvolvimento e desempenho
+- Ciclos de avaliação de desempenho com critérios ponderados, autoavaliação e calibração
+- **PDI** (Plano de Desenvolvimento Individual) com metas, ações e modelos reutilizáveis
+- **OKRs** com objetivos, resultados-chave e check-ins
+- Plano de sucessão
+- Feedbacks com plano de ação e histórico de status
 
-## Laravel Sponsors
+### Treinamentos (LMS)
+- Catálogo de cursos com aulas, controle de progresso e vídeo obrigatório
+- Trilhas de aprendizagem e treinamentos obrigatórios
+- Provas, avaliação de reação e dúvidas por aula
+- Emissão de certificado em PDF e relatórios para o RH
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Clima e comunicação interna
+- Pesquisas de clima com modelos, comparativo entre pesquisas e ranking de gestores
+- Check-in de humor diário com painel por equipe
+- Feed social (posts, reações, comentários, enquetes, salvos) e comunidades com eventos
+- Publicações oficiais com confirmação de leitura
+- Ouvidoria com anexos, respostas e encerramento automático
 
-### Premium Partners
+### Operação
+- Reserva de salas com imagens e controle de manutenção
+- Reuniões com pauta e atas
+- Gestão de tarefas com subtarefas, tags e comentários
+- Controle de equipamentos: atribuição, manutenção, inventário e termo de responsabilidade em PDF
+- Calendário corporativo com importação de feriados nacionais
+- Notificações internas para os principais eventos do sistema
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Relatórios
+- Exportação em **PDF** e **Excel** de pesquisas, avaliações, feedbacks e humor das equipes
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Tecnologias
 
-## Code of Conduct
+| Camada | Tecnologias |
+|---|---|
+| Back-end | PHP 8.3, Laravel 12, Livewire 3 |
+| Front-end | Blade, Tailwind CSS 4, Vite, ApexCharts |
+| Banco de dados | PostgreSQL 16 |
+| Filas e cache | Redis, Laravel Queues |
+| Documentos | DomPDF, PhpSpreadsheet, PDF Parser |
+| Infraestrutura | Docker, Docker Compose, Nginx |
+| Testes e qualidade | Pest, Laravel Pint |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+## Arquitetura do ambiente Docker
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| Serviço | Função |
+|---|---|
+| `app` | PHP-FPM 8.3 com a aplicação |
+| `nginx` | Servidor web (porta 8080) |
+| `postgres` | Banco de dados, com healthcheck |
+| `redis` | Cache e filas |
+| `queue` | Worker processando jobs em segundo plano |
+| `node` | Vite em modo de desenvolvimento (porta 5173) |
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-"# CRMDP" 
+## Como rodar
+
+**Pré-requisitos:** Docker e Docker Compose.
+
+```bash
+# 1. Clonar o repositório
+git clone https://github.com/DevLucassousa25/SistemDP.git
+cd SistemDP
+
+# 2. Criar o arquivo de ambiente
+cp .env.example .env
+# Ajuste DB_HOST=postgres, DB_USERNAME e DB_PASSWORD no .env
+
+# 3. Subir os containers
+docker compose up -d --build
+
+# 4. Instalar dependências e preparar a aplicação
+docker compose exec app composer install
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan migrate --seed
+docker compose exec app php artisan storage:link
+```
+
+Acesse em **http://localhost:8080**.
+
+## Testes
+
+```bash
+docker compose exec app php artisan test
+```
+
+---
+
+## Autor
+
+**Lucas Sousa** — Desenvolvedor Full Stack
+[LinkedIn](https://www.linkedin.com/in/lucas-sousa-a10474212/) · [GitHub](https://github.com/DevLucassousa25)
